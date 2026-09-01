@@ -1,5 +1,5 @@
 {
-  "schema_version": "milky_cow_contract_gate.v2",
+  "schema_version": "milky_cow_contract_gate.v3",
   "governance": {
     "active_foundation_gate": "config/milky_cow_contract_gate.json",
     "superseded_initial_scope_record": "config/milky_cow_study_contract.json",
@@ -53,7 +53,10 @@
   "status": "foundation_only_integrated_sweep_prohibited",
   "deterministic_vertical_slice_fixture": {
     "status": "executable_contract_fixture_not_study_baseline",
-    "pa_targets": [1, 2],
+    "pa_targets": [
+      1,
+      2
+    ],
     "evaluation_consumer_boundary": "adapter_invariant_nonoverlapping_synthetic_offers",
     "scaling": "fixed_one_mnq_per_account",
     "commission_timing": "close_only_for_pa_intratrade_boundary",
@@ -61,7 +64,10 @@
     "pa_stream_binding": "exact_opportunity_selection_digest_raw_count_ordinal_and_offer",
     "acquisition": "one_funded_evaluation_at_a_time_toward_target",
     "replacement": "each_death_requires_one_funded_shared_pipeline_evaluation; immediate_admissible_planning_precedes_new_entries; residual_backlog_blocks_growth_not_funded_pipeline_or_pa_events",
-    "external_capital": ["through_first_pa_n1", "none_with_320_starting_cash_n2"],
+    "external_capital": [
+      "through_first_pa_n1",
+      "none_with_320_starting_cash_n2"
+    ],
     "payout": "minimum_500_always_atomic_pa_and_treasury_transaction_at_session_close_with_no_open_position",
     "event_order": [
       "settle_pa_exits",
@@ -79,7 +85,12 @@
     "raw_manifest": "manifests/rr1_import_20260829.json",
     "selector_scope": "whole_verified_tape_once",
     "selector_reset_scope": "never_for_pa_book_scenarios",
-    "causal_order": ["entry_at", "window_order", "source_row", "ticket"],
+    "causal_order": [
+      "entry_at",
+      "window_order",
+      "source_row",
+      "ticket"
+    ],
     "busy_interval": "[entry_at, exit_at)",
     "exit_at_t_precedes_entry_at_t": true,
     "expected_raw_offers": 12658,
@@ -90,7 +101,20 @@
     "zero_duration_event_rule": "after_positive_duration_exits_and_before_payouts_enter_evaluation_then_pa_then_settle_pa_then_evaluation",
     "pa_consumer_mode": "common_preselected_global_stream",
     "pa_copy_input_type": "accepted_opportunity_with_selector_digest_and_ordinal",
-    "evaluation_consumer_mode": null
+    "evaluation_consumer_mode": "cycle_local_one_position_restarted_at_each_renewal_boundary",
+    "evaluation_consumer_contract": {
+      "selector_scope": "per_evaluation_cycle",
+      "selector_reset_scope": "every_renewal_boundary",
+      "busy_interval": "[entry_at, exit_at)",
+      "block_offer_when_busy_at_entry": true,
+      "boundary_spanning_offer": "skipped_and_cycle_closed_without_consuming_it",
+      "position_size_mnq": 3,
+      "position_size_status": "parent_baseline_value_not_an_independent_optimum",
+      "differs_from_pa_stream_by_design": "the PA book consumes one whole-tape selection made once and never reset; the Evaluation re-selects inside every 30-day cycle. The two phases never share a selector.",
+      "local_implementation": "src/milky_cow/evaluation_lock.py",
+      "parent_parity_source": "reference/shared_source/evaluation.py",
+      "parent_revision": "106cfb782c6e573856282095441bb69f23924a55"
+    }
   },
   "intratrade_path_order": {
     "source_constrained_cases": [
@@ -101,7 +125,10 @@
       "two_sided_close_at_mfe_because_an_earlier_mfe_to_mae_excursion_is_possible",
       "two_sided_close_strictly_between_extrema"
     ],
-    "phase_scope": ["evaluation", "pa"],
+    "phase_scope": [
+      "evaluation",
+      "pa"
+    ],
     "central_arm": "source_constrained_then_seeded_coin",
     "scenario_arms": [
       "source_constrained_then_mae_first",
@@ -128,7 +155,28 @@
     ]
   },
   "pa_book": {
-    "active_pa_count_values": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    "active_pa_count_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
     "active_pa_count_axis_semantics": {
       "headline_estimand": "maintained_target_active_pas_acquired_from_zero",
       "initial_state": "zero_evaluations_zero_pas",
@@ -137,8 +185,15 @@
       "death_behavior": "selected_replacement_policy_attempts_to_restore_n",
       "diagnostic_counterfactual": "initial_n_active_pas_operating_economics_only"
     },
-    "allowed_roles": ["active_alive", "dead"],
-    "eligibility": ["activation_at_strictly_before_entry", "alive", "explicit_compliance_checks_pass"],
+    "allowed_roles": [
+      "active_alive",
+      "dead"
+    ],
+    "eligibility": [
+      "activation_at_strictly_before_entry",
+      "alive",
+      "explicit_compliance_checks_pass"
+    ],
     "distribution": "copy_to_all_eligible_active_pas",
     "account_copy_count_formula": "count(eligible_active_pas)",
     "copy_batch_lifecycle": "one_outstanding_global_batch_from_entry_until_exact_exit_then_settle_once_before_next_bound_entry",
@@ -154,49 +209,75 @@
     ]
   },
   "scaling": {
-    "selected_policy_id": null,
-    "scope": null,
-    "threshold_metric": null,
-    "levels": null,
-    "threshold_operator": null,
-    "decision_time": null,
-    "downscale_rule": null,
+    "selected_policy_id": "flat_one_mnq_no_scaling_phase_1",
+    "phase_status": "phase_1_every_eligible_pa_trades_one_mnq_at_every_entry",
+    "applies_to": "pa_phase_only_the_evaluation_uses_its_own_position_size",
+    "scope": "per_account",
+    "threshold_metric": "equity_profit_usd",
+    "threshold_metric_status": "non_binding_the_single_level_schedule_records_the_metric_but_never_compares_it",
+    "levels": [
+      {
+        "minimum_metric_usd": null,
+        "mnq": 1
+      }
+    ],
+    "threshold_operator": "greater_than_or_equal",
+    "threshold_operator_status": "non_binding_at_one_level",
+    "decision_time": "entry_before_trade_after_prior_same_timestamp_events",
+    "downscale_rule": "immediate",
+    "downscale_rule_status": "non_binding_at_one_level",
     "synchronized_aggregation": null,
-    "maximum_mnq": null,
-    "outcome_scaling": null,
-    "commission_timing": null,
-    "aggregate_fill_assumption": null
+    "maximum_mnq": 1,
+    "outcome_scaling": "linear_per_mnq",
+    "commission_timing": "close_only",
+    "commission_timing_parity": "reference/shared_source/pa.py charges the round-turn commission only in closing net P&L",
+    "aggregate_fill_assumption": "perfect_linear_no_slippage_phase_1"
   },
   "acquisition": {
-    "selected_policy_id": null,
+    "selected_policy_id": "greedy_to_target_parent_baseline",
+    "mode": "one_per_decision",
     "target_semantics": "maintained_active_pa_target_acquired_from_zero_with_pipeline_hard_cap",
-    "decision_schedule": null,
+    "decision_schedule": "every_event_at_which_treasury_cash_permits_and_the_pipeline_is_below_n",
+    "max_purchases_per_decision": 1,
     "maximum_running_evaluations": null,
+    "cadence_days": null,
     "pipeline_credit_toward_target": "each_alive_active_pa_each_running_evaluation_and_each_pending_activation_counts_one",
-    "renewal_and_cancellation": null,
+    "renewal_and_cancellation": "parent_renewal_mechanics_charge_one_fee_carry_state_if_alive_restart_fresh_if_failed_no_cancellation_modeled",
     "overshoot_behavior": "prohibit_any_purchase_or_activation_transition_that_would_make_capacity_commitments_exceed_n",
-    "executable_target_accounting_contracts": ["active_plus_running_and_pending"]
+    "greedy_semantics": "greedy in time, not in batch: buy at every event cash allows, at most one Evaluation per decision, never fill several open slots at one instant",
+    "executable_target_accounting_contracts": [
+      "active_plus_running_and_pending"
+    ],
+    "hard_cap_enforcement": "tested_before_every_purchase_and_every_activation_transition"
   },
   "replacement": {
-    "selected_policy_id": null,
-    "mode": null,
-    "simultaneous_death_handling": null,
-    "shares_evaluation_pipeline": null,
-    "purchase_priority": null,
+    "selected_policy_id": "greedy_to_target_emergent_replacement",
+    "mode": "evaluation_pipeline",
+    "derivation": "not_an_independent_policy_a_death_drops_the_pipeline_below_n_and_the_acquisition_rule_buys",
+    "simultaneous_death_handling": "sequential_backlog_one_purchase_per_decision_in_deterministic_pa_id_order",
+    "shares_evaluation_pipeline": true,
+    "max_purchases_per_death_event": 1,
+    "purchase_priority": "none_growth_and_replacement_share_one_queue_and_are_indistinguishable",
     "death_count_input": "required_positive_integer",
     "executable_backlog_contract": "each_death_decrements_only_when_a_replacement_evaluation_is_funded; residual_backlog_cannot_be_reclassified_as_growth"
   },
   "external_capital": {
-    "selected_policy_id": null,
-    "mode": null,
-    "starting_cash_usd": null,
+    "selected_policy_id": "through_first_pa_parent_baseline",
+    "mode": "through_first_pa",
+    "starting_cash_usd": 35.0,
+    "starting_cash_basis": "one_evaluation_purchase_fee_parent_seed_external_capital",
     "lifetime_hard_cap_usd": null,
-    "permitted_uses": null,
-    "contribution_timing": null,
-    "bridge_close_event": null,
-    "bridge_reopens": null,
+    "permitted_uses": [
+      "evaluation_purchase",
+      "evaluation_renewal",
+      "pa_activation"
+    ],
+    "contribution_timing": "just_in_time_exact_shortfall",
+    "bridge_close_event": "first_pa_activated",
+    "bridge_reopens": false,
     "first_pa_activation_latch": "treasury_owned_timestamped_irreversible",
-    "unfunded_obligation_behavior": null
+    "unfunded_obligation_behavior": "skip_the_purchase_atomically_no_partial_funding_and_no_run_failure",
+    "known_consequence_at_high_n": "the bridge closes at the FIRST activation, so PAs 2..N are funded only from trading profit and payouts. High-N arms are therefore capital constrained by construction and may never fill the book within the chosen horizon; book-fill time and right-censoring must be reported per N beside any headline economics."
   },
   "payout_candidates": {
     "source": "config/payout_policies.json",
@@ -219,25 +300,65 @@
     "regime_definitions": null,
     "stress_scenarios": {
       "intratrade_path_order": "three_arms_locked_above",
-      "aggregate_execution_and_slippage": null,
+      "aggregate_execution_and_slippage": {
+        "modeled": false,
+        "phase_1_assumption": "perfect_linear_no_slippage_phase_1",
+        "parent_precedent": "slippage_ticks_per_side 0 and no pending-order model",
+        "known_bias_direction": "favors_high_n",
+        "why_it_is_not_neutral_here": "the parent filled one MNQ per accepted signal at R=1; copy-to-all fills N MNQ simultaneously, so the error in a perfect-fill assumption grows with N, which is the study axis itself",
+        "cheapest_future_check": "one_tick_per_side_sensitivity_on_the_selected_n_arms",
+        "status": "declared_not_modeled_in_phase_1_by_user_decision_2026_09_02"
+      },
       "prop_firm_failure": null,
       "rule_change": null
     }
   },
   "unresolved_before_integrated_sweep": [
-    "evaluation_consumer_mode",
     "evaluation_rule_boundary_resolutions",
-    "scaling_policy_and_thresholds",
-    "pa_intratrade_commission_timing",
-    "aggregate_execution_assumption",
-    "acquisition_policy",
-    "replacement_policy",
-    "external_capital_policy_and_budget",
     "payout_lifecycle_timing",
     "same_timestamp_event_order",
     "economic_objective",
     "rolling_cohort_horizon_and_censoring",
     "regime_definitions",
     "stress_scenarios"
+  ],
+  "parent_comparison": {
+    "purpose": "this study exists to be differenced against the parent staggering study; every adopted mechanic below is adopted to hold everything except PA-book management constant",
+    "parent_repository": "Eval_PA_optimal_path",
+    "parent_revision": "106cfb782c6e573856282095441bb69f23924a55",
+    "parent_baseline_config": "config/legacy_25k_baseline.json",
+    "parent_arm_compared_against": {
+      "purchase_policy": "greedy_to_target",
+      "target_pa_count_k": 5,
+      "standby_pa_target_s": 0,
+      "routing_policy": "max_headroom",
+      "pa_requested_copies_r": 1,
+      "pa_intratrade_path": "mae_first",
+      "bootstrap_funding_mode": "through_first_pa"
+    },
+    "intended_single_difference": "PA-book management only: copy-to-all replaces max_headroom routing at R=1, and payout aggressiveness is not inherited",
+    "adopted_for_comparability": [
+      "evaluation_consumer_mode",
+      "pa_mnq_per_account",
+      "pa_intratrade_commission_timing",
+      "aggregate_execution_assumption",
+      "acquisition_policy",
+      "replacement_policy",
+      "external_capital_policy_and_budget"
+    ],
+    "not_adopted": {
+      "target_pa_count_k": "K=5 is a parent selection; N is this study's swept axis 1..20",
+      "routing_policy": "prohibited mechanic in this study",
+      "payout_policy_ranking": "the six policies remain candidates, not optima",
+      "horizon_and_regimes": "not yet selected here; see unresolved fields"
+    },
+    "comparison_arm_for_parent_delta": "source_constrained_then_mae_first",
+    "comparison_arm_rationale": "the parent pinned pa_intratrade_path=mae_first. The seeded coin stays this study's internal delta_reference for its own path-order stress, but it is NOT the arm to difference against the parent.",
+    "status": "adopted_by_user_decision_2026_09_02_for_a_controlled_comparison_not_inherited_conclusions"
+  },
+  "evaluation_rule_boundary_open_questions": [
+    "does a running Evaluation renew when the pipeline is already at the N cap",
+    "does a failed Evaluation inside a cycle wait for its boundary before restarting",
+    "which Evaluation trading-day basis governs the minimum-day test at a cycle edge"
   ]
 }

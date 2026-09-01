@@ -29,8 +29,19 @@ Verified and implemented:
   including explicit pending activation, renewal preflight, payout atomicity,
   N=1 replacement, N=2 divergence, and treasury reconciliation fixtures;
 - active gate coverage for every PA count 1..20 and the exact six payout
-  candidates; and
-- source/local implementation provenance verification.
+  candidates;
+- source/local implementation provenance verification; and
+- seven gate fields resolved for parity with the parent baseline arm, each
+  buildable from the gate into the primitive it names: the cycle-local
+  Evaluation consumer, flat 1 MNQ, close-only commission, declared
+  execution non-model, greedy-in-time acquisition, emergent replacement, and
+  the through-first-PA capital bridge.
 
-`scripts/run_tests.ps1` currently passes 48 tests. The integrated sweep remains
-prohibited by the null/unresolved fields in `config/milky_cow_contract_gate.json`.
+`scripts/run_tests.ps1` currently passes 54 tests. Seven gate fields remain
+unresolved, so the integrated sweep is still prohibited by
+`config/milky_cow_contract_gate.json`.
+
+Two recorded consequences to carry into reporting: the phase-1 no-slippage
+assumption is biased `favors_high_n`, and the through-first-PA bridge leaves
+PAs 2..N funded only from trading profit, so book-fill time and right
+censoring must be reported per N.

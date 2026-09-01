@@ -40,17 +40,24 @@ class StudyContractTests(unittest.TestCase):
             gate["pa_book"]["active_pa_count_values"],
             list(range(1, 21)),
         )
-        self.assertEqual(gate["schema_version"], "milky_cow_contract_gate.v2")
+        self.assertEqual(gate["schema_version"], "milky_cow_contract_gate.v3")
         self.assertEqual(
             gate["pa_book"]["distribution"],
             "copy_to_all_eligible_active_pas",
         )
         unresolved = set(gate["unresolved_before_integrated_sweep"])
-        self.assertIn("evaluation_consumer_mode", unresolved)
-        self.assertIn("scaling_policy_and_thresholds", unresolved)
-        self.assertIn("replacement_policy", unresolved)
-        self.assertIn("external_capital_policy_and_budget", unresolved)
-        self.assertIn("economic_objective", unresolved)
+        self.assertEqual(
+            unresolved,
+            {
+                "evaluation_rule_boundary_resolutions",
+                "payout_lifecycle_timing",
+                "same_timestamp_event_order",
+                "economic_objective",
+                "rolling_cohort_horizon_and_censoring",
+                "regime_definitions",
+                "stress_scenarios",
+            },
+        )
         fixture = gate["deterministic_vertical_slice_fixture"]
         self.assertEqual(
             fixture["status"],
