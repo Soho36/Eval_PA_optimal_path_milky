@@ -12,7 +12,7 @@ from milky_cow.contracts import (
     ReplacementPolicy,
     plan_evaluation_purchase_intents,
 )
-from milky_cow.inputs import get_timezone
+from milky_cow.inputs import PATH_COIN_SEED, get_timezone
 from milky_cow.treasury import ExternalCapitalPolicy, Treasury
 
 
@@ -340,6 +340,37 @@ class IntegratedSweepGateTests(unittest.TestCase):
             set(gate["pa_book"]["allowed_roles"]),
             {"active_alive", "dead"},
         )
+        axis = gate["pa_book"]["active_pa_count_axis_semantics"]
+        self.assertEqual(
+            axis["headline_estimand"],
+            "maintained_target_active_pas_acquired_from_zero",
+        )
+        self.assertEqual(axis["initial_state"], "zero_evaluations_zero_pas")
+        self.assertIn("active_plus_running_evaluations_plus_pending_activations", axis["hard_cap_accounting"])
+        self.assertNotIn(
+            "active_pa_count_axis_semantics",
+            gate["unresolved_before_integrated_sweep"],
+        )
+
+        path = gate["intratrade_path_order"]
+        self.assertEqual(
+            path["scenario_arms"],
+            [
+                "source_constrained_then_mae_first",
+                "source_constrained_then_mfe_first",
+                "source_constrained_then_seeded_coin",
+            ],
+        )
+        self.assertEqual(path["phase_scope"], ["evaluation", "pa"])
+        self.assertEqual(path["rr1_source_population_evidence"]["accepted_ambiguous_opportunities"], 3_722)
+        self.assertEqual(
+            path["delta_reference"],
+            "source_constrained_then_seeded_coin",
+        )
+        self.assertEqual(path["resolver_seed"], PATH_COIN_SEED)
+        acquisition = gate["acquisition"]
+        self.assertIn("running_evaluation", acquisition["pipeline_credit_toward_target"])
+        self.assertIn("exceed_n", acquisition["overshoot_behavior"])
 
     def test_active_gate_hash_binds_its_evidence_and_supersedes_initial_scope(self) -> None:
         gate = json.loads(

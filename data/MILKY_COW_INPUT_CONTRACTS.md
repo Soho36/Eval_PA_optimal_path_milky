@@ -5,8 +5,9 @@ Audit date: 2026-09-01 (Europe/Tallinn).
 ## Verdict
 
 The imported evidence is intact, and the PA copy-to-all distribution can be
-implemented and tested in isolation. An integrated lifecycle or parameter sweep
-is not authorized yet because the scaling schedule, Evaluation consumer mode,
+implemented and tested in isolation, and a deterministic N=1/N=2 contract
+lifecycle is executable. A study-scale lifecycle or parameter sweep is not
+authorized yet because the scaling schedule, Evaluation consumer mode,
 acquisition/replacement policies, external-capital budget, payout timing, event
 order, and economic objective are unresolved.
 
@@ -40,7 +41,14 @@ the whole verified tape with causal order
 blocked offers. The stream is exogenous to PA count and account state. Each PA
 book input is an accepted-opportunity record carrying the selector identity,
 accepted-stream digest, ordinal, and raw-offer count; a bare TradeOffer does not
-prove membership in the accepted partition.
+prove membership in the accepted partition. The lifecycle additionally binds
+the exact selected offer at that ordinal and monotonic consumption, preventing
+singleton or cycle-local reselection from manufacturing PA input evidence.
+
+There is one accepted zero-duration RR1 opportunity. Its special executable
+suborder is Evaluation entry, PA entry, PA settlement, then Evaluation
+settlement, after earlier positive-duration exits and before payouts. It cannot
+change its own eligibility.
 
 The pinned Evaluation adapter is different: it restarts one-position selection
 at each Evaluation and renewal boundary. Whole-tape selection and cycle-local
@@ -76,12 +84,23 @@ aggregation, maximum MNQ, and linear/nonlinear outcome assumption. No schedule
 is selected yet. The undated four-mini excerpt does not by itself authorize a
 40-MNQ conversion.
 
+## Completed-trade path boundary
+
+The tape does not observe MAE/MFE order. One-sided cases and two-sided cases
+closing at MAE have a settlement-effective constrained order. Two-sided cases
+closing at MFE remain ambiguous because an earlier MFE-to-MAE excursion is
+possible, as do closes strictly between extrema. The 5,029 raw ambiguities
+partition into 3,722 accepted and 1,307 blocked offers. Every lifecycle scenario
+must apply the same all-MAE-first, all-MFE-first, or seeded ambiguous-order arm
+to Evaluation and PA and report phase-specific changes from the seeded arm.
+
 ## Acquisition, replacement, and capital boundary
 
 An acquired or replacement PA must traverse Evaluation purchase/renewal, pass,
 activation funding, and strict post-activation eligibility. A death never
-creates an instant PA. All running Evaluations and pending activations must be
-visible capacity commitments if the chosen PA-count estimand is a target/cap.
+creates an instant PA. For the headline axis, N is the maintained active-PA
+target acquired from zero, and active + running Evaluation + pending activation
+commitments may never exceed N. Initial-N active is a diagnostic only.
 External contributions must be timestamped, purpose-tagged, budget checked, and
 cash-reconciled. No acquisition, replacement, or capital policy is selected yet.
 

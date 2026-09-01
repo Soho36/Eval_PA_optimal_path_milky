@@ -1,7 +1,7 @@
 {
   "schema_version": "milky_cow_implementation_provenance.v1",
   "verified_on": "2026-09-01",
-  "status": "foundation_contracts_only_integrated_sweep_prohibited",
+  "status": "foundation_and_deterministic_vertical_slice_integrated_sweep_prohibited",
   "source_repository": {
     "path": "I:/PycharmProjects/Eval_PA_optimal_path",
     "revision": "106cfb782c6e573856282095441bb69f23924a55"
@@ -43,6 +43,11 @@
       "path": "reference/shared_source/rules.py",
       "sha256": "f3924f349ef88f0b79803d001cb37e790c19624b243f07ffdd7525a7c6c68253",
       "source_repository_path": "src/eval_pa_optimal_path/rules.py"
+    },
+    {
+      "path": "reference/shared_source/payouts.py",
+      "sha256": "1448447c39b89490ceab4524eb5d755a8a33dca10818910274d26f3be8c6c2e6",
+      "source_repository_path": "src/eval_pa_optimal_path/payouts.py"
     }
   ],
   "local_artifacts": [
@@ -73,7 +78,7 @@
     },
     {
       "path": "config/milky_cow_contract_gate.json",
-      "sha256": "f41cabaa80572ec9423531e24bf74e7f7b2a1a8bb60df725eb6c440a7942dfda",
+      "sha256": "88c82ea1ffcb198e9070633c9fec850c5d873b8292ab2edc7c49a44ed6e4a2ab",
       "role": "active_foundation_gate"
     },
     {
@@ -83,17 +88,17 @@
     },
     {
       "path": "rules/MILKY_COW_COPY_TO_ALL_RULES.txt",
-      "sha256": "e1991b978967dafd217fe040dc34889770018de8729d961563f4819052b59c6a",
+      "sha256": "1573a1edd80bb6e4b0d8e42285920f31a61f20ef07bf064d3d0b1454c10375ae",
       "role": "active_pa_book_rule_overlay"
     },
     {
       "path": "data/MILKY_COW_INPUT_CONTRACTS.md",
-      "sha256": "e35d21c6428c70cdefaa093f574e3ef4432af6543b8b7c41303fcae5b307a1e0",
+      "sha256": "efb0ae97f7f9ecc822658108e0f3e2b87277ce13b784a4d94bbbce67528d0701",
       "role": "input_contract_audit"
     },
     {
       "path": "src/milky_cow/inputs.py",
-      "sha256": "8143499d9cb82fb778a05822ba9e6bedf03ad76bade50f734dd539c134c6192c",
+      "sha256": "8d03672f3b0e3175ec7b7f6eec7a9dae7cb93521445955ca82f888673c72d458",
       "role": "rr1_and_accepted_stream_contract"
     },
     {
@@ -102,14 +107,29 @@
       "role": "upstream_evaluation_behavior_lock"
     },
     {
+      "path": "src/milky_cow/evaluation.py",
+      "sha256": "6e1d43f97af6bee2a2a706c359adc4797463a29f662173d2033b6b6fa538de8a",
+      "role": "stateful_evaluation_contract"
+    },
+    {
       "path": "src/milky_cow/contracts.py",
       "sha256": "d69823706e95c5c231facca0758eb8c3307b74ce6efa31518fba2d56608ea4e5",
       "role": "scaling_acquisition_replacement_contracts"
     },
     {
       "path": "src/milky_cow/copy_to_all.py",
-      "sha256": "a86914f0bc6841b1331b37870a27b51e19ca3a885f7b8cbb8582512906fcf131",
+      "sha256": "d54c1df4da421d7a9cd2e612d087a8fc58c4415175eade4feb78eb2d5281b0c3",
       "role": "copy_to_all_and_exit_settlement_contract"
+    },
+    {
+      "path": "src/milky_cow/payouts.py",
+      "sha256": "afda020cba6ea972932d99e50ef4374ba2955d0faf96b6ec88c52db9387fe81a",
+      "role": "six_candidate_payout_execution_contract"
+    },
+    {
+      "path": "src/milky_cow/lifecycle.py",
+      "sha256": "20578979b45f6d07e5dac826e5354999ed4428db0361c967292b0fdbab678c7a",
+      "role": "deterministic_contract_lifecycle_composition"
     },
     {
       "path": "src/milky_cow/treasury.py",
@@ -118,7 +138,7 @@
     },
     {
       "path": "src/milky_cow/provenance.py",
-      "sha256": "cd59037ad0fc06580522a520e6a2ba737d3d61279723417d0e6f7f11e3b23600",
+      "sha256": "7262368ca0673fe7cc30411d7cd4ea1495136685d47d8ea5c6d611eef593bdc9",
       "role": "evidence_verifier"
     },
     {
@@ -133,18 +153,23 @@
     },
     {
       "path": "tests/test_evidence_and_evaluation_lock.py",
-      "sha256": "f7d82ff08d19b1a050a46ea0c4f1ba296bf01f0eb2030c5df3a3199a52344f51",
+      "sha256": "e7c7a883bca7629aceb2b59b8d972f0f3a9c78b3a395ce79d12e9296094567f4",
       "role": "evidence_and_evaluation_fixtures"
     },
     {
       "path": "tests/test_copy_to_all_and_scaling.py",
-      "sha256": "0b6148449a3083ed001ec85495bbebf719c578e555a62aa5213069778c684280",
+      "sha256": "395ceb77d7dad253655d411a1a5baea3425413ba61fb4dda9a5612c325ece847",
       "role": "copy_scaling_and_settlement_fixtures"
     },
     {
       "path": "tests/test_lifecycle_policy_contracts.py",
-      "sha256": "27e31c66761e57e1ca9cb2c31b454a1392c7aade4863c06761a364ca9f61cea0",
+      "sha256": "08cdf37a64914e5e38c2be26ab18c6bbab09fa42197ca16e01d6cd80c3aac064",
       "role": "acquisition_replacement_capital_and_gate_fixtures"
+    },
+    {
+      "path": "tests/test_integrated_lifecycle_fixture.py",
+      "sha256": "ac83cfd653b8f970575a93fe837a670f7f3feddaf738ec6181a1b746282b64b6",
+      "role": "deterministic_n1_n2_lifecycle_and_payout_fixtures"
     },
     {
       "path": "project_memory/BEGINNING_OF_A_WORK_SESSION.md",
@@ -153,37 +178,37 @@
     },
     {
       "path": "project_memory/PROJECT.md",
-      "sha256": "3d209d35574e5dc4e2a97b2e24e505e48a0aed961e5782395bc944ca211a0c91",
+      "sha256": "5088ea012d474efa72548095743f0ad8fa0c8fca90904defa13c26a8bf9a4a33",
       "role": "project_scope_memory"
     },
     {
       "path": "project_memory/EVIDENCE.md",
-      "sha256": "8ff4038535e41dba0471c1dd19a77e8a9aaea21fe4961641e1b8632f294d9ec4",
+      "sha256": "a2b7ec7dfe15448356f1da5930342239dda04a260d79bc89594410de3094f444",
       "role": "evidence_memory"
     },
     {
       "path": "project_memory/DECISIONS.md",
-      "sha256": "00fbb89cf39fcd0af30179b7bb15fec33b3f77a3fa980d92643bd5add126ce39",
+      "sha256": "08b3bef893047e23e2304293bf55e2a330c0ad9515ae61bfcd268aeaf57e696f",
       "role": "locked_and_unresolved_decisions_memory"
     },
     {
       "path": "project_memory/ARCHITECTURE.md",
-      "sha256": "0730a59cbc6d6a16292af1615530cbc9ff78060e61bf8dd9f1401e503f405e99",
+      "sha256": "707f31e4b5fde8ca4a2d3de2f05c8ffc830ab0e162617270ba1dc331b02d0c90",
       "role": "foundation_architecture_memory"
     },
     {
       "path": "project_memory/STATE.md",
-      "sha256": "e47d89ffd24e19667449dab35c9933635cc1a7faff1fea1777fdf880aeb9018b",
+      "sha256": "ac5777a4b7ddd5462f8339cf786cd73dc4b7426010f3b5a7f4845e433756fb91",
       "role": "current_project_state_memory"
     },
     {
       "path": "project_memory/TODO.md",
-      "sha256": "7974602c9a0bf5386d047013d42d0866f30304f1dcc48b0d37e1c77fde7ffcc8",
+      "sha256": "d7c5e8bee361959c38db92d2248b7d907f10de03781f8283e92c8fe3967ee30a",
       "role": "current_gate_work_queue"
     },
     {
       "path": "project_memory/TESTING.md",
-      "sha256": "38ea5ef009a293bb880a1ad10809d069aaaa606abdd0e70407151991871aee6f",
+      "sha256": "9f39488f5607cba7666d9dac48d214503588ca853c63ddee5aed268a80cb9023",
       "role": "executable_testing_memory"
     },
     {
@@ -193,7 +218,7 @@
     },
     {
       "path": "tests/test_study_contract.py",
-      "sha256": "3fb2148cb940cbd26dc8909f97d79ec5189bf7b260cbfe6d9afb3068022e041d",
+      "sha256": "a5f68acef12f6cf5226b282b053a76edc791d0b2de90c36059a0c38375b41499",
       "role": "active_vs_frozen_scope_governance_fixture"
     }
   ],
@@ -222,6 +247,17 @@
       ]
     },
     {
+      "local_path": "src/milky_cow/evaluation.py",
+      "reviewed_source_paths": [
+        "reference/shared_source/evaluation.py"
+      ],
+      "excluded_parent_mechanics": [
+        "integrated_consumer_selection",
+        "fee_funding",
+        "parent_lifecycle_orchestration"
+      ]
+    },
+    {
       "local_path": "src/milky_cow/contracts.py",
       "reviewed_source_paths": [
         "reference/shared_source/rules.py"
@@ -243,6 +279,18 @@
         "busy_seat",
         "standby_PA",
         "fixed_one_MNQ"
+      ]
+    },
+    {
+      "local_path": "src/milky_cow/payouts.py",
+      "reviewed_source_paths": [
+        "reference/shared_source/rules.py",
+        "reference/shared_source/payouts.py"
+      ],
+      "excluded_parent_mechanics": [
+        "parent_policy_rankings",
+        "staggering_book_assumptions",
+        "study_timing_selection"
       ]
     },
     {

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+import hashlib
 import json
 from pathlib import Path
 import unittest
@@ -8,9 +9,9 @@ import unittest
 from milky_cow.evaluation_lock import simulate_eodmae_evaluation_lock
 from milky_cow.inputs import (
     get_timezone,
-    load_rr1_offers,
-    select_global_one_position,
-    verify_rr1_import,
+    localize_wall_time,
+    load_verified_rr1_dataset,
+    path_order_for_offer,
 )
 from milky_cow.provenance import (
     verify_implementation_provenance,
@@ -25,8 +26,9 @@ class EvidenceAndEvaluationLockTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.raw_root = ROOT / "data" / "raw" / "rr1"
-        cls.offers = load_rr1_offers(cls.raw_root)
-        cls.selection = select_global_one_position(cls.offers)
+        cls.dataset = load_verified_rr1_dataset(cls.raw_root)
+        cls.offers = cls.dataset.offers
+        cls.selection = cls.dataset.selection
         cls.zone = get_timezone("Europe/Tallinn")
         cls.fixture = json.loads(
             (
@@ -50,12 +52,12 @@ class EvidenceAndEvaluationLockTests(unittest.TestCase):
 
     def test_implementation_derivatives_are_hash_bound_to_reviewed_sources(self) -> None:
         result = verify_implementation_provenance(ROOT)
-        self.assertEqual(result.reviewed_sources, 7)
-        self.assertGreaterEqual(result.local_artifacts, 19)
-        self.assertEqual(result.derivations, 5)
+        self.assertEqual(result.reviewed_sources, 8)
+        self.assertGreaterEqual(result.local_artifacts, 23)
+        self.assertEqual(result.derivations, 7)
 
     def test_rr1_manifest_and_global_stream_parity(self) -> None:
-        verified = verify_rr1_import(self.raw_root)
+        verified = self.dataset.verification
         self.assertEqual((verified.files, verified.bytes), (46, 1_725_388))
         self.assertEqual(
             verified.combined_set_sha256,
@@ -69,6 +71,47 @@ class EvidenceAndEvaluationLockTests(unittest.TestCase):
             "1175787ba50f0ab9f08a953f60b661e597c70f2bdb9329a517603616aaae6759",
         )
         accepted_records = self.selection.accepted_opportunities
+        ambiguous = [
+            record
+            for record in accepted_records
+            if record.offer.intratrade_path_status == "ambiguous"
+        ]
+        self.assertEqual(
+            (
+                sum(
+                    offer.intratrade_path_status == "ambiguous"
+                    for offer in self.offers
+                ),
+                len(ambiguous),
+                sum(
+                    offer.intratrade_path_status == "ambiguous"
+                    for offer in self.selection.blocked
+                ),
+            ),
+            (5_029, 3_722, 1_307),
+        )
+        central_arm = "source_constrained_then_seeded_coin"
+        assignments = [
+            (record, path_order_for_offer(record.offer, central_arm))
+            for record in ambiguous
+        ]
+        self.assertEqual(
+            (
+                sum(order == "mae_first" for _, order in assignments),
+                sum(order == "mfe_first" for _, order in assignments),
+            ),
+            (1_838, 1_884),
+        )
+        assignment_digest = hashlib.sha256()
+        for record, order in assignments:
+            assignment_digest.update(record.offer.trade_key.encode("utf-8"))
+            assignment_digest.update(b"\0")
+            assignment_digest.update(order.encode("utf-8"))
+            assignment_digest.update(b"\n")
+        self.assertEqual(
+            assignment_digest.hexdigest(),
+            "fe8ffebb92966bfb40675100b7a56d5977c0cc1c40bfbe9d4e3aea2341bdda45",
+        )
         self.assertEqual(len(accepted_records), 9_299)
         self.assertEqual(accepted_records[0].accepted_ordinal, 1)
         self.assertEqual(accepted_records[-1].accepted_ordinal, 9_299)
@@ -101,6 +144,16 @@ class EvidenceAndEvaluationLockTests(unittest.TestCase):
         )
         self.assertEqual(winter.entry_at.utcoffset(), timedelta(hours=2))
         self.assertEqual(summer.entry_at.utcoffset(), timedelta(hours=3))
+        with self.assertRaisesRegex(ValueError, "Nonexistent"):
+            localize_wall_time(
+                datetime(2024, 3, 31, 3, 30),
+                "Europe/Tallinn",
+            )
+        repeated = datetime(2024, 10, 27, 3, 30)
+        fold_zero = localize_wall_time(repeated, "Europe/Tallinn", fold=0)
+        fold_one = localize_wall_time(repeated, "Europe/Tallinn", fold=1)
+        self.assertEqual(fold_zero.utcoffset(), timedelta(hours=3))
+        self.assertEqual(fold_one.utcoffset(), timedelta(hours=2))
 
     def test_three_pinned_eodmae_episodes_are_executable_behavior_locks(self) -> None:
         for expected in self.fixture["representative_episodes"]:

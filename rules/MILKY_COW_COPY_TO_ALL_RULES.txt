@@ -1,5 +1,5 @@
 LEGACY 25K MILKY-COW COPY-TO-ALL OVERLAY
-Version: 2026-09-01.copy-to-all.1
+Version: 2026-09-01.copy-to-all.2
 Status: user-authorized project rule; effective for this repository only
 Applicability: [-infinity, +infinity) unless a named scenario overrides a field
 
@@ -40,6 +40,17 @@ modeling work. A PA copy decision must carry an accepted-opportunity record
 bound to the selector ID, accepted-stream digest, ordinal, and raw-offer count;
 a bare or blocked raw offer is not a valid PA-book input.
 
+An integrated lifecycle must additionally bind each accepted-opportunity record
+to the exact verified selection row at that ordinal and consume rows
+monotonically. Re-selecting a blocked offer on a singleton or cycle-local subset
+does not create valid PA evidence. It must settle the prior PA copy batch before
+entering the next bound opportunity. The RR1 tape contains one accepted
+zero-duration opportunity. At its timestamp, settle earlier positive-duration
+PA and Evaluation exits first; then enter its Evaluation copy, enter its PA
+copy batch, settle the PA batch, and settle the Evaluation copy, all before
+payouts, renewals, activations, purchases, or positive-duration entries at that
+timestamp. The zero-duration opportunity cannot affect its own entry eligibility.
+
 This section locks the PA-phase opportunity source. Whether the integrated
 Evaluation phase consumes this already-selected stream or retains the pinned
 per-Evaluation/per-renewal fill-time adapter is unresolved. The copied EODMAE
@@ -79,6 +90,19 @@ observed at the exit event and must not be reported as if the source completed
 P&L were realized. Whether round-turn commission is included at MAE/MFE equity
 or only at close remains an explicit, unresolved PA accounting input.
 
+Completed-trade path order is a named lifecycle-wide uncertainty dimension.
+One-sided cases and two-sided cases ending at MAE retain their settlement-
+effective order in every scenario. A close at MFE does not exclude an earlier
+MFE-to-MAE excursion and remains ambiguous. Ambiguous cases vary across
+`source_constrained_then_mae_first`,
+`source_constrained_then_mfe_first`, and
+`source_constrained_then_seeded_coin` arms. The seeded arm is a reproducible
+imputation, not observed truth. Apply the same scenario arm to Evaluation and PA
+settlement, while reporting ambiguity encounters separately for their selected
+consumer streams. Reports must show all three arms and changes from the seeded
+arm in Evaluation passes, failures, time and cost as well as PA deaths and
+payouts.
+
 5. MNQ SCALING
 
 Each account copy carries a positive integer MNQ count selected causally from an
@@ -105,6 +129,21 @@ An active-count target may constrain active PAs plus capacity commitments
 (running Evaluations and paid-or-unpaid pending activations) to prevent accidental
 overshoot. It is not a router capacity K. Exact acquisition and dead-PA
 replacement policy candidates remain unresolved.
+
+For an Evaluation-pipeline replacement trace, each PA death remains an
+unprocessed replacement obligation until one funded Evaluation commitment
+represents it. If acquisition or concurrency caps admit only part of a
+correlated-death cluster, the remainder persists and cannot be relabeled as
+growth. That backlog does not pause the already funded Evaluation pipeline or
+the exogenous PA opportunity stream.
+
+For the headline 1-through-20 axis, N is the maintained target number of active
+PAs. A cohort starts with zero Evaluations and zero PAs, acquires every PA through
+the Evaluation/pass/paid-activation lifecycle, attempts to restore deaths under
+the selected replacement policy, and never permits active PAs plus running
+Evaluations plus pending activations to exceed N. A separately labeled initial-N
+active-book run is a diagnostic counterfactual that isolates PA operating
+economics; it is not the headline acquisition-from-zero estimand.
 
 7. EXTERNAL CAPITAL AND TREASURY
 

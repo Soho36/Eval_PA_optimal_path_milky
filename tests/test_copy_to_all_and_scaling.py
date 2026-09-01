@@ -9,7 +9,13 @@ from milky_cow.copy_to_all import (
     copy_to_all,
     settle_copy_decision,
 )
-from milky_cow.inputs import TradeOffer, get_timezone, select_global_one_position
+from milky_cow.inputs import (
+    TradeOffer,
+    get_timezone,
+    path_order_for_offer,
+    resolve_path_order,
+    select_global_one_position,
+)
 
 
 ZONE = get_timezone("Europe/Tallinn")
@@ -28,6 +34,7 @@ def offer(
     mfe: float = 100.0,
     pnl: float = 100.0,
     commission: float = 1.0,
+    resolved: str = "mae_first",
 ) -> TradeOffer:
     return TradeOffer(
         trade_key=key,
@@ -46,7 +53,7 @@ def offer(
         gross_pnl_usd_per_mnq=pnl,
         candle_range=1.0,
         commission_usd_per_mnq=commission,
-        resolved_path_order="mae_first",
+        resolved_path_order=resolved,
         source_file_sha256="0" * 64,
     )
 
@@ -247,6 +254,113 @@ class CopyToAllParityTests(unittest.TestCase):
         self.assertFalse(intra_result.survived)
         self.assertFalse(intra_result.completed_trade_outcome_applied)
         self.assertIsNone(intra_result.net_pnl_usd)
+
+    def test_path_stress_changes_only_ambiguous_trade_order(self) -> None:
+        seeded = resolve_path_order(
+            datetime(2026, 1, 13, 10, 3),
+            datetime(2026, 1, 13, 10, 33),
+            -1_000.0,
+            1_000.0,
+            1.05,
+        )
+        self.assertEqual(seeded, "mfe_first")
+        ambiguous = offer(
+            "ambiguous_boundary",
+            entry="2026-01-13 10:03:00",
+            exit="2026-01-13 10:33:00",
+            mae=-1_000.0,
+            mfe=1_000.0,
+            pnl=1.05,
+            commission=1.05,
+            resolved=seeded,
+        )
+        self.assertEqual(ambiguous.intratrade_path_status, "ambiguous")
+        outcomes = {}
+        for arm in (
+            "source_constrained_then_mae_first",
+            "source_constrained_then_mfe_first",
+            "source_constrained_then_seeded_coin",
+        ):
+            account = PAAccount(
+                pa_id=1,
+                activated_at=ambiguous.entry_at - timedelta(days=1),
+                equity_profit_usd=100.0,
+                peak_profit_usd=101.05,
+                liquidation_floor_profit_usd=-1_398.95,
+            )
+            decision = copy_to_all(accepted_offer(ambiguous), [account], schedule())
+            result = settle_copy_decision(
+                decision,
+                {1: account},
+                event_at=ambiguous.exit_at,
+                path_order=path_order_for_offer(ambiguous, arm),
+                commission_timing="close_only",
+            )[0]
+            outcomes[arm] = result.survived
+        self.assertTrue(outcomes["source_constrained_then_mae_first"])
+        self.assertFalse(outcomes["source_constrained_then_mfe_first"])
+        self.assertFalse(outcomes["source_constrained_then_seeded_coin"])
+
+        constrained = offer(
+            "one_sided",
+            mae=-100.0,
+            mfe=0.0,
+            pnl=-50.0,
+            resolved="mae_first",
+        )
+        self.assertEqual(constrained.intratrade_path_status, "source_constrained")
+        self.assertEqual(
+            path_order_for_offer(constrained, "source_constrained_then_mae_first"),
+            "mae_first",
+        )
+        self.assertEqual(
+            path_order_for_offer(constrained, "source_constrained_then_mfe_first"),
+            "mae_first",
+        )
+        terminal_mae = offer(
+            "terminal_mae",
+            mae=-100.0,
+            mfe=100.0,
+            pnl=-100.0,
+            resolved="mfe_first",
+        )
+        terminal_mfe = offer(
+            "terminal_mfe",
+            mae=-100.0,
+            mfe=100.0,
+            pnl=100.0,
+            resolved="mae_first",
+        )
+        self.assertEqual(terminal_mae.intratrade_path_status, "source_constrained")
+        self.assertEqual(terminal_mfe.intratrade_path_status, "ambiguous")
+        for arm in outcomes:
+            self.assertEqual(path_order_for_offer(terminal_mae, arm), "mfe_first")
+        self.assertEqual(
+            path_order_for_offer(
+                terminal_mfe,
+                "source_constrained_then_mae_first",
+            ),
+            "mae_first",
+        )
+        self.assertEqual(
+            path_order_for_offer(
+                terminal_mfe,
+                "source_constrained_then_mfe_first",
+            ),
+            "mfe_first",
+        )
+        seeded_terminal = path_order_for_offer(
+            terminal_mfe,
+            "source_constrained_then_seeded_coin",
+        )
+        self.assertIn(seeded_terminal, {"mae_first", "mfe_first"})
+        self.assertEqual(
+            seeded_terminal,
+            path_order_for_offer(
+                terminal_mfe,
+                "source_constrained_then_seeded_coin",
+            ),
+        )
 
 
 class ScalingContractTests(unittest.TestCase):

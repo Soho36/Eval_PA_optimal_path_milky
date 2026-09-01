@@ -20,6 +20,7 @@ import csv
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta, tzinfo
 from decimal import Decimal, InvalidOperation
+from functools import lru_cache
 import hashlib
 import json
 import math
@@ -30,6 +31,12 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 PathOrder = Literal["mae_first", "mfe_first"]
+PathStressArm = Literal[
+    "source_constrained_then_mae_first",
+    "source_constrained_then_mfe_first",
+    "source_constrained_then_seeded_coin",
+]
+IntratradePathStatus = Literal["source_constrained", "ambiguous"]
 RAW_COLUMNS = (
     "ticket",
     "entry_time",
@@ -54,6 +61,12 @@ STATS_COLUMNS = (
     "sharpe",
 )
 PATH_COIN_SEED = 20260823
+EXPECTED_RAW_OFFERS = 12_658
+EXPECTED_ACCEPTED_OPPORTUNITIES = 9_299
+EXPECTED_BLOCKED_OFFERS = 3_359
+EXPECTED_ACCEPTED_STREAM_SHA256 = (
+    "1175787ba50f0ab9f08a953f60b661e597c70f2bdb9329a517603616aaae6759"
+)
 STRATEGY_ID = "rr_r_mfe_buy_stop_entry_rr1"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_IMPORT_MANIFEST = PROJECT_ROOT / "manifests/rr1_import_20260829.json"
@@ -133,6 +146,15 @@ class TradeOffer:
     @property
     def exit_trading_day(self) -> date:
         return self.exit_at.date()
+
+    @property
+    def intratrade_path_status(self) -> IntratradePathStatus:
+        constrained = source_constrained_path_order(
+            self.mae_usd_per_mnq,
+            self.mfe_usd_per_mnq,
+            self.gross_pnl_usd_per_mnq,
+        )
+        return "source_constrained" if constrained is not None else "ambiguous"
 
 
 @dataclass(frozen=True, slots=True)
@@ -231,6 +253,15 @@ class OpportunitySelection:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class VerifiedRR1Dataset:
+    """One fresh integrity check plus one normalized, selected in-memory tape."""
+
+    verification: VerifiedRR1Import
+    offers: tuple[TradeOffer, ...]
+    selection: OpportunitySelection
+
+
 HOUR = timedelta(hours=1)
 EET = timedelta(hours=2)
 EEST = timedelta(hours=3)
@@ -295,6 +326,7 @@ class EuropeTallinn(tzinfo):
 _TALLINN = EuropeTallinn()
 
 
+@lru_cache(maxsize=None)
 def get_timezone(name: str) -> tzinfo:
     try:
         return ZoneInfo(name)
@@ -420,11 +452,27 @@ def resolve_path_order(
     *,
     seed: int = PATH_COIN_SEED,
 ) -> PathOrder:
+    """Preserve the pinned upstream resolver for the Evaluation behavior lock."""
+
     one_sided = mfe <= 0 or mae >= 0
     if not one_sided and math.isclose(pnl, mae, rel_tol=1e-5, abs_tol=1e-8):
         return "mfe_first"
     if one_sided or math.isclose(pnl, mfe, rel_tol=1e-5, abs_tol=1e-8):
         return "mae_first"
+    return seeded_ambiguous_path_order(entry_label, exit_label, mae, mfe, pnl, seed=seed)
+
+
+def seeded_ambiguous_path_order(
+    entry_label: datetime,
+    exit_label: datetime,
+    mae: float,
+    mfe: float,
+    pnl: float,
+    *,
+    seed: int = PATH_COIN_SEED,
+) -> PathOrder:
+    """Deterministically impute one order without claiming it was observed."""
+
     keys = (
         _source_epoch_ns(entry_label),
         _source_epoch_ns(exit_label),
@@ -435,6 +483,63 @@ def resolve_path_order(
     payload = seed.to_bytes(8, "big", signed=True) + struct.pack("<5q", *keys)
     digest = hashlib.blake2b(payload, digest_size=8).digest()
     return "mfe_first" if digest[-1] & 1 else "mae_first"
+
+
+def source_constrained_path_order(
+    mae: float,
+    mfe: float,
+    pnl: float,
+) -> PathOrder | None:
+    """Return a settlement-effective constraint, else a two-sided ambiguity.
+
+    A two-sided trade ending at MAE guarantees an adverse endpoint after any
+    earlier MFE, which is sufficient for trailing-drawdown settlement. Ending
+    at MFE does not exclude an earlier MFE -> MAE excursion and therefore does
+    not prove MAE-first order.
+    """
+
+    if not all(math.isfinite(value) for value in (mae, mfe, pnl)):
+        raise ValueError("Path extrema and closing P&L must be finite")
+    one_sided = mfe <= 0 or mae >= 0
+    if one_sided:
+        return "mae_first"
+    if math.isclose(pnl, mae, rel_tol=1e-5, abs_tol=1e-8):
+        return "mfe_first"
+    return None
+
+
+def path_order_for_offer(
+    offer: TradeOffer,
+    stress_arm: PathStressArm,
+) -> PathOrder:
+    """Apply stress only where the completed-trade endpoints leave order unknown."""
+
+    arms: dict[str, PathOrder | Literal["seeded_coin"]] = {
+        "source_constrained_then_mae_first": "mae_first",
+        "source_constrained_then_mfe_first": "mfe_first",
+        "source_constrained_then_seeded_coin": "seeded_coin",
+    }
+    if stress_arm not in arms:
+        raise ValueError("Unsupported intratrade path stress arm")
+    constrained = source_constrained_path_order(
+        offer.mae_usd_per_mnq,
+        offer.mfe_usd_per_mnq,
+        offer.gross_pnl_usd_per_mnq,
+    )
+    if constrained is not None:
+        return constrained
+    ambiguous_resolution = arms[stress_arm]
+    return (
+        seeded_ambiguous_path_order(
+            offer.entry_at.replace(tzinfo=None),
+            offer.exit_at.replace(tzinfo=None),
+            offer.mae_usd_per_mnq,
+            offer.mfe_usd_per_mnq,
+            offer.gross_pnl_usd_per_mnq,
+        )
+        if ambiguous_resolution == "seeded_coin"
+        else ambiguous_resolution
+    )
 
 
 def _discover_kind(root: Path, *, stats: bool) -> dict[str, Path]:
@@ -476,17 +581,13 @@ def _localize_label(label: str, timezone: str) -> tuple[datetime, datetime]:
     return naive, localize_wall_time(naive, timezone, fold=0)
 
 
-def load_rr1_offers(
+def _load_rr1_offers_unverified(
     raw_root: str | Path,
     *,
     timezone: str = "Europe/Tallinn",
     commission_usd_per_mnq: float = 1.05,
-    manifest_path: str | Path = DEFAULT_IMPORT_MANIFEST,
-    verify_manifest: bool = True,
 ) -> list[TradeOffer]:
     root = Path(raw_root)
-    if verify_manifest:
-        verify_rr1_import(root, manifest_path)
     if not math.isfinite(commission_usd_per_mnq) or commission_usd_per_mnq < 0:
         raise ValueError("Commission must be finite and non-negative")
     trades = _discover_kind(root, stats=False)
@@ -598,6 +699,62 @@ def load_rr1_offers(
         )
     )
     return offers
+
+
+def load_rr1_offers(
+    raw_root: str | Path,
+    *,
+    timezone: str = "Europe/Tallinn",
+    commission_usd_per_mnq: float = 1.05,
+    manifest_path: str | Path = DEFAULT_IMPORT_MANIFEST,
+) -> list[TradeOffer]:
+    """Freshly verify every imported artifact before normalizing any offers."""
+
+    verify_rr1_import(raw_root, manifest_path)
+    return _load_rr1_offers_unverified(
+        raw_root,
+        timezone=timezone,
+        commission_usd_per_mnq=commission_usd_per_mnq,
+    )
+
+
+def load_verified_rr1_dataset(
+    raw_root: str | Path,
+    *,
+    timezone: str = "Europe/Tallinn",
+    commission_usd_per_mnq: float = 1.05,
+    manifest_path: str | Path = DEFAULT_IMPORT_MANIFEST,
+) -> VerifiedRR1Dataset:
+    """Verify once, then normalize and select without a second integrity pass."""
+
+    verification = verify_rr1_import(raw_root, manifest_path)
+    offers = tuple(
+        _load_rr1_offers_unverified(
+            raw_root,
+            timezone=timezone,
+            commission_usd_per_mnq=commission_usd_per_mnq,
+        )
+    )
+    selection = select_global_one_position(list(offers))
+    observed = (
+        len(offers),
+        len(selection.accepted),
+        len(selection.blocked),
+        selection.accepted_stream_sha256,
+    )
+    expected = (
+        EXPECTED_RAW_OFFERS,
+        EXPECTED_ACCEPTED_OPPORTUNITIES,
+        EXPECTED_BLOCKED_OFFERS,
+        EXPECTED_ACCEPTED_STREAM_SHA256,
+    )
+    if observed != expected:
+        raise ValueError(f"Verified RR1 selection parity mismatch: {observed} != {expected}")
+    return VerifiedRR1Dataset(
+        verification=verification,
+        offers=offers,
+        selection=selection,
+    )
 
 
 def select_global_one_position(

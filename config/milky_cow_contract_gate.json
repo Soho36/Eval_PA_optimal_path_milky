@@ -1,5 +1,5 @@
 {
-  "schema_version": "milky_cow_contract_gate.v1",
+  "schema_version": "milky_cow_contract_gate.v2",
   "governance": {
     "active_foundation_gate": "config/milky_cow_contract_gate.json",
     "superseded_initial_scope_record": "config/milky_cow_study_contract.json",
@@ -41,16 +41,40 @@
     },
     {
       "path": "rules/MILKY_COW_COPY_TO_ALL_RULES.txt",
-      "sha256": "e1991b978967dafd217fe040dc34889770018de8729d961563f4819052b59c6a",
+      "sha256": "1573a1edd80bb6e4b0d8e42285920f31a61f20ef07bf064d3d0b1454c10375ae",
       "role": "active_pa_book_rule_overlay"
     },
     {
       "path": "src/milky_cow/inputs.py",
-      "sha256": "8143499d9cb82fb778a05822ba9e6bedf03ad76bade50f734dd539c134c6192c",
+      "sha256": "8d03672f3b0e3175ec7b7f6eec7a9dae7cb93521445955ca82f888673c72d458",
       "role": "selector_implementation"
     }
   ],
   "status": "foundation_only_integrated_sweep_prohibited",
+  "deterministic_vertical_slice_fixture": {
+    "status": "executable_contract_fixture_not_study_baseline",
+    "pa_targets": [1, 2],
+    "evaluation_consumer_boundary": "adapter_invariant_nonoverlapping_synthetic_offers",
+    "scaling": "fixed_one_mnq_per_account",
+    "commission_timing": "close_only_for_pa_intratrade_boundary",
+    "aggregate_execution": "perfect_linear_no_slippage_fixture_only",
+    "pa_stream_binding": "exact_opportunity_selection_digest_raw_count_ordinal_and_offer",
+    "acquisition": "one_funded_evaluation_at_a_time_toward_target",
+    "replacement": "each_death_requires_one_funded_shared_pipeline_evaluation; immediate_admissible_planning_precedes_new_entries; residual_backlog_blocks_growth_not_funded_pipeline_or_pa_events",
+    "external_capital": ["through_first_pa_n1", "none_with_320_starting_cash_n2"],
+    "payout": "minimum_500_always_atomic_pa_and_treasury_transaction_at_session_close_with_no_open_position",
+    "event_order": [
+      "settle_pa_exits",
+      "settle_evaluation_exits_and_passes",
+      "for_zero_duration_only_evaluation_entry_then_pa_entry_then_pa_exit_then_evaluation_exit",
+      "execute_session_close_payouts",
+      "process_due_renewals",
+      "fund_pending_activations_then_activate",
+      "fund_death_replacements_before_growth",
+      "accept_evaluation_entries",
+      "create_pa_copy_batches"
+    ]
+  },
   "opportunity_stream": {
     "raw_manifest": "manifests/rr1_import_20260829.json",
     "selector_scope": "whole_verified_tape_once",
@@ -62,18 +86,62 @@
     "expected_accepted_opportunities": 9299,
     "expected_blocked_offers": 3359,
     "accepted_stream_key_sha256": "1175787ba50f0ab9f08a953f60b661e597c70f2bdb9329a517603616aaae6759",
+    "expected_zero_duration_offers": 1,
+    "zero_duration_event_rule": "after_positive_duration_exits_and_before_payouts_enter_evaluation_then_pa_then_settle_pa_then_evaluation",
     "pa_consumer_mode": "common_preselected_global_stream",
     "pa_copy_input_type": "accepted_opportunity_with_selector_digest_and_ordinal",
     "evaluation_consumer_mode": null
   },
+  "intratrade_path_order": {
+    "source_constrained_cases": [
+      "one_sided_extrema_use_mae_first_settlement_order",
+      "two_sided_close_at_mae_uses_mfe_first_settlement_order"
+    ],
+    "ambiguity_scope": [
+      "two_sided_close_at_mfe_because_an_earlier_mfe_to_mae_excursion_is_possible",
+      "two_sided_close_strictly_between_extrema"
+    ],
+    "phase_scope": ["evaluation", "pa"],
+    "central_arm": "source_constrained_then_seeded_coin",
+    "scenario_arms": [
+      "source_constrained_then_mae_first",
+      "source_constrained_then_mfe_first",
+      "source_constrained_then_seeded_coin"
+    ],
+    "delta_reference": "source_constrained_then_seeded_coin",
+    "resolver_seed": 20260823,
+    "seeded_arm_evidence_status": "deterministic_imputation_not_observed_truth",
+    "rr1_source_population_evidence": {
+      "raw_ambiguous_offers": 5029,
+      "accepted_ambiguous_opportunities": 3722,
+      "blocked_ambiguous_offers": 1307,
+      "accepted_seeded_mae_first": 1838,
+      "accepted_seeded_mfe_first": 1884,
+      "assignment_digest_serialization": "accepted_ambiguous_in_global_accepted_order:trade_key_utf8+NUL+path_order_utf8+LF",
+      "accepted_seeded_assignment_sha256": "fe8ffebb92966bfb40675100b7a56d5977c0cc1c40bfbe9d4e3aea2341bdda45"
+    },
+    "required_reporting": [
+      "phase_specific_ambiguous_encounter_count",
+      "evaluation_pass_failure_time_and_cost_delta_from_seeded_arm",
+      "pa_death_delta_from_seeded_arm",
+      "payout_delta_from_seeded_arm"
+    ]
+  },
   "pa_book": {
     "active_pa_count_values": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    "active_pa_count_axis_semantics": null,
+    "active_pa_count_axis_semantics": {
+      "headline_estimand": "maintained_target_active_pas_acquired_from_zero",
+      "initial_state": "zero_evaluations_zero_pas",
+      "pa_origin": "evaluation_pass_paid_activation_only",
+      "hard_cap_accounting": "active_plus_running_evaluations_plus_pending_activations_lte_n",
+      "death_behavior": "selected_replacement_policy_attempts_to_restore_n",
+      "diagnostic_counterfactual": "initial_n_active_pas_operating_economics_only"
+    },
     "allowed_roles": ["active_alive", "dead"],
     "eligibility": ["activation_at_strictly_before_entry", "alive", "explicit_compliance_checks_pass"],
     "distribution": "copy_to_all_eligible_active_pas",
     "account_copy_count_formula": "count(eligible_active_pas)",
-    "copy_batch_lifecycle": "outstanding_from_entry_until_exact_exit_then_settle_once",
+    "copy_batch_lifecycle": "one_outstanding_global_batch_from_entry_until_exact_exit_then_settle_once_before_next_bound_entry",
     "prohibited_mechanics": [
       "signal_staggering",
       "routing_competition",
@@ -101,12 +169,12 @@
   },
   "acquisition": {
     "selected_policy_id": null,
-    "target_semantics": null,
+    "target_semantics": "maintained_active_pa_target_acquired_from_zero_with_pipeline_hard_cap",
     "decision_schedule": null,
     "maximum_running_evaluations": null,
-    "pipeline_credit_toward_target": null,
+    "pipeline_credit_toward_target": "each_alive_active_pa_each_running_evaluation_and_each_pending_activation_counts_one",
     "renewal_and_cancellation": null,
-    "overshoot_behavior": null,
+    "overshoot_behavior": "prohibit_any_purchase_or_activation_transition_that_would_make_capacity_commitments_exceed_n",
     "executable_target_accounting_contracts": ["active_plus_running_and_pending"]
   },
   "replacement": {
@@ -115,7 +183,8 @@
     "simultaneous_death_handling": null,
     "shares_evaluation_pipeline": null,
     "purchase_priority": null,
-    "death_count_input": "required_positive_integer"
+    "death_count_input": "required_positive_integer",
+    "executable_backlog_contract": "each_death_decrements_only_when_a_replacement_evaluation_is_funded; residual_backlog_cannot_be_reclassified_as_growth"
   },
   "external_capital": {
     "selected_policy_id": null,
@@ -148,12 +217,16 @@
     "rolling_cohort_rule": null,
     "horizon_and_right_censoring": null,
     "regime_definitions": null,
-    "stress_scenarios": null
+    "stress_scenarios": {
+      "intratrade_path_order": "three_arms_locked_above",
+      "aggregate_execution_and_slippage": null,
+      "prop_firm_failure": null,
+      "rule_change": null
+    }
   },
   "unresolved_before_integrated_sweep": [
     "evaluation_consumer_mode",
     "evaluation_rule_boundary_resolutions",
-    "active_pa_count_axis_semantics",
     "scaling_policy_and_thresholds",
     "pa_intratrade_commission_timing",
     "aggregate_execution_assumption",

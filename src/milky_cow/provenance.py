@@ -199,6 +199,7 @@ def verify_implementation_provenance(
         "reference/shared_source/pa.py",
         "reference/shared_source/treasury.py",
         "reference/shared_source/rules.py",
+        "reference/shared_source/payouts.py",
     }
     required_locals = {
         "TRANSFER_MANIFEST.json",
@@ -220,8 +221,11 @@ def verify_implementation_provenance(
         "data/MILKY_COW_INPUT_CONTRACTS.md",
         "src/milky_cow/inputs.py",
         "src/milky_cow/evaluation_lock.py",
+        "src/milky_cow/evaluation.py",
         "src/milky_cow/contracts.py",
         "src/milky_cow/copy_to_all.py",
+        "src/milky_cow/payouts.py",
+        "src/milky_cow/lifecycle.py",
         "src/milky_cow/treasury.py",
         "src/milky_cow/provenance.py",
         "scripts/verify_transfer_snapshot.py",
@@ -231,12 +235,15 @@ def verify_implementation_provenance(
         "tests/test_evidence_and_evaluation_lock.py",
         "tests/test_copy_to_all_and_scaling.py",
         "tests/test_lifecycle_policy_contracts.py",
+        "tests/test_integrated_lifecycle_fixture.py",
     }
     required_derivatives = {
         "src/milky_cow/inputs.py",
         "src/milky_cow/evaluation_lock.py",
+        "src/milky_cow/evaluation.py",
         "src/milky_cow/contracts.py",
         "src/milky_cow/copy_to_all.py",
+        "src/milky_cow/payouts.py",
         "src/milky_cow/treasury.py",
     }
 

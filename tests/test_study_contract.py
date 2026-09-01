@@ -40,6 +40,7 @@ class StudyContractTests(unittest.TestCase):
             gate["pa_book"]["active_pa_count_values"],
             list(range(1, 21)),
         )
+        self.assertEqual(gate["schema_version"], "milky_cow_contract_gate.v2")
         self.assertEqual(
             gate["pa_book"]["distribution"],
             "copy_to_all_eligible_active_pas",
@@ -50,6 +51,24 @@ class StudyContractTests(unittest.TestCase):
         self.assertIn("replacement_policy", unresolved)
         self.assertIn("external_capital_policy_and_budget", unresolved)
         self.assertIn("economic_objective", unresolved)
+        fixture = gate["deterministic_vertical_slice_fixture"]
+        self.assertEqual(
+            fixture["status"],
+            "executable_contract_fixture_not_study_baseline",
+        )
+        self.assertEqual(fixture["pa_targets"], [1, 2])
+        self.assertEqual(
+            fixture["evaluation_consumer_boundary"],
+            "adapter_invariant_nonoverlapping_synthetic_offers",
+        )
+        self.assertEqual(
+            fixture["pa_stream_binding"],
+            "exact_opportunity_selection_digest_raw_count_ordinal_and_offer",
+        )
+        self.assertEqual(
+            gate["opportunity_stream"]["expected_zero_duration_offers"],
+            1,
+        )
 
 
 if __name__ == "__main__":

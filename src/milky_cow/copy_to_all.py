@@ -36,6 +36,10 @@ class PAAccount:
     last_mnq: int = 1
     completed_count: int = 0
     realized_daily_pnl_usd: dict[date, float] = field(default_factory=dict)
+    payout_period_daily_pnl_usd: dict[date, float] = field(default_factory=dict)
+    payout_count: int = 0
+    cumulative_gross_payouts_usd: float = 0.0
+    cumulative_net_payouts_usd: float = 0.0
 
     def __post_init__(self) -> None:
         if (
@@ -69,11 +73,29 @@ class PAAccount:
             or self.completed_count < 0
         ):
             raise ValueError("PA completed count must be a non-negative integer")
-        if any(
-            not isinstance(day, date) or not math.isfinite(value)
-            for day, value in self.realized_daily_pnl_usd.items()
+        if (
+            not isinstance(self.payout_count, int)
+            or isinstance(self.payout_count, bool)
+            or self.payout_count < 0
         ):
-            raise ValueError("PA realized-daily history is invalid")
+            raise ValueError("PA payout count must be a non-negative integer")
+        for name, history in (
+            ("realized-daily", self.realized_daily_pnl_usd),
+            ("payout-period", self.payout_period_daily_pnl_usd),
+        ):
+            if any(
+                not isinstance(day, date) or not math.isfinite(value)
+                for day, value in history.items()
+            ):
+                raise ValueError(f"PA {name} history is invalid")
+        if any(
+            not math.isfinite(value) or value < 0
+            for value in (
+                self.cumulative_gross_payouts_usd,
+                self.cumulative_net_payouts_usd,
+            )
+        ):
+            raise ValueError("PA cumulative payout state must be finite and non-negative")
 
     @property
     def nominal_balance_usd(self) -> float:
@@ -406,6 +428,9 @@ def settle_account_copy(
     day = offer.exit_trading_day
     account.realized_daily_pnl_usd[day] = money(
         account.realized_daily_pnl_usd.get(day, 0.0) + net_pnl
+    )
+    account.payout_period_daily_pnl_usd[day] = money(
+        account.payout_period_daily_pnl_usd.get(day, 0.0) + net_pnl
     )
     if _breached(
         account.equity_profit_usd,

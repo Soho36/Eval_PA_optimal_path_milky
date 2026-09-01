@@ -26,6 +26,18 @@ an exact byte-for-byte code import.
 - executable RR1, accepted-stream, copy-to-all, lifecycle, capital, and
   provenance fixtures under `tests/`.
 
+The verified RR1 path-order population contains 5,029 raw ambiguous offers:
+3,722 accepted and 1,307 blocked. Under seed 20260823, the accepted ambiguous
+opportunities resolve 1,838 MAE-first / 1,884 MFE-first. The ordered
+`trade_key + NUL + path_order + LF` assignment digest is
+`fe8ffebb92966bfb40675100b7a56d5977c0cc1c40bfbe9d4e3aea2341bdda45`.
+This proves reproducibility, not the real intratrade order.
+
+The deterministic contract fixture now exercises N=1 acquisition, activation,
+payout, death and non-instant replacement, plus N=2 copied trades followed by
+activation/payout divergence. Its fixed one-MNQ, perfect-linear execution and
+synthetic nonoverlapping offers are fixture assumptions, not study findings.
+
 ## Candidate evidence, not conclusions
 
 - `config/payout_policies.json`: six policies to retest.
