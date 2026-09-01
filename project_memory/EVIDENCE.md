@@ -1,36 +1,41 @@
 # Evidence
 
-## Parent snapshot
+## Transfer snapshot
 
-This starter was assembled from:
+The starter was assembled from `I:\PycharmProjects\Eval_PA_optimal_path` at
+revision `106cfb782c6e573856282095441bb69f23924a55`.
 
-- repository: `I:\PycharmProjects\Eval_PA_optimal_path`
-- branch at assembly: `master`
-- commit: `106cfb782c6e573856282095441bb69f23924a55`
+`TRANSFER_MANIFEST.json` is the immutable handoff inventory. The first-session
+verification found all 73 imported parent artifacts exact. The user's shorter
+`.gitignore` and deleted one-use prompt are recorded separately in
+`manifests/transfer_verification_20260901.json`. Subsequent edits to named
+starter-bundle files are project development, not imported-parent mutation.
 
-`TRANSFER_MANIFEST.json` is the authoritative byte-level inventory of the
-bundle. The copied upstream manifests preserve the earlier EODMAE and
-Accounts_staggering source revisions. Verify all hashes before first use.
+`manifests/implementation_provenance_20260901.json` binds each reviewed parent
+source and active local derivative by SHA-256. No local code file claims to be
+an exact byte-for-byte code import.
 
 ## Strong reusable evidence
 
-- `data/raw/rr1/`: frozen completed-trade input tape.
+- `data/raw/rr1/`: frozen 12,658-row completed-trade tape.
 - `manifests/rr1_import_20260829.json`: raw import identity.
-- `manifests/upstream_evidence_20260829.json`: pinned upstream revisions.
-- `rules/`: effective-dated Legacy 25K study rules and audit.
+- `rules/MILKY_COW_COPY_TO_ALL_RULES.txt`: active PA-book overlay.
+- `config/milky_cow_contract_gate.json`: active foundation gate.
 - `tests/fixtures/evaluation/eodmae_legacy_25k_x3_behavior_lock.json`:
-  Evaluation behavior lock.
-- `reference/RR_r_MFE_buy-stop-entry(EXAMPLE).cs`: explanation of the source
-  strategy's one-open-trade signal blocking.
+  Evaluation-only upstream behavior lock.
+- executable RR1, accepted-stream, copy-to-all, lifecycle, capital, and
+  provenance fixtures under `tests/`.
 
 ## Candidate evidence, not conclusions
 
 - `config/payout_policies.json`: six policies to retest.
-- files in `reference/shared_source/`: reviewed parent implementations that may
-  be imported selectively with tests.
-- files in `reference/shared_tests/`: parity and integrity test references.
+- inherited effective-dated rules outside the milky overlay.
+- files in `reference/shared_source/` and `reference/shared_tests/`.
+- copied cohort, regime, horizon, inventory, and policy-ranking claims.
 
-## Deliberate exclusions
+## Evidence limitations
 
-No staggering routing fixture, withdrawal compatibility fixture, inventory-grid
-result, or parent optimum claim is part of this bundle.
+The ignored/untracked RR1 bytes are fully hashed, but their generator/MQL5
+lineage is not proven. Aggregate identical execution at up to 20 copied and
+scaled accounts is not established and requires an explicit assumption plus
+stress.

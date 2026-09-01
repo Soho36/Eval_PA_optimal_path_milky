@@ -7,29 +7,34 @@ synchronized book of Legacy 25K PAs and withdrawing/reinvesting cash over time.
 
 ## Defining distinction
 
-The input strategy first produces the same global one-position opportunity tape
-used by the parent Evaluation study. Every eligible active PA then receives a
-copy of each accepted opportunity. If ten PAs are active, the event creates ten
-account-level trades. There is no router choosing among accounts.
+The verified source tape is selected once into one causal, whole-tape,
+one-position PA opportunity stream. Every eligible active PA receives a copy of
+each accepted opportunity. If ten PAs are eligible, the event creates ten
+account-level copies. There is no router choosing among accounts.
 
-Accounts can diverge because they may activate at different times, have
-different balances/payout histories, use different contract counts under a
-future scaling rule, or die at different times after such divergence. Without
-those differences, copied accounts remain perfectly path-correlated.
+The upstream Evaluation behavior lock instead resets one-position selection at
+each Evaluation/renewal cycle. The integrated Evaluation consumer remains an
+explicit decision; the behavior lock is not silently the lifecycle baseline.
 
-## Initial study dimensions
+Accounts can diverge through activation time, balances and payouts, MNQ count,
+compliance, or prior death. Before those differences, copied accounts remain
+perfectly path-correlated.
 
-- active PA count, ultimately 1-20;
+## Study dimensions
+
+- every active-PA count from 1 through 20;
 - Evaluation acquisition and dead-PA replacement;
-- payout and reinvestment policy;
-- one-or-more-MNQ scaling thresholds;
-- external-capital constraints; and
-- firm-wide/rule-change concentration stress.
+- all six payout candidates and reinvestment timing;
+- explicitly selected MNQ scaling thresholds and scope;
+- external-capital constraints;
+- rolling cohorts and independently defined regimes; and
+- trading, aggregate-execution, firm-failure, and rule-change stress.
 
-## Out of scope initially
+## Out of scope
 
 - signal staggering and routing competition;
 - dormant PA reserves;
+- inherited `max_headroom`, K=2/S=1, inventory, fill-rate, or optimum claims;
 - NinjaTrader order placement or broker-fill simulation;
 - non-Legacy account types; and
-- claims that parent-project rankings transfer to this model.
+- an integrated sweep before every active gate blocker is resolved and tested.

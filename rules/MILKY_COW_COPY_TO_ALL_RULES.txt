@@ -1,0 +1,134 @@
+LEGACY 25K MILKY-COW COPY-TO-ALL OVERLAY
+Version: 2026-09-01.copy-to-all.1
+Status: user-authorized project rule; effective for this repository only
+Applicability: [-infinity, +infinity) unless a named scenario overrides a field
+
+1. PRECEDENCE AND EVIDENCE
+
+This overlay supersedes only the PA opportunity, routing, inventory, acquisition,
+replacement, scaling, and external-capital language inherited from sections 7
+and 9A of rules/25k_legacy_rules.txt and the corresponding claims in
+rules/LEGACY_25K_AUDIT.md, data/INPUT_CONTRACTS_FROM_PARENT.md, and
+config/legacy_25k_baseline.json.
+
+The copied files remain evidence for common Legacy 25K Evaluation, account,
+drawdown, fee, activation, and payout candidates. They are not edited and their
+recorded source revisions and byte hashes remain authoritative provenance.
+For runtime governance, config/milky_cow_contract_gate.json is the active
+foundation gate. The transferred config/milky_cow_study_contract.json is a
+frozen initial scope record and is not runtime-merged with this gate or with the
+parent baseline.
+
+The explicit user instruction and this overlay control the new PA-book
+semantics. Code, tests, manifests, and fixtures establish what inherited
+artifacts actually do; they do not silently override this overlay. Any active
+implementation conflict with an effective project rule stops the affected
+modeling work.
+
+2. GLOBAL COMPLETED-TRADE OPPORTUNITY STREAM
+
+Normalize and verify all 12,658 RR1 raw offers before selection. Sort with the
+causal key (entry_at, window_order, source_row, ticket). Select one global stream
+with one position slot and [entry_at, exit_at) occupancy. An exit at T frees the
+slot for an entry at T. Selection is performed once on the frozen tape, outside
+every PA account and book-size scenario; changing the number or state of PAs
+must never change the accepted global opportunity stream.
+
+The audited 9,299 accepted and 3,359 blocked counts are parity targets derived
+from the verified input, not hard-coded filters. A count mismatch stops affected
+modeling work. A PA copy decision must carry an accepted-opportunity record
+bound to the selector ID, accepted-stream digest, ordinal, and raw-offer count;
+a bare or blocked raw offer is not a valid PA-book input.
+
+This section locks the PA-phase opportunity source. Whether the integrated
+Evaluation phase consumes this already-selected stream or retains the pinned
+per-Evaluation/per-renewal fill-time adapter is unresolved. The copied EODMAE
+fixture may be executed only as an upstream behavior lock until that choice is
+made.
+
+3. COPY-TO-ALL PA DISTRIBUTION
+
+For each accepted global opportunity, create one account-level trade copy for
+every eligible PA. A PA is eligible exactly when it is activated, alive, active,
+and its activation timestamp is strictly earlier than the opportunity entry.
+Every live activated PA is active; there is no standby, dormant, reserve, or
+later-promotion role.
+
+There is no router, selection competition, requested-copy R, max_headroom order,
+K/S inventory, seat fill rate, congestion loss, or busy-account capacity metric.
+Deterministic PA-ID ordering is permitted only for reproducible reporting and
+event processing; it must not change membership in the recipient set.
+
+Because the input stream has one global [entry_at, exit_at) position, a normal
+PA cannot be busy when the next accepted entry occurs. A rule or compliance
+check may block an individual account copy only if that check is explicitly
+configured and the block is recorded with a reason. Absent such a rule, the
+account-copy count equals the eligible active-PA count. The resulting copy batch
+is an outstanding event record until the source trade's exact exit timestamp.
+It may settle once; it is not a busy-seat, routing, or fill-rate mechanic.
+
+4. ACCOUNT DIVERGENCE AND CORRELATION
+
+Copies use the same one-MNQ source P&L, MAE, MFE, timestamps, and path scenario.
+Before scaling, execution assumptions, activation times, account balances,
+payout histories, or prior deaths diverge, identical PAs must remain state-
+identical and must survive or die together. The model must report clustered
+deaths rather than collapse them into one book-level death. Because the source
+tape supplies only completed-trade extrema, an intratrade liquidation is
+observed at the exit event and must not be reported as if the source completed
+P&L were realized. Whether round-turn commission is included at MAE/MFE equity
+or only at close remains an explicit, unresolved PA accounting input.
+
+5. MNQ SCALING
+
+Each account copy carries a positive integer MNQ count selected causally from an
+explicit scaling schedule at entry. Threshold boundaries, the balance/equity
+basis, per-account versus synchronized-book scope, synchronized aggregation,
+maximum contracts, and threshold timing must all be named inputs. A threshold
+comparison uses only state known before that entry, after earlier same-timestamp
+events under the versioned event order.
+
+No integrated run may infer thresholds from max_headroom, K, parent rankings, or
+the undated four-mini excerpt. Linear multiplication of one-MNQ P&L/MAE/MFE and
+execution costs is also an explicit study assumption and must receive aggregate-
+size/slippage stress. The initial schedule and scope remain unresolved.
+
+6. ACQUISITION AND REPLACEMENT
+
+All activated, alive PAs trade; acquiring a dormant spare is prohibited. A PA
+can arise only from a paid Evaluation, pass, paid activation, and the locked
+activation-time exclusion. A dead PA cannot reset and no replacement PA appears
+instantly. Replacement creates an Evaluation/acquisition obligation whose delay,
+cash funding, failure, renewal, pass, and activation remain observable.
+
+An active-count target may constrain active PAs plus capacity commitments
+(running Evaluations and paid-or-unpaid pending activations) to prevent accidental
+overshoot. It is not a router capacity K. Exact acquisition and dead-PA
+replacement policy candidates remain unresolved.
+
+7. EXTERNAL CAPITAL AND TREASURY
+
+Every external contribution must be explicit, timestamped, purpose-tagged, and
+included in cash reconciliation. No fee may receive a silent top-up. A policy
+must state whether outside capital is prohibited, capped by a numeric lifetime
+budget, or bridged for explicitly named lifecycle obligations and must state the
+irreversible bridge-closing event. The copied through_first_pa convention is a
+candidate, not a silently inherited baseline for this project.
+
+8. SWEEP GATE
+
+An integrated parameter sweep is prohibited until executable tests lock:
+
+- verified RR1 normalization and the global accepted-stream parity;
+- N eligible PAs producing exactly N copies for N = 1, 2, and 3;
+- activation-at-entry exclusion and correlated pre-divergence outcomes;
+- every selected scaling threshold, boundary, scope, and timing rule;
+- acquisition commitments without dormant PAs or target overshoot;
+- death clustering and non-instant replacement through Evaluations;
+- external-capital authorization, exhaustion, closure, and reconciliation;
+- the selected Evaluation adapter and its parity fixture; and
+- deterministic event ordering and provenance.
+
+The eventual policy space includes every integer active-PA target from 1 through
+20 and all six payout-policy candidates. No active count, payout policy, scaling
+schedule, acquisition policy, or replacement policy is optimal at this stage.

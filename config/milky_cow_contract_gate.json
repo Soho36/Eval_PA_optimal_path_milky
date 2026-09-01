@@ -1,0 +1,170 @@
+{
+  "schema_version": "milky_cow_contract_gate.v1",
+  "governance": {
+    "active_foundation_gate": "config/milky_cow_contract_gate.json",
+    "superseded_initial_scope_record": "config/milky_cow_study_contract.json",
+    "superseded_artifact_role": "frozen_transfer_evidence_only",
+    "runtime_merge_with_parent_or_initial_contract": false,
+    "implementation_provenance_manifest": "manifests/implementation_provenance_20260901.json"
+  },
+  "rules_overlay": "rules/MILKY_COW_COPY_TO_ALL_RULES.txt",
+  "evidence_bindings": [
+    {
+      "path": "TRANSFER_MANIFEST.json",
+      "sha256": "cf35b3ebb3d33eb9ace7aab292beb4ac38851d96c8f427969ba4238f6859d11d",
+      "role": "immutable_transfer_inventory"
+    },
+    {
+      "path": "manifests/transfer_verification_20260901.json",
+      "sha256": "f22f33df2abdec769c1f56ee4a2fc6968694d4ecc0bb49e3da7ae84290c61071",
+      "role": "acknowledged_local_transfer_state"
+    },
+    {
+      "path": "manifests/rr1_import_20260829.json",
+      "sha256": "43cb044246651cf4fa12423737c525a1b403c521d0b66b95497d563fcc96dac8",
+      "role": "raw_rr1_input_manifest"
+    },
+    {
+      "path": "config/milky_cow_study_contract.json",
+      "sha256": "c114d3ed2b7a1d0a38112a1f9d70a1fc91725835eb15866de750213ebb09f6ef",
+      "role": "superseded_initial_scope_record"
+    },
+    {
+      "path": "config/README.md",
+      "sha256": "aaa9ee0be4a7b9aea5fb2306e5650f0fba879d7de0a5b1726b595b636d136e8c",
+      "role": "active_config_governance_readme"
+    },
+    {
+      "path": "config/payout_policies.json",
+      "sha256": "97efc7fc60c8a440616696d7ac2d29cf89abd6f457c2b889cb68df2feec0fb0f",
+      "role": "candidate_payout_catalog"
+    },
+    {
+      "path": "rules/MILKY_COW_COPY_TO_ALL_RULES.txt",
+      "sha256": "e1991b978967dafd217fe040dc34889770018de8729d961563f4819052b59c6a",
+      "role": "active_pa_book_rule_overlay"
+    },
+    {
+      "path": "src/milky_cow/inputs.py",
+      "sha256": "8143499d9cb82fb778a05822ba9e6bedf03ad76bade50f734dd539c134c6192c",
+      "role": "selector_implementation"
+    }
+  ],
+  "status": "foundation_only_integrated_sweep_prohibited",
+  "opportunity_stream": {
+    "raw_manifest": "manifests/rr1_import_20260829.json",
+    "selector_scope": "whole_verified_tape_once",
+    "selector_reset_scope": "never_for_pa_book_scenarios",
+    "causal_order": ["entry_at", "window_order", "source_row", "ticket"],
+    "busy_interval": "[entry_at, exit_at)",
+    "exit_at_t_precedes_entry_at_t": true,
+    "expected_raw_offers": 12658,
+    "expected_accepted_opportunities": 9299,
+    "expected_blocked_offers": 3359,
+    "accepted_stream_key_sha256": "1175787ba50f0ab9f08a953f60b661e597c70f2bdb9329a517603616aaae6759",
+    "pa_consumer_mode": "common_preselected_global_stream",
+    "pa_copy_input_type": "accepted_opportunity_with_selector_digest_and_ordinal",
+    "evaluation_consumer_mode": null
+  },
+  "pa_book": {
+    "active_pa_count_values": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    "active_pa_count_axis_semantics": null,
+    "allowed_roles": ["active_alive", "dead"],
+    "eligibility": ["activation_at_strictly_before_entry", "alive", "explicit_compliance_checks_pass"],
+    "distribution": "copy_to_all_eligible_active_pas",
+    "account_copy_count_formula": "count(eligible_active_pas)",
+    "copy_batch_lifecycle": "outstanding_from_entry_until_exact_exit_then_settle_once",
+    "prohibited_mechanics": [
+      "signal_staggering",
+      "routing_competition",
+      "max_headroom",
+      "requested_copy_r",
+      "standby_pa",
+      "dormant_pa_reserve",
+      "fill_rate",
+      "congestion_loss"
+    ]
+  },
+  "scaling": {
+    "selected_policy_id": null,
+    "scope": null,
+    "threshold_metric": null,
+    "levels": null,
+    "threshold_operator": null,
+    "decision_time": null,
+    "downscale_rule": null,
+    "synchronized_aggregation": null,
+    "maximum_mnq": null,
+    "outcome_scaling": null,
+    "commission_timing": null,
+    "aggregate_fill_assumption": null
+  },
+  "acquisition": {
+    "selected_policy_id": null,
+    "target_semantics": null,
+    "decision_schedule": null,
+    "maximum_running_evaluations": null,
+    "pipeline_credit_toward_target": null,
+    "renewal_and_cancellation": null,
+    "overshoot_behavior": null,
+    "executable_target_accounting_contracts": ["active_plus_running_and_pending"]
+  },
+  "replacement": {
+    "selected_policy_id": null,
+    "mode": null,
+    "simultaneous_death_handling": null,
+    "shares_evaluation_pipeline": null,
+    "purchase_priority": null,
+    "death_count_input": "required_positive_integer"
+  },
+  "external_capital": {
+    "selected_policy_id": null,
+    "mode": null,
+    "starting_cash_usd": null,
+    "lifetime_hard_cap_usd": null,
+    "permitted_uses": null,
+    "contribution_timing": null,
+    "bridge_close_event": null,
+    "bridge_reopens": null,
+    "first_pa_activation_latch": "treasury_owned_timestamped_irreversible",
+    "unfunded_obligation_behavior": null
+  },
+  "payout_candidates": {
+    "source": "config/payout_policies.json",
+    "status": "candidates_not_optima",
+    "policy_ids": [
+      "minimum_500_always",
+      "maximum_always",
+      "rush_to_uncapped",
+      "cap_maximizer",
+      "preserve_safety_net",
+      "half_of_maximum"
+    ],
+    "lifecycle_timing": null
+  },
+  "event_order": null,
+  "economic_objective": null,
+  "reporting": {
+    "rolling_cohort_rule": null,
+    "horizon_and_right_censoring": null,
+    "regime_definitions": null,
+    "stress_scenarios": null
+  },
+  "unresolved_before_integrated_sweep": [
+    "evaluation_consumer_mode",
+    "evaluation_rule_boundary_resolutions",
+    "active_pa_count_axis_semantics",
+    "scaling_policy_and_thresholds",
+    "pa_intratrade_commission_timing",
+    "aggregate_execution_assumption",
+    "acquisition_policy",
+    "replacement_policy",
+    "external_capital_policy_and_budget",
+    "payout_lifecycle_timing",
+    "same_timestamp_event_order",
+    "economic_objective",
+    "rolling_cohort_horizon_and_censoring",
+    "regime_definitions",
+    "stress_scenarios"
+  ]
+}

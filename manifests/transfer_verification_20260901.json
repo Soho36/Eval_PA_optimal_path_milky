@@ -1,0 +1,74 @@
+{
+  "schema_version": "milky_cow_transfer_verification.v1",
+  "verified_at": "2026-09-01T08:19:17.7965414+03:00",
+  "base_manifest": {
+    "path": "TRANSFER_MANIFEST.json",
+    "sha256": "cf35b3ebb3d33eb9ace7aab292beb4ac38851d96c8f427969ba4238f6859d11d",
+    "schema_version": "milky_cow_transfer_manifest.v1",
+    "source_repository": "I:\\PycharmProjects\\Eval_PA_optimal_path",
+    "source_commit": "106cfb782c6e573856282095441bb69f23924a55"
+  },
+  "repository_head_at_verification": "2917ee76248cda52fe295f1829c87646d4ba5024",
+  "verification": {
+    "manifest_entries": 96,
+    "manifest_declared_bytes": 2032359,
+    "exact_entries": 94,
+    "acknowledged_deviations": 2,
+    "parent_snapshot_entries": 73,
+    "parent_snapshot_exact": 73,
+    "rr1_artifacts_exact": 46
+  },
+  "acknowledged_deviations": [
+    {
+      "path": ".gitignore",
+      "origin": "starter_bundle",
+      "manifest_state": {
+        "exists": true,
+        "bytes": 123,
+        "sha256": "8e8011b6b6add038dc7d1e2f3abcdf957729b086bc228409ae0776f4e7e0cb26"
+      },
+      "verified_state": {
+        "exists": true,
+        "bytes": 7,
+        "sha256": "4c93ee09d3a599ea1549dbc2e1da66b99836566ae7fb963252b93708b85363e9"
+      },
+      "reason": "User intentionally replaced the starter ignore rules with venv/ for the local environment.",
+      "user_confirmed": true
+    },
+    {
+      "path": "NEW_CHAT_PROMPT.md",
+      "origin": "starter_bundle",
+      "manifest_state": {
+        "exists": true,
+        "bytes": 1466,
+        "sha256": "c7f1584e22759e0ff13ca5aa4445d2f53da9780b2dd2f790428dc21f5270d410"
+      },
+      "verified_state": {
+        "exists": false,
+        "bytes": null,
+        "sha256": null
+      },
+      "reason": "User intentionally deleted the one-use prompt after placing it in the current Codex chat.",
+      "user_confirmed": true
+    }
+  ],
+  "post_verification_project_development": {
+    "recorded_at": "2026-09-01",
+    "meaning": "These starter-bundle files changed only after the first transfer verification as normal project development; imported parent_snapshot artifacts remain immutable.",
+    "current_state_verified_by": "manifests/implementation_provenance_20260901.json",
+    "starter_paths": [
+      "config/README.md",
+      "project_memory/ARCHITECTURE.md",
+      "project_memory/BEGINNING_OF_A_WORK_SESSION.md",
+      "project_memory/DECISIONS.md",
+      "project_memory/EVIDENCE.md",
+      "project_memory/PROJECT.md",
+      "project_memory/STATE.md",
+      "project_memory/TESTING.md",
+      "project_memory/TODO.md",
+      "scripts/run_tests.ps1",
+      "tests/test_study_contract.py"
+    ]
+  },
+  "provenance_limit": "The 46 RR1 files are ignored/untracked at the pinned upstream revision. Their hashes establish the observed imported bytes, not the generator lineage or exact MQL5 origin."
+}
