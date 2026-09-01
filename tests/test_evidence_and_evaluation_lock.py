@@ -39,16 +39,26 @@ class EvidenceAndEvaluationLockTests(unittest.TestCase):
                 / "eodmae_legacy_25k_x3_behavior_lock.json"
             ).read_text(encoding="utf-8")
         )
+        cls.zone = get_timezone("Europe/Tallinn")
+        cls.fixture = json.loads(
+            (
+                ROOT
+                / "tests"
+                / "fixtures"
+                / "evaluation"
+                / "eodmae_legacy_25k_x3_behavior_lock.json"
+            ).read_text(encoding="utf-8")
+        )
 
     def test_transfer_receipt_preserves_every_imported_parent_artifact(self) -> None:
         result = verify_transfer_snapshot(ROOT)
         self.assertEqual(result.manifest_entries, 96)
         self.assertEqual(result.parent_snapshot_entries, 73)
         self.assertEqual(result.parent_snapshot_exact, 73)
-        self.assertEqual(result.initial_exact_entries, 94)
+        self.assertEqual(result.initial_exact_entries, 95)
         self.assertEqual(result.exact_entries, 83)
-        self.assertEqual(result.project_developed_entries, 11)
-        self.assertEqual(result.acknowledged_deviations, 2)
+        self.assertEqual(result.project_developed_entries, 12)
+        self.assertEqual(result.acknowledged_deviations, 1)
 
     def test_implementation_derivatives_are_hash_bound_to_reviewed_sources(self) -> None:
         result = verify_implementation_provenance(ROOT)

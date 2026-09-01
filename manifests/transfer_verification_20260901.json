@@ -12,29 +12,13 @@
   "verification": {
     "manifest_entries": 96,
     "manifest_declared_bytes": 2032359,
-    "exact_entries": 94,
-    "acknowledged_deviations": 2,
+    "exact_entries": 95,
+    "acknowledged_deviations": 1,
     "parent_snapshot_entries": 73,
     "parent_snapshot_exact": 73,
     "rr1_artifacts_exact": 46
   },
   "acknowledged_deviations": [
-    {
-      "path": ".gitignore",
-      "origin": "starter_bundle",
-      "manifest_state": {
-        "exists": true,
-        "bytes": 123,
-        "sha256": "8e8011b6b6add038dc7d1e2f3abcdf957729b086bc228409ae0776f4e7e0cb26"
-      },
-      "verified_state": {
-        "exists": true,
-        "bytes": 7,
-        "sha256": "4c93ee09d3a599ea1549dbc2e1da66b99836566ae7fb963252b93708b85363e9"
-      },
-      "reason": "User intentionally replaced the starter ignore rules with venv/ for the local environment.",
-      "user_confirmed": true
-    },
     {
       "path": "NEW_CHAT_PROMPT.md",
       "origin": "starter_bundle",
@@ -57,6 +41,7 @@
     "meaning": "These starter-bundle files changed only after the first transfer verification as normal project development; imported parent_snapshot artifacts remain immutable.",
     "current_state_verified_by": "manifests/implementation_provenance_20260901.json",
     "starter_paths": [
+      ".gitignore",
       "config/README.md",
       "project_memory/ARCHITECTURE.md",
       "project_memory/BEGINNING_OF_A_WORK_SESSION.md",

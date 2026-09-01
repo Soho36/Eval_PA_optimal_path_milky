@@ -16,7 +16,7 @@
     },
     {
       "path": "manifests/transfer_verification_20260901.json",
-      "sha256": "f22f33df2abdec769c1f56ee4a2fc6968694d4ecc0bb49e3da7ae84290c61071",
+      "sha256": "47ed887b65b8101d71b6ca0b6afcb7fe0e921423db1c9a670a0e1e0674d8c613",
       "role": "acknowledged_local_transfer_state"
     },
     {

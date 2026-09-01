@@ -58,7 +58,7 @@
     },
     {
       "path": "manifests/transfer_verification_20260901.json",
-      "sha256": "f22f33df2abdec769c1f56ee4a2fc6968694d4ecc0bb49e3da7ae84290c61071",
+      "sha256": "47ed887b65b8101d71b6ca0b6afcb7fe0e921423db1c9a670a0e1e0674d8c613",
       "role": "acknowledged_transfer_state"
     },
     {
@@ -78,7 +78,7 @@
     },
     {
       "path": "config/milky_cow_contract_gate.json",
-      "sha256": "88c82ea1ffcb198e9070633c9fec850c5d873b8292ab2edc7c49a44ed6e4a2ab",
+      "sha256": "db19a5fd482677daced24d0d795b956bb7dcd7a32b4de0cb8f66d59aaa47214c",
       "role": "active_foundation_gate"
     },
     {
@@ -153,7 +153,7 @@
     },
     {
       "path": "tests/test_evidence_and_evaluation_lock.py",
-      "sha256": "e7c7a883bca7629aceb2b59b8d972f0f3a9c78b3a395ce79d12e9296094567f4",
+      "sha256": "746bcca722434510d3555edcb61088be125bc2c6db2f7568d18b604621b5b883",
       "role": "evidence_and_evaluation_fixtures"
     },
     {
