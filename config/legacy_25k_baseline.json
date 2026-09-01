@@ -1,0 +1,372 @@
+{
+  "schema_version": 1,
+  "schema_id": "legacy_25k_baseline.v1",
+  "scenario_id": "legacy_25k_counterfactual_perpetual_one_day",
+  "rules_version": "2026-08-31.study-baseline.3",
+  "rules_file": "rules/25k_legacy_rules.txt",
+  "status": "user_authorized_counterfactual_study_baseline",
+  "rules": {
+    "nominal_balance_usd": 25000,
+    "evaluation_profit_target_usd": 1500,
+    "evaluation_trailing_drawdown_usd": 1500,
+    "evaluation_fee_usd": 35,
+    "activation_fee_usd": 125,
+    "evaluation_contracts_mnq": 3,
+    "evaluation_minimum_trading_days": 1,
+    "evaluation_cycle_days": 30,
+    "evaluation_threshold_touch_fails": true,
+    "evaluation_carries_if_alive_at_renewal": true,
+    "activation_delay_seconds": 0,
+    "pa_trailing_drawdown_usd": 1500,
+    "pa_frozen_floor_profit_usd": 100,
+    "pa_threshold_touch_fails": true,
+    "payout_minimum_days": 8,
+    "payout_minimum_profitable_days": 5,
+    "payout_profitable_day_usd": 50,
+    "payout_request_gate_balance_usd": 26600,
+    "payout_safety_net_balance_usd": 26600,
+    "payout_minimum_request_usd": 500,
+    "payout_first_five_cap_usd": 1500,
+    "payout_safety_net_request_count": 3,
+    "payout_cap_request_count": 5,
+    "payout_post_safety_minimum_balance_usd": 25100.01,
+    "payout_full_split_cumulative_usd": 25000,
+    "payout_split_after_full": 0.9,
+    "commission_roundturn_usd_per_mnq": 1.05
+  },
+  "study": {
+    "timezone": "Europe/Tallinn",
+    "session_open": "01:00",
+    "session_close": "23:59",
+    "pa_requested_copies_r": 1,
+    "target_pa_count_k": 5,
+    "standby_pa_target": 0,
+    "routing_policy": "max_headroom",
+    "product_availability": "always_in_study",
+    "evaluation_intratrade_path": "resolved",
+    "pa_intratrade_path": "mae_first",
+    "max_evaluation_purchases_per_event": 1,
+    "max_concurrent_evaluations": null,
+    "bootstrap_external_funding_until_first_pa": true,
+    "bootstrap_funding_mode": "through_first_pa",
+    "purchase_policy": "greedy_to_target",
+    "purchase_cadence_days": null,
+    "purchase_headroom_trigger_usd": null,
+    "purchase_cash_reserve_usd": null
+  },
+  "scope": {
+    "product_id": "apex_legacy_25k_rithmic",
+    "nominal_balance_usd": 25000,
+    "allowed_account_types": [
+      "legacy_25k_evaluation",
+      "legacy_25k_pa"
+    ],
+    "other_account_types_allowed": false,
+    "completed_trade_economic_model_only": true
+  },
+  "time": {
+    "source_timezone": "Europe/Tallinn",
+    "timezone_database": "IANA",
+    "apply_historical_dst": true,
+    "source_labels_are_local_wall_clock": true,
+    "ambiguous_wall_time_fold": 0,
+    "nonexistent_wall_time": "validation_error",
+    "session_open_local": "01:00:00",
+    "session_close_local": "23:59:00",
+    "session_id": "Europe/Tallinn local calendar date",
+    "session_interval": "[01:00:00, 23:59:00]",
+    "session_clock_filters_completed_fills": false,
+    "retain_authoritative_00_hour_and_cross_date_fills": true,
+    "observed_tape_exceptions": {
+      "entry_hour_00_count": 2,
+      "exit_hour_00_count": 11,
+      "entry_exit_local_date_difference_count": 97
+    },
+    "evaluation_trading_day_basis": "entry_local_calendar_date",
+    "pa_realized_pnl_day_basis": "exit_local_calendar_date",
+    "exit_at_t_precedes_entry_at_t": true
+  },
+  "availability": {
+    "mode": "counterfactual_perpetual",
+    "effective_interval": {
+      "from_inclusive": null,
+      "to_exclusive": null
+    },
+    "new_evaluation_purchase_allowed": true,
+    "ignore_real_world_legacy_retirement": true,
+    "assumption_status": "user_study_assumption"
+  },
+  "cohorts": {
+    "mode": "rolling_historical_session_starts",
+    "start_source": "valid session starts in normalized trade tape",
+    "cohorts_are_separate_historical_opportunities": true,
+    "initial_state": {
+      "evaluations": 0,
+      "pas": 0,
+      "treasury_cash_mode": "one_evaluation_purchase_fee"
+    },
+    "first_action": "purchase_one_evaluation_at_cohort_start",
+    "existing_subscription_start_scenario": false
+  },
+  "commercial_terms": {
+    "currency": "USD",
+    "evaluation_purchase_fee_usd": 35,
+    "evaluation_renewal_fee_usd": 35,
+    "pa_activation_fee_usd": 125,
+    "evaluation_cycle_calendar_days": 30,
+    "price_status": "pinned_eodmae_snapshot_used_as_configurable_baseline"
+  },
+  "fixed_strategy": {
+    "instrument": "MNQ",
+    "risk_reward_ratio": 1.0,
+    "canonical_windows": 23,
+    "commission_round_turn_usd_per_mnq": 1.05,
+    "slippage_ticks_per_side": 0,
+    "pending_order_model": false,
+    "completed_trade_fill_time_proxy": true,
+    "source_example": {
+      "path": "RR_r_MFE_buy-stop-entry(EXAMPLE).cs",
+      "language": "MQL5_despite_cs_suffix",
+      "sha256": "7509483ffa61581680347ef6bc5e812b46d0308e16551b82abb282faaaccd48c",
+      "git_revision": "0ac561ae7990da7031241180f6ec545b94075ca9",
+      "git_blob": "ded3eaca7632b2ecd8530e82de52957145d8ce36",
+      "evidence_role": "semantic_one_position_example_not_proven_csv_generator",
+      "declares_timezone": false,
+      "default_flatten_local_label": "23:30",
+      "establishes_study_session_clock": false,
+      "missing_for_exact_ea_parity": [
+        "setup_timestamp",
+        "pending_order_timestamp"
+      ]
+    }
+  },
+  "evaluation": {
+    "starting_balance_usd": 25000,
+    "position_size_mnq": 3,
+    "position_size_status": "inherited_candidate_not_integrated_optimum",
+    "profit_target_usd": 1500,
+    "target_balance_usd": 26500,
+    "target_basis": "realized_net_balance",
+    "daily_loss_limit_usd": null,
+    "minimum_trading_days": 1,
+    "minimum_day_mode": "one_day_promotion_assumed_for_all_simulated_dates",
+    "trading_day_definition": "local session containing at least one accepted evaluation trade",
+    "one_position_adapter": {
+      "scope": "global_across_all_windows_per_evaluation_cycle",
+      "busy_interval": "[entry_at, exit_at)",
+      "block_offer_when_busy_at_entry": true,
+      "restart_at_renewal_boundary": true,
+      "model_pending_orders": false,
+      "parity_scope": "exact_pinned_eodmae_fill_time_adapter_only",
+      "source_ea_relationship": "semantic_approximation"
+    },
+    "trailing_drawdown": {
+      "amount_usd": 1500,
+      "initial_threshold_usd": 23500,
+      "basis": "modeled_intratrade_equity_peak_from_completed_trade_path_proxy",
+      "threshold_formula": "peak_equity_usd - 1500",
+      "freeze_enabled": false,
+      "threshold_touch_fails": true,
+      "breach_operator": "<="
+    },
+    "same_event_order": [
+      "drawdown_survival",
+      "book_realized_net_pnl",
+      "minimum_day_and_target_pass_test"
+    ],
+    "renewal": {
+      "cycle_calendar_days": 30,
+      "boundary_event_order": "trade_exit_then_pass_or_failure_then_renewal",
+      "alive_state_at_boundary": "renew_and_carry_balance_peak_and_threshold",
+      "failed_state_before_boundary": "dormant",
+      "failed_state_at_boundary": "renew_into_fresh_evaluation",
+      "charge_one_renewal_fee": true
+    }
+  },
+  "activation": {
+    "mode": "immediate_paid_activation",
+    "delay_seconds": 0,
+    "event_at": "qualifying_evaluation_trade_exit",
+    "pa_entry_at_same_timestamp_eligible": false,
+    "first_eligible_pa_entry": "entry_at strictly greater than activation timestamp",
+    "fee_usd": 125,
+    "external_capital_bridge": {
+      "allowed_for_first_activation_shortfall": true,
+      "top_up_only_the_shortfall": true,
+      "record_as_external_capital": true
+    },
+    "assumption_status": "upstream_compatibility_assumption"
+  },
+  "pa": {
+    "starting_balance_usd": 25000,
+    "trailing_drawdown": {
+      "amount_usd": 1500,
+      "initial_threshold_usd": 23500,
+      "threshold_formula": "min(peak_equity_usd - 1500, 25100)",
+      "maximum_threshold_usd": 25100,
+      "threshold_touch_fails": true,
+      "breach_operator": "<="
+    },
+    "opportunity_adapter": {
+      "mode": "all_concurrent_cross_window_offers",
+      "busy_interval": "[entry_at, exit_at)",
+      "retain_all_raw_offers": true
+    },
+    "exposure": {
+      "requested_copies_r": 1,
+      "mnq_per_selected_pa": 1,
+      "k_is_separate_decision_variable": true,
+      "changing_k_must_not_change_requested_r": true
+    },
+    "router": {
+      "candidate": "max_headroom",
+      "eligible_pa_requirements": [
+        "alive",
+        "tradable",
+        "not_busy"
+      ],
+      "ordering": [
+        "headroom_desc",
+        "assigned_count_asc",
+        "pa_id_asc"
+      ],
+      "headroom_formula": "equity_usd - liquidation_threshold_usd",
+      "historical_capacity_candidate": "K >= 5R",
+      "capacity_claim_status": "exact_tape_candidate_not_future_guarantee"
+    },
+    "firm_wide_pa_count_cap": null,
+    "firm_wide_pa_count_cap_status": "not_imposed_in_baseline_supplied_excerpts_do_not_define_one",
+    "compliance_scope": {
+      "contract_scaling": "nonbinding_at_one_mnq_per_selected_pa",
+      "maximum_risk_to_reward": "satisfied_by_fixed_1_to_1_strategy",
+      "dca": "not_applicable",
+      "adding": "not_applicable",
+      "hedging": "not_applicable",
+      "variable_sizing": "not_applicable",
+      "mae_30_percent_guideline": "not_modeled"
+    }
+  },
+  "payout_rules": {
+    "policy_file": "config/payout_policies.json",
+    "account_scope": "independent_per_pa",
+    "minimum_trading_days_since_activation_or_last_request": 8,
+    "minimum_profitable_days": 5,
+    "profitable_day_threshold_net_usd": 50,
+    "request_gate_balance_usd": 26600,
+    "minimum_gross_request_usd": 500,
+    "maximum_gross_request_first_five_usd": 1500,
+    "maximum_gross_request_from_sixth_usd": null,
+    "eligible_amount_formula": {
+      "payout_numbers_1_to_3": "500 + max(0, balance_usd - 26600)",
+      "payout_numbers_4_plus": "max(0, balance_usd - 25100.01)",
+      "apply_payout_number_cap_after_formula": true
+    },
+    "consistency_30_percent": "not_modeled",
+    "event_handling": {
+      "mode": "atomic_request_approval_balance_removal_and_treasury_receipt",
+      "delay_seconds": 0,
+      "denials": "not_modeled",
+      "continued_trading_while_pending": "not_applicable_no_pending_state"
+    },
+    "trader_split": {
+      "cumulative_gross_threshold_usd": 25000,
+      "share_through_threshold": 1.0,
+      "share_after_threshold": 0.9,
+      "scope": "per_pa"
+    }
+  },
+  "treasury": {
+    "cash_ledger_required": true,
+    "seed_external_capital": "one_evaluation_purchase_fee",
+    "baseline_bootstrap_funding_mode": "through_first_pa",
+    "bootstrap_external_funding_until_first_pa": true,
+    "pre_first_pa_shortfalls": [
+      "scheduled_evaluation_renewals_until_first_pa_activation",
+      "first_pa_activation"
+    ],
+    "top_up_mode": "minimum_just_in_time_external_contribution",
+    "after_first_pa_evaluation_purchases_and_renewals": "treasury_cash_only",
+    "named_inventory_bootstrap_sensitivity": "through_inventory_target uses treasury first and JIT external shortfalls until simultaneous live activated PA inventory first reaches K + S, then closes permanently",
+    "payout_cash_available": "same_atomic_payout_timestamp",
+    "purchases_must_preserve_cash_conservation": true
+  },
+  "payout_policy_comparison": {
+    "baseline_policy_id": "minimum_500_always",
+    "all_policies_are_candidates_not_integrated_optima": true,
+    "policy_ids": [
+      "minimum_500_always",
+      "maximum_always",
+      "rush_to_uncapped",
+      "cap_maximizer",
+      "preserve_safety_net",
+      "half_of_maximum"
+    ],
+    "supersedes": "The six accumulation-trigger policies derived from the Accounts_staggering $200-per-$400 ratchet. They were retired on 2026-08-30: the triggers never bound, so two of them produced identical results."
+  },
+  "intentionally_not_modeled": [
+    "real_world_legacy_retirement_and_offer_gaps",
+    "other_account_types",
+    "pending_order_and_broker_fill_lifecycle",
+    "evaluation_review_and_pa_setup_delays",
+    "pa_mae_compliance_events",
+    "payout_consistency",
+    "payout_delays_and_denials",
+    "live_account_transfer"
+  ],
+  "horizon": {
+    "primary_days": 720,
+    "diagnostic_days": 180,
+    "primary_rationale": "180 days was inherited from EODMAE, whose episode ends at first paid activation. Here the median time to a first PA is 61 days and to a first payout 141 days, so a 180-day horizon ends at roughly the first withdrawal and the reinvestment loop being studied barely runs. Lengthening the horizon flips the sign of net realized cash.",
+    "diagnostic_rationale": "180 days is retained as a time-to-first-cash diagnostic, not as a policy-comparison horizon.",
+    "tape_span_days": 2384,
+    "status": "user_selected_2026_08_30"
+  },
+  "purchase_policy": {
+    "policy": "greedy_to_target",
+    "cadence_days": null,
+    "headroom_trigger_usd": null,
+    "cash_reserve_usd": null,
+    "role": "Treasury purchase timing is the staggering decision in this project. A PA container must be earned through a $35 Evaluation and arrives a median 61 days later, so the number of live PAs is an outcome of this rule rather than an input. target_pa_count_k is an upper bound for every policy, never a guarantee.",
+    "available": {
+      "greedy_to_target": "Buy whenever cash allows and the pipeline is below target_pa_count_k. Baseline and fastest acquisition.",
+      "fixed_cadence": "At most one Evaluation per cadence_days, measured from the previous purchase and seeded at the cohort start. The one Accounts_staggering principle expected to transfer, because it is a rule about when to add capacity rather than a claim about how much.",
+      "death_replacement": "Buy only to make good on PA deaths. Never grows the book beyond the size it already reached.",
+      "headroom_triggered": "Buy when the least-cushioned live PA falls below headroom_trigger_usd, or when no PA is alive. Adds a fresh container when the existing ones become fragile.",
+      "cash_buffer": "Greedy, but never spends below cash_reserve_usd, so an existing renewal or pending activation is never stranded by a new purchase."
+    },
+    "status": "user_selected_2026_08_30"
+  },
+  "account_inventory": {
+    "active_pa_target_k": 5,
+    "standby_pa_target_s": 0,
+    "max_concurrent_evaluations": null,
+    "base_stock_formula": "live_active_pas + live_standby_pas + running_evaluations + pending_activations",
+    "base_stock_upper_bound": "K + S",
+    "standby_role": "activated_but_dormant_until_oldest_first_promotion_after_active_pa_death",
+    "routing_scope": "active_pas_only_fixed_r_1",
+    "bootstrap_funding_mode": "through_first_pa",
+    "grid_sensitivity_modes": [
+      "through_first_pa",
+      "through_inventory_target"
+    ],
+    "status": "user_selected_2026_08_31"
+  },
+  "regimes": {
+    "role": "Reporting partition of cohort start dates. Never reaches the simulator and cannot change a cohort result. Every run reports per regime by default because the first 720-day study found the difference between start periods larger than the difference between any two policies.",
+    "windows": [
+      {
+        "name": "2020-2021",
+        "from_date": null,
+        "to_date": "2022-01-01"
+      },
+      {
+        "name": "2022-2024",
+        "from_date": "2022-01-01",
+        "to_date": null
+      }
+    ],
+    "contract": "Windows are half-open [from_date, to_date), must be ordered, contiguous and unbounded at both ends, so every cohort start falls in exactly one regime and none is dropped from a comparison.",
+    "boundary_status": "2022-01-01 is where the observed split is clearest on this tape. It is a reporting convention, not a claim that a structural break occurred on that date.",
+    "status": "user_selected_2026_08_30"
+  }
+}

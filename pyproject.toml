@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "legacy-25k-milky-cow"
+version = "0.1.0"
+description = "Completed-trade simulator for synchronized Legacy 25K PA books"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]

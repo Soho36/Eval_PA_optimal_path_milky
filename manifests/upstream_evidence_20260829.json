@@ -1,0 +1,263 @@
+{
+  "manifest_version": 1,
+  "created_at": "2026-08-29T00:30:33+03:00",
+  "scope": "Legacy 25K only; audit catalogue, not a raw-input import manifest",
+  "hash_conventions": {
+    "git_tracked_text": "SHA-256 of exact Git blob contents at the named revision (LF-normalized repository bytes)",
+    "untracked_or_binary": "SHA-256 of observed raw file bytes",
+    "selected_tree_manifest": "sort POSIX relative paths; for each update with path, NUL, raw file SHA-256 digest, NUL, decimal bytes, newline"
+  },
+  "repositories": [
+    {
+      "project": "EODMAE",
+      "absolute_path": "I:/PycharmProjects/EODMAE",
+      "git_revision": "c7a08f41f6434440500dbaef731acc14a4708442",
+      "head_matched_revision_at_audit": true
+    },
+    {
+      "project": "Accounts_staggering",
+      "absolute_path": "I:/PycharmProjects/Accounts_staggering",
+      "git_revision": "b676def567e85a2bde2dd556ee9d2ad2899659b1",
+      "head_matched_revision_at_audit": true
+    }
+  ],
+  "local_rule_sources": [
+    {
+      "path": "rules/EV-account_rules.txt",
+      "bytes": 7055,
+      "sha256": "8256ad5467f3e9b5b36b1f4ef8aa6ec684f62ef33497fd7cbbacf3994438fb7a",
+      "effective_dated": false,
+      "source_attributed": false
+    },
+    {
+      "path": "rules/Payout_rules.txt",
+      "bytes": 7984,
+      "sha256": "3ea26951c053655639c87189882cfdec7c79278934b9dfa216fb542c9a0c6632",
+      "effective_dated": false,
+      "source_attributed": false
+    }
+  ],
+  "local_strategy_evidence": [
+    {
+      "path": "RR_r_MFE_buy-stop-entry(EXAMPLE).cs",
+      "bytes": 26369,
+      "sha256": "7509483ffa61581680347ef6bc5e812b46d0308e16551b82abb282faaaccd48c",
+      "git_revision": "0ac561ae7990da7031241180f6ec545b94075ca9",
+      "git_blob": "ded3eaca7632b2ecd8530e82de52957145d8ce36",
+      "actual_language": "MQL5",
+      "evidence_role": "semantic example of new-bar one-position gating",
+      "provenance_limit": "Not established as the exact generator of the frozen headerless RR=1 exports; the example writer emits a header and those exports omit setup and pending-order timestamps, so fill-time replay cannot prove exact EA parity."
+    }
+  ],
+  "observed_common_rr1_inputs": {
+    "status": "present and byte-identical in both worktrees; ignored and absent from both pinned Git trees; exact bytes imported into this repository",
+    "trade_selection": {
+      "glob": "RR/*/*_1.00.csv",
+      "files": 23,
+      "bytes": 1713202,
+      "selected_tree_manifest_sha256": "b6815a2fa31a384e0735082f42459f7d1919a31abb17257201f5a7c733913f20"
+    },
+    "stats_selection": {
+      "glob": "RR_stats/*/*_1.00_stats.csv",
+      "files": 23,
+      "bytes": 12186,
+      "selected_tree_manifest_sha256": "fa6cc07a699cf7604d12e5a59d34d2b0ee0ab4d8487f6eb2d67ee342c1f82c4d"
+    },
+    "combined": {
+      "files": 46,
+      "bytes": 1725388,
+      "selected_tree_manifest_sha256": "1bf2f1c83fe96bf5b86653583f33f52c35631cf0ea561566e0dcb35756274f7e"
+    },
+    "imported_into_this_repository": true,
+    "destination_root": "data/raw/rr1",
+    "import_manifest": "manifests/rr1_import_20260829.json",
+    "import_manifest_records_individual_hashes": true,
+    "import_validation": "46 files, 1,725,388 bytes and 12,658 trade rows; source/destination hashes and trade/stats aggregates match"
+  },
+  "eodmae_evidence": {
+    "classification": "strong conditional upstream Evaluation candidate; behavior lock only",
+    "tracked_artifacts": [
+      {
+        "path": "README.md",
+        "git_blob": "b0f3bb7a4630ba1033fea3673462493f0437c3b0",
+        "sha256": "8d6acdd9955290b12c5952a743e2ffc43001597ee63160875c3f877480d0c294"
+      },
+      {
+        "path": "Accounts_spec.xlsx",
+        "sha256": "ea484178bfcc00e56df58cdc0d842c48e9810076908307e08be6e6881a59ae83"
+      },
+      {
+        "path": "account_optimizer/simulator.py",
+        "git_blob": "b2e178b40dd8a149255aaa62bd8c74114eddcaf6",
+        "sha256": "86f359fbe376138bc92e29ac65facf4c3ed4950aa6759a7250d064df9390565f"
+      },
+      {
+        "path": "account_optimizer/specs.py",
+        "git_blob": "1857d5f64e291440847198ca5d678fcf68f557bb",
+        "sha256": "109b1c1e86f97f9f7a521180ed78f762b7f698c975f172caa1e763f1996d4cdf"
+      },
+      {
+        "path": "account_optimizer/sweeps.py",
+        "git_blob": "4358623d357f65ce415bcf7082f35b2a24763143",
+        "sha256": "5b6638c9019a139730c9d6e18eacef23dc6209a5d5624414809f571e6dc13f02"
+      },
+      {
+        "path": "account_optimizer/study.py",
+        "git_blob": "128aedd82dfce07ab215a9bd517a2570969934bd",
+        "sha256": "5a5e8282035b653f2bcca98fa433affdf9595191d13d6825658821b9d2b74a26"
+      }
+    ],
+    "untracked_generated_bundle": {
+      "path": "outputs/account_type_study_product_rules_20260823",
+      "git_tree_contains_path": false,
+      "artifacts": [
+        {
+          "path": "run_manifest.json",
+          "bytes": 7287,
+          "sha256": "7efc8a875ebad929c87094c7952a9d84573afc71df7128ab02927ea80221ce0f"
+        },
+        {
+          "path": "analysis_manifest.json",
+          "bytes": 1279,
+          "sha256": "e8f2f3601c43968e25f983c61fd76382c7fbc95312c353b5ad75dafe03415291"
+        },
+        {
+          "path": "episodes.csv",
+          "bytes": 911811880,
+          "sha256": "b06a1cc29a8b0cbc9737e0db4007a81b94f778ae5d6e61858eda17c56cf13a0b"
+        },
+        {
+          "path": "scenario_summary.csv",
+          "bytes": 1205000,
+          "sha256": "06cbc79b4bdc31076dc70fe86275d31aafaefba6451bd510a24b2a24125b8c91"
+        },
+        {
+          "path": "ranking.csv",
+          "bytes": 234700,
+          "sha256": "1b00e18d8b2a4e21fc5ade0055de0ca588406b5a77e5f0a7daac3b2010ef4903"
+        },
+        {
+          "path": "account_specs.csv",
+          "bytes": 1811,
+          "sha256": "87fef1c290ec53b4508d2057732a58f3969f3aa32ceecb614309954b289751b8"
+        },
+        {
+          "path": "decision_table.csv",
+          "bytes": 6856,
+          "sha256": "11098c7a97865a3d212bf8b8c517f8421b916705800630795e0dc1f02728812d"
+        },
+        {
+          "path": "episode_audit.json",
+          "bytes": 571,
+          "sha256": "be58ff49fdc706138097c97108316af764679fe3ce482d1ad2892b6937377083"
+        }
+      ],
+      "provenance_limit": "bundle records no Git revision or hashes of its simulator/study/specs/sweeps generator files"
+    },
+    "material_rule_mismatches": [
+      "upstream assumes no minimum Evaluation trading days",
+      "upstream treats threshold touch as failure",
+      "upstream bills and activates at pass without verified review/setup delay",
+      "upstream uses one timeless price snapshot and no Legacy 25K offer timeline"
+    ]
+  },
+  "accounts_staggering_evidence": {
+    "classification": "historical mechanical capacity plus candidate router; weak withdrawal mechanism",
+    "tracked_artifacts": [
+      {
+        "path": "addiotional_helpers/signal_router.py",
+        "git_blob": "2b8bffd7d8df4559629622d4f0b89171a5e55c26",
+        "sha256": "2b1c5402c2d9eb908b3b2252e552d42ce3a00086304be4207f29d9e1579c690c"
+      },
+      {
+        "path": "tests/test_signal_router.py",
+        "git_blob": "ae09e5d20a026b3b10554f3843f33a7d15373749",
+        "sha256": "9a681a457931ede7fd1c7562db5751f5b09d5ad65b772a0c63606cdd401abb38"
+      },
+      {
+        "path": "results/signal_routing_capacity.csv",
+        "git_blob": "6bff1007fe7649b02ecce203aba6314e81e02135",
+        "sha256": "5016b8fa207023ebcb34bae7e39e947d481a659f3585ee84ba1b5070876216e9"
+      },
+      {
+        "path": "results/signal_routing_economics.csv",
+        "sha256": "694bb05a6e42adce1cab369df8dcf5cb97de67697ed4284bf2f7bfc84e9e8d92"
+      },
+      {
+        "path": "account_farming.py",
+        "git_blob": "38b5995c5673cf598dead4adee2d7ac7943ab133",
+        "sha256": "bdcd55567bbc739cf0f2eca533b9db6949255d546f6ccf2375e922d224a56aa7"
+      },
+      {
+        "path": "addiotional_helpers/allocation_sweep.py",
+        "git_blob": "771e4affe4e3cdf1ba5808bb1499272014866d48",
+        "sha256": "91e423d87e5edecb30da9cdc77d4d8d6a167c3de9fb3ef44f02cc34997c87e8a"
+      },
+      {
+        "path": "results/allocation_sweep.csv",
+        "git_blob": "8a4c78ce50f4a0e8712ee6983e5813f6bdad404f",
+        "sha256": "c7c00d405e737d73b9c727eb4fc29e605b70fb892b46a0aa21e94c1ed6ee4b58"
+      },
+      {
+        "path": "results/farming_withdrawal_policies.csv",
+        "git_blob": "2204391961f7a1a2f2ef7ba3ea237c5eb0d2a6ec",
+        "sha256": "ea09a545e92914a9ba860072a3576f0669e68839809844229dfdfe21c58a5118"
+      }
+    ],
+    "provenance_limits": [
+      "raw RR=1 inputs and stats are ignored and absent from the pinned commit",
+      "routing outputs contain no input hashes, code revision, full config, or per-decision selection ledger",
+      "allocation outputs record simulator SHA-256 4dbf14d8ca774c3bc096b838489211273133addf2b49d113730f7d85c77bf4a0, which does not match the pinned account_farming.py and was not found in reachable history"
+    ],
+    "legacy_25k_limits": [
+      "routing economics use drawdown 2500, frozen floor 100, seat cost 200 and simplified harvesting",
+      "withdrawal comparisons use drawdown 2500; the drawdown-1500 row is only a same-price diagnostic",
+      "literal 200 withdrawals conflict with the supplied 500 minimum payout request",
+      "old farming runner increases exposure with K and has no fixed R"
+    ]
+  },
+  "study_resolutions": {
+    "scope": "Legacy 25K Evaluation to Legacy 25K PA to withdrawal/reinvestment only",
+    "availability": "counterfactual perpetual availability at every simulated timestamp",
+    "time": {
+      "timezone": "Europe/Tallinn",
+      "dst": "historical IANA rules",
+      "ambiguous_fold": 0,
+      "nonexistent_wall_time": "validation error",
+      "session_open": "01:00",
+      "session_close": "23:59",
+      "completed_fill_exception": "retain 2 authoritative 00:00 entries, 11 exits during 00:00-00:59 and 97 cross-date trades; session clock schedules events but does not filter fills",
+      "evaluation_day_basis": "entry local calendar date",
+      "pa_pnl_day_basis": "exit local calendar date"
+    },
+    "phase_adapters": {
+      "evaluation": "pinned EODMAE one-global-position fill-time adapter",
+      "pa": "retain all concurrent cross-window offers and route fixed R copies",
+      "limitation": "Evaluation adapter is semantic—not exact setup/order parity with the MQL5 example"
+    },
+    "bootstrap_capital": "minimum just-in-time external top-ups for scheduled Evaluation renewals and first PA activation until the first PA exists; treasury-only thereafter",
+    "payout_policy_ids": [
+      "withdraw_500_after_1000_profit",
+      "withdraw_500_after_1500_profit",
+      "withdraw_500_after_2000_profit",
+      "withdraw_1000_after_2000_profit",
+      "maximum_eligible_withdrawal",
+      "minimum_only_when_eligible"
+    ],
+    "candidate_guardrail": "Legacy 25K x3, K >= 5R/max_headroom and all payout policies have different evidence strengths and are not integrated optima until compared here under fixed R."
+  },
+  "fixture_files": [
+    "tests/fixtures/evaluation/eodmae_legacy_25k_x3_behavior_lock.json",
+    "tests/fixtures/routing/accounts_staggering_routing_behavior_lock.json",
+    "tests/fixtures/withdrawal/account_farming_200_per_400_behavior_lock.json"
+  ],
+  "gate_status": {
+    "rules_frozen": true,
+    "raw_inputs_imported": true,
+    "input_contract_structure_defined": true,
+    "behavior_lock_fixtures_defined": true,
+    "verified_firm_rule_fixtures_defined": false,
+    "verified_firm_rule_fixtures_required_for_named_counterfactual_baseline": false,
+    "integrated_simulator_authorized": true
+  }
+}

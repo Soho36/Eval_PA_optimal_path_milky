@@ -1,0 +1,364 @@
+LEGACY 25K COUNTERFACTUAL STUDY RULES
+Version: 2026-08-31.study-baseline.3
+Product: Apex Legacy 25K Rithmic only
+Status: user-authorized study specification; not a claim of historical firm availability
+
+1. PURPOSE AND APPLICABILITY
+
+This file is the primary human-readable rule contract for the first integrated
+Evaluation -> PA -> withdrawal/reinvestment study. It applies to every simulated
+instant and purchase cohort unless a named sensitivity scenario overrides a
+field. The half-open applicability interval is [-infinity, +infinity).
+
+The study is intentionally counterfactual: a new Legacy 25K Evaluation is
+available for purchase at every simulated timestamp. Actual product retirement,
+offer gaps, and account grandfathering are ignored. No other account type or
+platform is permitted in this baseline.
+
+Rule-status labels used below:
+
+- USER_STUDY_ASSUMPTION: explicitly selected for this research question.
+- SUPPLIED_RULE_EXCERPT: supported by EV-account_rules.txt or Payout_rules.txt,
+  but not treated as a dated historical representation.
+- UPSTREAM_COMPATIBILITY_ASSUMPTION: selected to reproduce or conservatively
+  extend pinned upstream behavior.
+- OUT_OF_SCOPE: intentionally absent from the first model.
+
+Machine-readable companions:
+
+- config/legacy_25k_baseline.json
+- config/payout_policies.json
+
+2. TIME AND SESSION INTERPRETATION
+
+- Interpret every source timestamp as a Europe/Tallinn local wall-clock label
+  and attach the IANA Europe/Tallinn timezone. Apply its historical DST rules.
+- If a source label is ambiguous during the autumn DST fold, choose fold=0
+  (the first occurrence). Reject nonexistent spring-gap wall times rather than
+  silently shifting them.
+- The modeled session opens at 01:00 and closes at 23:59 local time on the same
+  local calendar date. That local date is the trading-day identifier.
+- The completed-trade input is authoritative for entry and exit labels. The
+  model does not convert the strategy to Eastern Time and does not model holiday
+  or early-close exceptions.
+- The MQL5 example declares no source timezone and defaults its flatten control
+  to 23:30. It does not establish the study clock. Europe/Tallinn and the
+  01:00/23:59 boundaries are the user's superseding study convention.
+- Session open/close drives cohort, trading-day, and payout decisions; it is not
+  a filter that deletes authoritative completed fills. Retain the two observed
+  00:00 entries, 11 observed 00:00-00:59 exits, and 97 trades whose exit local
+  date differs from their entry local date. Evaluation trading-day credit uses
+  the entry local calendar date; PA realized P&L and profitable-day credit use
+  the exit local calendar date.
+- An existing position occupying [entry_at, exit_at) is free at exit_at. Thus an
+  exit at T is processed before a possible entry at T.
+
+Status: USER_STUDY_ASSUMPTION.
+
+3. HISTORICAL START COHORTS AND CAPITAL
+
+- Generate rolling historical start cohorts from valid session starts in the
+  normalized trade tape. Each cohort is a separate historical starting
+  opportunity, not another simultaneous customer.
+- Each cohort begins with zero Evaluations, zero PAs, and treasury/external
+  capital sufficient to buy one Evaluation. Buy exactly one Evaluation at the
+  cohort start. The first purchase seeds the fixed-cadence clock.
+- The initial seed contribution equals the applicable Evaluation purchase fee.
+  Until the first PA is activated, contribute only any shortfall needed for
+  scheduled Evaluation renewals and that first PA activation, just in time, and
+  record every top-up as external capital. After the first PA exists, later
+  Evaluation purchases and renewals must use treasury cash and receive no
+  automatic external top-ups.
+- This convention is named `through_first_pa` and remains the default baseline.
+- The named `through_inventory_target` sensitivity uses the same initial state,
+  but may buy later Evaluations when cadence and the running-Evaluation cap
+  permit even before the first PA exists. Spend treasury cash first, then
+  contribute only the just-in-time shortfall for base-stock purchases, renewals,
+  and activations. The bridge closes permanently when simultaneous live,
+  activated PA inventory first reaches K active plus S standby PAs. Later PA
+  deaths never reopen it. Every contribution remains visible as external capital.
+- A future existing-subscription starting scenario is separate and is not part
+  of this baseline.
+
+Status: USER_STUDY_ASSUMPTION. `through_first_pa` is the main starting-capital
+convention. `through_inventory_target` is a user-authorized, separately reported
+external-inventory-building sensitivity selected 2026-08-31; the two modes must
+not be pooled as though they had the same capital constraint.
+
+4. COMMERCIAL TERMS
+
+- Evaluation purchase/30-calendar-day renewal fee: USD 35.
+- PA activation fee: USD 125.
+- New Evaluations are perpetually available at USD 35.
+- A live Evaluation renews at each fixed 30-calendar-day boundary and carries
+  its balance, peak and drawdown state. A failed Evaluation remains dormant until
+  that boundary, then renews into a fresh Evaluation. The renewal is charged once
+  and its one-position adapter restarts.
+- At an exact boundary, a trade exit and its pass/failure decision occur before
+  renewal processing.
+
+Status: availability is USER_STUDY_ASSUMPTION; amounts and fixed-cycle behavior
+are UPSTREAM_COMPATIBILITY_ASSUMPTION values from the pinned EODMAE candidate.
+They are parameters, not claims about all historical Apex prices.
+
+5. EVALUATION ACCOUNT
+
+Identity and economics:
+
+- Starting balance: USD 25,000.
+- Profit target: USD 1,500; target balance: USD 26,500.
+- Trailing drawdown amount: USD 1,500; initial liquidation threshold: USD 23,500.
+- Daily loss limit: none.
+- Position size: 3 MNQ per accepted Evaluation trade. This is an inherited
+  candidate to test, not an integrated optimum.
+- Execution baseline: USD 1.05 round-turn commission per MNQ and zero slippage;
+  named sensitivity scenarios may change execution costs without changing rules.
+
+Opportunity adapter:
+
+- Replay all 23 strategy windows in one causal stream for each Evaluation and
+  each renewal cycle.
+- The Evaluation has one global position slot. A raw offer is accepted only if
+  that slot is free at the offer's entry time. Any offer arriving while the slot
+  is occupied is blocked for that Evaluation.
+- The completed trade's [entry_at, exit_at) interval is a filled-position-time
+  proxy. Pending orders, fill probability, re-pricing, and broker/order lifecycle
+  events are not modeled.
+- This exactly matches the pinned EODMAE fill-time phase adapter and is only a
+  semantic approximation of the supplied source strategy. The supplied
+  `RR_r_MFE_buy-stop-entry(EXAMPLE).cs` (MQL5 despite its `.cs` suffix) checks
+  the one-position condition when a new setup bar is processed, but its CSV
+  exposes only later fill/exit times, not setup or pending-order times. Exact
+  source-EA parity is therefore impossible from this completed-trade tape. The
+  Evaluation adapter intentionally differs from the PA opportunity adapter.
+
+Drawdown and pass:
+
+- Update the Evaluation trailing threshold from the highest modeled intratrade
+  equity supported by the completed trade's MFE/MAE path scenario. The threshold
+  is peak equity minus USD 1,500.
+- Do not freeze the Evaluation threshold. This is the stricter pinned-EODMAE
+  compatibility assumption; it is explicitly configurable for sensitivity.
+- Touching the threshold fails the Evaluation: modeled equity <= threshold is a
+  failure. This conservative boundary matches pinned upstream behavior even
+  though the supplied prose uses "below."
+- Test drawdown survival before crediting a pass at the same trade event. A pass
+  requires realized net balance >= USD 26,500 and at least one completed trading
+  day.
+- Require one accepted Evaluation trading day for the entire baseline interval.
+  The user confirms on 2026-08-30 that the one-day pass has been the operating
+  reality since roughly 2025-09 and that the seven-day figure in
+  EV-account_rules.txt survives only in tutorial text. The value is therefore a
+  confirmed current rule, not a guess.
+  It remains counterfactual over most of this tape, which begins 2020-01-02, so
+  roughly the first five and a half years are simulated under a rule that did
+  not yet apply to them. The divergence is large: at seven days the same 100
+  starts over 180 days fall from 21 to 11 cohorts reaching a payout and from
+  $14,000 to $5,500 in gross payouts. Keep it replaceable by a dated scenario.
+  Evaluation day credit uses the accepted trade's entry local calendar date,
+  including the explicitly retained 00:00 completed fills.
+
+Status: account values/no daily loss are SUPPLIED_RULE_EXCERPT or pinned 25K
+inputs; 3 MNQ is an inherited candidate; opportunity, equality, no-freeze, and
+one-day promotion behavior are labeled study/compatibility assumptions.
+
+6. EVALUATION PASS AND PA ACTIVATION
+
+- A qualifying Evaluation passes at the exit timestamp of the qualifying trade.
+- Charge the USD 125 activation fee once and activate the resulting PA at that
+  same timestamp. There is no review, purchase-link, setup, or tradability delay
+  in the baseline.
+- A PA born at T is activated immediately but is not eligible for a PA signal
+  whose entry timestamp is also T. It becomes tradable for entries strictly
+  after T. The event ordering must be deterministic and recorded in the run
+  manifest.
+
+Status: immediate paid activation is UPSTREAM_COMPATIBILITY_ASSUMPTION.
+
+7. PERFORMANCE ACCOUNT AND ROUTING
+
+Account mechanics:
+
+- PA starting balance: USD 25,000.
+- Trailing drawdown amount: USD 1,500; initial threshold: USD 23,500.
+- Trail the threshold USD 1,500 below the modeled intratrade equity peak until
+  it reaches USD 25,100. It never rises above USD 25,100.
+- Touching the threshold kills the PA: modeled equity <= threshold is failure.
+  A failed PA cannot be reset.
+- Each selected PA trades exactly one MNQ for a signal copy.
+
+Opportunity and exposure contract:
+
+- Retain all raw concurrent cross-window opportunities in the PA phase.
+- Each signal requests a fixed number R of one-MNQ copies. The baseline R is 1.
+  K is the target number of active routed PA drawdown containers and is a
+  separate decision variable. Changing K must never change requested R.
+- S is the target number of already activated standby PAs. A standby is dormant:
+  it receives no signals, accrues no trading or payout days, and cannot request a
+  payout. When an active PA dies, promote the oldest standby by activation time
+  and then PA ID before processing an entry at that timestamp. A promoted PA
+  remains active; there is no later demotion.
+- A newly activated PA fills an unoccupied active slot first and otherwise enters
+  standby. Every live PA has exactly one role. Base-stock inventory position is
+  live active plus live standby PAs, running Evaluations, and pending activations;
+  it may not exceed K + S.
+- `max_concurrent_evaluations`, when set, limits running Evaluation subscriptions
+  only. A passed Evaluation pending activation counts toward base stock but is not
+  running. The default is unbounded for backward compatibility; the inventory
+  grid explicitly compares one and two.
+- Route copies only to alive, tradable, non-busy PAs. Use max_headroom ordering:
+  greatest (equity - liquidation_threshold), then fewer prior assignments, then
+  lower monotonically allocated PA ID.
+- Positions occupy [entry_at, exit_at). An existing PA exiting at T is eligible
+  for an entry at T; a newly activated/replacement PA at T is not eligible for
+  an entry at T.
+- K >= 5R is an inherited historical capacity candidate for this exact tape,
+  not a rule or guaranteed future bound. Compare K policies while holding R
+  fixed and report requested versus delivered exposure.
+- Do not impose a separate firm-wide PA ownership or activation cap in the
+  baseline. K is the explicit study variable; a cap can be added only as a named
+  sensitivity scenario. The supplied excerpts do not define such a cap.
+
+Compliance scope:
+
+- Contract scaling limits are nonbinding because a selected PA receives one MNQ.
+- The fixed strategy uses 1:1 risk/reward and therefore satisfies a 5:1 maximum
+  risk-to-reward restriction.
+- DCA, adding, hedging, and variable sizing are inapplicable unless completed-
+  trade evidence contradicts the fixed strategy contract.
+- The 30% MAE/compliance guideline is OUT_OF_SCOPE. Do not create failure,
+  warning, probation, or eligibility events from it.
+
+8. PAYOUT ELIGIBILITY AND AMOUNT LIMITS
+
+Apply payout state independently to each PA.
+
+- A request opportunity requires at least eight completed PA trading days since
+  PA activation (first request) or the last executed request (later requests).
+- At least five days in that window must have realized net profit >= USD 50.
+- PA balance must be at least USD 26,600 at the request decision.
+- Gross request minimum: USD 500.
+- Gross request cap: USD 1,500 for executed payouts 1 through 5; no fixed dollar
+  cap from payout 6 onward.
+- For payouts 1 through 3, the greatest amount allowed by the Safety Net is
+  USD 500 + max(0, balance - USD 26,600). For payout 4 onward, the Safety Net is
+  treated as ended and the greatest amount allowed by balance is
+  max(0, balance - USD 25,100.01). The one-cent margin is required because
+  threshold touch fails. Apply the payout-number cap after this formula. This
+  post-third formula is an explicit configurable study interpretation.
+- The 30% payout consistency rule is OUT_OF_SCOPE and never blocks a request.
+- Payout request, approval, PA balance removal, and treasury receipt are one
+  atomic event at the decision timestamp. There are no delays or denials.
+- The trader receives 100% of the first USD 25,000 of cumulative gross approved
+  payouts per PA and 90% thereafter. The PA balance is reduced by the gross
+  request; treasury receives the split-adjusted amount.
+
+9. PAYOUT POLICY COMPARISON
+
+Compare exactly these six candidate policies from config/payout_policies.json
+(schema v2):
+
+1. minimum_500_always      - the USD 500 minimum whenever eligible.
+2. maximum_always          - the maximum eligible gross whenever eligible.
+3. rush_to_uncapped        - USD 500 for payouts 1-5, then maximum eligible.
+4. cap_maximizer           - the full USD 1,500 for payouts 1-5, waiting until
+                             that whole amount is eligible, then maximum.
+5. preserve_safety_net     - maximum eligible, but never leaving the balance
+                             below USD 26,600.
+6. half_of_maximum         - 50% of the eligible maximum, floored at USD 500.
+
+The axis under test is the payout counter, not a dollar trigger. The USD 1,500
+cap ends after payout 5 and the Safety Net after payout 3, so the number of
+early requests is itself a decision: five minimum requests reach the uncapped
+regime in the fewest eligible windows, while waiting for the full cap extracts
+more per window but stays capped longer. preserve_safety_net supplies the third
+pole by refusing to encroach on the balance gate at all.
+
+A policy chooses an amount only inside the section 8 eligible range. Each is an
+early rule, an optional switch after a payout number, and an optional late
+rule. A rule is minimum, maximum, fixed or fraction. A fixed rule with
+require_full waits for its whole amount rather than silently degrading into a
+smaller policy. An optional post-payout balance floor may cap any policy and is
+re-checked at execution.
+
+This set supersedes the six accumulation-trigger policies of version
+2026-08-29.study-baseline.1, which descended from the Accounts_staggering
+USD 200 per USD 400 lifetime-gain ratchet. Two of those were measurably
+identical because the eight-trading-day and USD 26,600 gates always bound
+first. The accumulator mechanism is retained in code and tests so that set
+remains reproducible as a named sensitivity.
+
+None of the six is an integrated optimum until this repository compares them
+under common inputs at fixed R.
+
+9A. TREASURY PURCHASE TIMING (STAGGERING)
+
+The number of active and standby PAs achieved is an outcome of when cash is
+spent, not an input. A container costs USD 35 per Evaluation cycle plus USD 125
+activation and arrives only when that Evaluation passes, a median 61 days after
+the decision to buy it. K active plus S standby is a base-stock upper bound for
+every policy below and is never a level reached on demand.
+
+1. greedy_to_target   - buy whenever cash allows and the pipeline is below K.
+2. fixed_cadence      - at most one Evaluation per cadence_days, measured from
+                        the previous successful purchase and seeded at the
+                        cohort start. A failed/no-cash attempt does not move the
+                        clock, and a PA death does not bypass cadence.
+3. death_replacement  - buy only against accumulated PA deaths; never grow the
+                        book beyond the size it already reached.
+4. headroom_triggered - buy when the least-cushioned live PA falls below
+                        headroom_trigger_usd, or when no PA is alive.
+5. cash_buffer        - greedy, but never spend below cash_reserve_usd, so an
+                        existing renewal or pending activation is not stranded.
+
+These policies are not independent of section 9. A PA that only gains holds
+headroom equal to its drawdown; it is the withdrawal that cuts the cushion,
+because the floor has already frozen at plus USD 100 and a payout removes equity
+above it. The payout policy therefore partly determines when a
+headroom_triggered purchase fires. Do not tune the two families in isolation.
+
+The inherited K >= 5R boundary is not carried in as a target. It answers a
+capacity question under Accounts_staggering's premises, where a seat is already
+owned, costs USD 200 and appears instantly. Peak positive-duration overlap on
+this tape is five and that remains true, but it is the wrong question when a
+container must be earned.
+
+The 2026-08-31 inventory grid fixes R = 1 and crosses K = 1, 2, 3; S = 0, 1, 2;
+cadence = 30, 45, 60, 90 days; one or two running Evaluations; both named
+bootstrap modes; and all six payout candidates in section 9. The separate
+copied-to-all-accounts "milky cow" design is not part of this project.
+
+Status: USER_STUDY_ASSUMPTION, expanded 2026-08-31.
+
+9B. STUDY HORIZON
+
+The primary policy-comparison horizon is 720 days. 180 days is retained only as
+a time-to-first-cash diagnostic.
+
+180 days was inherited from EODMAE, whose episode ends at first paid activation.
+Here the median cohort needs 61 days to reach a PA and 141 to a first payout, so
+a 180-day horizon ends at roughly the first withdrawal and measures acquisition
+rather than the reinvestment loop. On identical starts, moving from 180 to 540
+days took gross payouts from USD 14,000 to USD 100,000 and flipped net realized
+cash from minus USD 15,895 to plus USD 18,230. The tape spans 2,384 days, so 720
+days still leaves roughly 1,100 fully observed rolling starts.
+
+Status: USER_STUDY_ASSUMPTION, selected 2026-08-30.
+
+10. INTENTIONALLY OMITTED EVENTS
+
+The first baseline does not model:
+
+- real-world Legacy product retirement or intermittent offers;
+- account types other than Legacy 25K Rithmic;
+- NT8/MT5 pending orders, re-pricing, fill mechanics, or broker rejection;
+- Evaluation review delay or PA setup delay;
+- PA 30% MAE/compliance enforcement;
+- payout 30% consistency;
+- payout request review, denial, processing delay, bank delay, or cancellation;
+- DCA, adding, hedging, variable sizing, Live transfer, or unrelated conduct
+  rules when absent from the completed-trade data.
+
+These omissions define the baseline study boundary. They do not invalidate the
+baseline, but a result must carry this rule-version identifier and must not be
+described as exact historical Apex account performance.

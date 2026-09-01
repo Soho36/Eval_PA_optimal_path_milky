@@ -1,0 +1,103 @@
+Important Information on Apex Legacy Account Payout Rules and Procedures (for current project only 25k RITHMIC accounts)
+At Apex, we make getting paid simple and reliable. Our priority is to process your payouts quickly and accurately so you can enjoy the rewards of your trading. To help make every transaction smooth and hassle-free, here are the key details and reminders you’ll want to know.
+
+Once you request a payout, you can immediately keep trading. You do NOT need to wait to trade until the payout is approved. Just be sure to trade as if the funds were already approved and removed from your balance, keeping in mind minimum thresholds so as not to blow the account.If you submit a request and then your account balance falls below the minimum required balance to request a payout, it will simply be denied. There is no reason to request to cancel or edit it.
+
+Payout Split Percentage
+Traders are entitled to 100% of the first $25,000 per account they are paid out, and 90% of the profit after that.
+
+Payout Requirements and Criteria
+To request a payout, you must meet the following criteria to ensure smooth and compliant processing. These steps apply to both U.S. and non-U.S. traders.
+
+8 Trading Days: You must have completed at least 8 trading days.
+Profit on 5 Days: At least 5 of those 8 days must show a profit of $50 or more.
+Safety Net for First Three Payouts: The safety net is calculated as your drawdown limit plus $100. This requirement applies to your first three payouts only. For more details, please refer to Safety Net Rules.
+30% Consistency Rule – Windfall
+The 30% Consistency Rule ensures that no single trading day accounts for more than 30% of the total profit balance at the time of a payout request. This rule promotes consistent trading practices and discourages high-risk, erratic trading styles.
+
+Key Details to Note:
+
+Profit Restrictions: If a single trading day generates more than 30% of the profit balance.
+Reset After Payout: Once a payout is approved, any single day after the approval can not be more than 30% of the profit balance.
+Exceptions: The rule applies until the sixth payout or until the account is transferred to a Live Prop Trading Account. At that point, the 30% rule is no longer in effect.
+Easy Calculation Method:
+
+Formula: Highest Profit Day ÷ 0.3 = Minimum Total Profit Required
+
+Example:
+
+On a $50k account, if your highest profit day since your last approved payout (or since you started trading, if this is your first payout request) was $1,500:
+
+Calculation: $1,500 ÷ 0.3 = $5,000
+
+In this situation, to request a payout, you would have to have at least $5,000 in total profit (current balance minus starting balance). If your current total profit is below this minimum, you’ll need to continue trading until you meet this requirement before requesting a payout.
+
+Safety Net Requirement for First Three Payouts
+
+Applies to First Three Payouts Only: The safety net requirement must be observed for the first three approved payouts. As of the fourth payout, the safety net requirement is no longer applicable.
+Safety Net Definition: The safety net is defined as the amount equivalent to the drawdown based on the account size, plus an additional $100.
+Applies to All Accounts: This rule applies to both new and existing accounts, ensuring consistency for traders as they progress.
+Minimum Payout: If the safety net threshold has been met, a payout equal to the minimum allowed amount of $500 can be requested, even if it exceeds the safety net amount.
+Payouts Above Minimum:
+To request a payout over $500, the balance must exceed the safety net threshold by an amount equal to the additional amount requested.
+Example:
+For a $50,000 account, we calculate the safety net as $2,500 + $100 = $2,600, based on the drawdown of $2,500.
+
+A trader with this account reaches a balance of $52,600. The trader can request the minimum payout of $500, leaving the balance at $52,100. This is acceptable, even though it encroaches on the safety net by the $500 allowed.
+
+To request a higher amount, for example, $1,200, the balance must exceed the safety net by the additional amount requested above the minimum of $500. In this case, the additional amount is $700, meaning the account balance must be at least $53,300. Requesting the $1,200 would leave the account balance at $52,100, which is still acceptable since it encroaches on the safety net by no more than the $500 allowed.
+
+Required Minimum Balance to Request a Payout
+Your account must meet the required minimum balance to approve a payout, which includes surpassing the trailing drawdown level. The trailing drawdown in a PA account stops at the starting balance plus $100.
+
+Minimum Required Balances:
+
+Account Size	Minimum Required Balance
+$25k Account	$26,600
+$50k Account	$52,600
+$100k Account	$103,100
+$150k Account	$155,100
+$250k Account	$256,600
+$300k Account	$307,600
+$100k Static	$102,600
+Note: For a $50k account, you cannot request a payout if your balance is $52,000. It must be at least $52,600.
+
+Minimum and Maximum Payout Amounts
+Minimum Payout: $500 for any account size. You must have at least eight (8) trading days since the last request and meet the minimum required balance.
+Maximum Payouts (First Five Payouts):
+Account Size	Maximum Payout
+$25k Account	$1,500
+$50k Account	$2,000
+$100k Account	$2,500
+$150k Account	$2,750
+$250k Account	$3,000
+$300k Account	$3,500
+$100k Static	$1,000
+No Maximum After Fifth Payout: Starting from the sixth payout, there’s no maximum payout amount, provided the minimum balance threshold remains in the account after the payout.
+100% Payout Eligibility Guidelines
+To qualify for 100% payouts, traders must first complete five approved payouts. Starting with the sixth payout, you can withdraw 100% of your profits, even if you reach this milestone earlier than four months. By following a steady 8-day payout cycle, you can achieve this in as little as 48 trading days, providing full access to your profits in approximately two months.
+
+Key Highlights:
+
+Eligibility: Complete five approved payouts to access 100% of your profits from the sixth payout onward.
+Faster Access: Achieve this in 48 trading days by maintaining an 8-day payout cycle.
+Existing Traders: If you’re already receiving 100% payouts or are in your third month, this update does not impact you.
+By following these guidelines, you’ll have streamlined and faster access to your earnings, providing you with more control over your profits.
+
+Multiple Accounts and Payouts: Understanding the Benefits
+
+At Apex Trader Funding, each account you manage is treated as a separate, stand-alone account. This allows you to maximize flexibility and opportunity when requesting payouts across multiple accounts.
+
+How Payouts Work with Multiple Accounts
+Separate Payouts: Each account operates independently, meaning you can request the maximum payout for each account during every eligible payout period.
+Example Scenario:Suppose you have ten (10) $50,000 accounts:
+You can withdraw $2,000 from each account every 8 trading days, for a total of $20,000 across all accounts.
+If you repeat this process over 16 trading days, you could withdraw a total of $40,000.
+This independence allows you to scale your trading and withdrawals based on your overall account structure.
+
+Benefits of Managing Multiple Accounts
+Increased Earning Potential: By leveraging payouts from multiple accounts, you can optimize your income within the same trading periods.
+Risk Management: Multiple accounts allow you to diversify your strategies and reduce the impact of losses on any single account.
+For more information on why maintaining multiple accounts can be advantageous, check out our detailed guide: Benefits of Managing Multiple Accounts.
+
+By managing multiple accounts responsibly, you can enhance both your trading opportunities and your payout potential.

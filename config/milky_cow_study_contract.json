@@ -1,0 +1,33 @@
+{
+  "schema_version": "milky_cow_study_contract.v1",
+  "account_type": "Legacy 25K",
+  "strategy_input": {
+    "rr": 1.0,
+    "source_timezone": "Europe/Tallinn",
+    "global_one_position_opportunity_selection": true
+  },
+  "pa_book": {
+    "signal_distribution": "copy_to_all_eligible_active_pas",
+    "staggering": false,
+    "routing_competition": false,
+    "dormant_pa_reserve": false,
+    "candidate_active_pa_counts": [1, 2, 3, 5, 10, 15, 20],
+    "new_pa_first_eligible_rule": "entry_timestamp_strictly_after_activation"
+  },
+  "candidate_payout_policies": [
+    "half_of_maximum",
+    "rush_to_uncapped",
+    "maximum_always",
+    "minimum_500_always",
+    "preserve_safety_net",
+    "cap_maximizer"
+  ],
+  "unresolved_before_integrated_sweep": [
+    "contract_scaling_schedule",
+    "per_account_vs_synchronized_scaling",
+    "dead_pa_replacement_policy",
+    "new_pa_acquisition_policy",
+    "external_capital_budget",
+    "prop_firm_concentration_stress"
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "schema_version": 2,
+  "schema_id": "legacy_25k_payout_policies.v2",
+  "rules_version": "2026-08-31.study-baseline.3",
+  "supersedes": {
+    "schema_id": "legacy_25k_payout_policies.v1",
+    "reason": "The v1 set descended from the Accounts_staggering $200-per-$400 lifetime-gain ratchet. The 2026-08-30 independence decision cut that inheritance, and measurement showed the accumulation triggers were never the binding constraint: withdraw_500_after_1000_profit and minimum_only_when_eligible produced identical cohort results because the eight-trading-day and $26,600 balance gates bind first."
+  },
+  "scope": {
+    "product_id": "apex_legacy_25k_rithmic",
+    "account_type": "legacy_25k_pa",
+    "account_scope": "independent_per_pa",
+    "amounts": "gross_request_usd_before_trader_split"
+  },
+  "eligibility_reference": "config/legacy_25k_baseline.json#/payout_rules",
+  "design_axis": {
+    "summary": "How the five capped payouts are spent before both the $1,500 cap and the Safety Net disappear, and how much cushion is left in the account.",
+    "binding_constraints_in_order": [
+      "8 completed PA trading days since activation or last executed request",
+      "5 of those days with realized net profit >= $50",
+      "balance >= $26,600 at the request decision",
+      "gross minimum $500",
+      "payouts 1-3 limited to $500 + max(0, balance - $26,600)",
+      "payouts 4+ limited to max(0, balance - $25,100.01)",
+      "payouts 1-5 capped at $1,500; no fixed cap from payout 6"
+    ],
+    "why_it_matters": "The cap and the Safety Net both end on a payout counter, not on a dollar amount, so the number of early requests is a decision variable in its own right. A policy that takes the $500 minimum five times reaches uncapped withdrawals in the fewest eligible windows; one that waits for the full $1,500 extracts more per window but stays capped longer."
+  },
+  "common_execution": {
+    "only_request_when_baseline_eligibility_is_true": true,
+    "apply_eligible_balance_amount_and_payout_number_cap": true,
+    "minimum_gross_request_usd": 500,
+    "fixed_amount_rule_with_require_full_waits_for_the_whole_amount": true,
+    "round_gross_request_down_to_cents": true,
+    "request_approval_and_receipt_are_atomic": true,
+    "denials_and_delays_modeled": false
+  },
+  "rule_kinds": {
+    "minimum": "request the $500 minimum",
+    "maximum": "request the largest amount baseline eligibility allows",
+    "fixed": "request a fixed amount; with require_full, wait until it is fully eligible",
+    "fraction": "request fraction x maximum eligible, floored at the $500 minimum"
+  },
+  "policies": [
+    {
+      "policy_id": "minimum_500_always",
+      "label": "$500 minimum whenever eligible",
+      "description": "Fastest burn through the five capped payouts and the largest retained account cushion. Reaches uncapped withdrawals in the fewest eligible windows.",
+      "early_rule": {"kind": "minimum"}
+    },
+    {
+      "policy_id": "maximum_always",
+      "label": "maximum eligible whenever eligible",
+      "description": "Extracts everything the rules allow at every opportunity. Strips the account to its floor and is the most exposed to a subsequent drawdown.",
+      "early_rule": {"kind": "maximum"}
+    },
+    {
+      "policy_id": "rush_to_uncapped",
+      "label": "$500 for payouts 1-5, then maximum",
+      "description": "Explicitly buys the uncapped regime with five minimum requests, then switches to maximum extraction. Tests whether the payout counter is worth optimizing directly.",
+      "early_rule": {"kind": "minimum"},
+      "switch_after_payout_number": 5,
+      "late_rule": {"kind": "maximum"}
+    },
+    {
+      "policy_id": "cap_maximizer",
+      "label": "full $1,500 for payouts 1-5, then maximum",
+      "description": "Waits for the full capped amount at each of the first five requests, then switches to maximum. The opposite pole from rush_to_uncapped on the same axis.",
+      "early_rule": {"kind": "fixed", "amount_usd": 1500, "require_full": true},
+      "switch_after_payout_number": 5,
+      "late_rule": {"kind": "maximum"}
+    },
+    {
+      "policy_id": "preserve_safety_net",
+      "label": "maximum without encroaching the safety net",
+      "description": "Maximum eligible subject to leaving at least $26,600 in the account, so the balance gate is never the reason the next request is refused. Trades extraction for immediate re-eligibility.",
+      "early_rule": {"kind": "maximum"},
+      "post_payout_floor_balance_usd": 26600
+    },
+    {
+      "policy_id": "half_of_maximum",
+      "label": "half of the eligible maximum",
+      "description": "Requests 50% of what is allowed, floored at $500. The honest heir of the old 50% intent, expressed against the constraint that actually binds rather than against a lifetime-gain ratchet.",
+      "early_rule": {"kind": "fraction", "fraction": 0.5}
+    }
+  ],
+  "retained_mechanism": {
+    "accumulated_profit_trigger_usd": "Still implemented and unit-tested on PayoutPolicy, but no baseline policy uses it. Kept so the superseded v1 ratchet remains reproducible as a named sensitivity rather than being deleted from the code."
+  }
+}
