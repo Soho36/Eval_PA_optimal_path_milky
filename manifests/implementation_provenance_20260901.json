@@ -78,7 +78,7 @@
     },
     {
       "path": "config/milky_cow_contract_gate.json",
-      "sha256": "056c074bea271b385eaf2686f0bf37134b2a746a03d6da5ce38003a1d4eebb4b",
+      "sha256": "fc25173472887921dbfcf84e08866ae0ccb79cf8609160b768871e2650d79f24",
       "role": "active_foundation_gate"
     },
     {
@@ -163,7 +163,7 @@
     },
     {
       "path": "tests/test_lifecycle_policy_contracts.py",
-      "sha256": "c99fa416d9f9ca4e8de66b5fba0703e9ccc1a3ee281f522982288a85c15190f1",
+      "sha256": "f70496b653b268f8dfa0be1ca9f441e3abffe5af819df65594def7c3ebe1badc",
       "role": "acquisition_replacement_capital_and_gate_fixtures"
     },
     {
@@ -188,7 +188,7 @@
     },
     {
       "path": "project_memory/DECISIONS.md",
-      "sha256": "4ea2f2f52e5d0d0618d81233659cd7937b9e13044bb864913e5b460c00c69500",
+      "sha256": "53e1fe621e6810b9d19fa6d8b0d568981eab727041493ce0473f1bdf66b78134",
       "role": "locked_and_unresolved_decisions_memory"
     },
     {
@@ -198,12 +198,12 @@
     },
     {
       "path": "project_memory/STATE.md",
-      "sha256": "543dbc05835ef979d9ef55f6ae42876e3cb942c6e32d726765b4fade07f68437",
+      "sha256": "73ab81b75d54663813cf953b015e0a558f75894299a5aa6a45e0d3cf3235c877",
       "role": "current_project_state_memory"
     },
     {
       "path": "project_memory/TODO.md",
-      "sha256": "1721b01399e1f7dc0ad392b145c1f4c7d724d820abc179adae1d21e3131f035b",
+      "sha256": "219f050a2eb537fd3b833f07bc70c771f3faaad3fd1bb04268d73ebc544a9144",
       "role": "current_gate_work_queue"
     },
     {
@@ -218,7 +218,7 @@
     },
     {
       "path": "tests/test_study_contract.py",
-      "sha256": "e95c99e3938a22de05b79d53d39b9dd23180745eeb770d1687aa4f021815fee9",
+      "sha256": "ee99c7cb33fa4cad7db430233787c13746eef67ce3037d6ee60305fc097d283a",
       "role": "active_vs_frozen_scope_governance_fixture"
     }
   ],

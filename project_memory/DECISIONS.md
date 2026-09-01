@@ -60,15 +60,67 @@
     funded only from trading profit and payouts, so high-N arms are capital
     constrained by construction and may not fill the book within the horizon.
 
+22. Evaluation boundaries: a renewal fee is paid only when the pipeline
+    excluding that Evaluation is below N; a mid-cycle drawdown breach stops
+    trading and stays dormant until the 30-day boundary, then restarts fresh
+    without carrying state (parent parity); the trading day cuts at
+    `Europe/Tallinn` 00:00, with Evaluation days on entry date and PA realized
+    P&L on exit date.
+23. A PA does not trade on a day it takes a payout. There is no automatic
+    book-wide blackout: PAs activate at different times and carry different
+    equity offsets. The effect is policy-dependent — policies that reset an
+    account to a common balance (`maximum_always`, `preserve_safety_net`) can
+    re-synchronize accounts onto shared payout days, while
+    `minimum_500_always` preserves the spread. Report the distribution of
+    simultaneous sit-outs per arm rather than assuming either extreme.
+24. The objective is total net cash withdrawn into the treasury, net of
+    external capital contributed. Surviving un-withdrawn PA equity is always
+    reported beside it and never summed into it.
+25. Cohorts start on the first valid session of each calendar month (~78 at a
+    720-day horizon). Daily rolling starts as in the parent would need 199,680
+    lifecycle runs across the 20xN by six-policy grid and are kept only as a
+    robustness check on one arm. Cohorts overlap, so they are not independent
+    samples.
+26. Horizon is 720 days primary, matching the parent so the comparison is
+    valid, plus a 1,440-day book-fill diagnostic on selected N. At horizon,
+    withdrawn cash and un-withdrawn equity are reported separately and running
+    Evaluations are sunk fees, never an asset.
+27. Regimes are a reporting partition only: the parent's two calendar windows
+    plus a `candle_range` volatility tercile. Directional bull/bear/sideways
+    regimes are deferred — the frozen tape has no price series, and deriving
+    direction from trade outcomes would make regime findings tautological.
+28. Prop-firm failure and rule-change stresses are not modeled, matching the
+    parent.
+
+29. A failed Evaluation stays dormant and keeps its pipeline slot until its
+    renewal boundary, and keeps paying renewal fees. This is parent parity,
+    verified in code: the parent's simulator never assigns a failure status —
+    `EvaluationRuntime.status` leaves `active` only for `passed` or
+    `closed_unpaid_renewal`, and `running_evaluation_count()` counts
+    `active`. Report blocked-slot days per N, since correlated deaths can
+    block several slots at once.
+30. Same-timestamp events use one canonical declared order: settle, realize,
+    spend, commit. Random ordering is rejected — it would break the
+    byte-reproducible digests the study rests on, break parent comparability,
+    and hide any real ordering effect inside variance. At least one pair does
+    bind: payout must precede renewal, activation and purchase, because payout
+    cash funds those same-instant fees. Insensitivity is measured once with a
+    permuted-order arm rather than assumed. `_PHASE_RANK` is asserted equal to
+    the gate's declared order by test.
+31. Payout timing is parent parity: atomic request, approval, balance removal
+    and treasury receipt, zero delay, no pending state, no denials. A terminal
+    sweep is a censoring valuation, never a policy. The $1k-per-$5k
+    accumulation trigger is not added as a seventh candidate: measured on the
+    tape at 1 MNQ, a 720-day window nets a median $6,139 and reaches $5,000 in
+    only 60.3% of windows, so the trigger would fire about once per PA per
+    horizon — before deaths and before the $26,600 gate consumes the first
+    $1,600. Reconsider only if phase 2 scales above 1 MNQ.
+
 ## Still unresolved before a study-scale lifecycle or sweep
 
-- the remaining Evaluation rule boundaries, now enumerated as explicit open
-  questions in the gate (renewal at the N cap, mid-cycle failure restart, and
-  the minimum-day basis at a cycle edge);
-- payout request/approval/receipt timing and open-position handling;
-- study-wide same-timestamp ordering outside the locked deterministic fixture;
-- the economic objective;
-- horizon, right censoring, and rolling cohorts;
-- regime definitions;
-- the remaining stresses (prop-firm failure, rule change); path order is locked
-  and execution is a declared non-model.
+Every contract field is resolved. What remains is work, not decisions:
+
+- no study-scale lifecycle runner exists, only the N=1/N=2 fixture slice;
+- the ordering-sensitivity arm has not been run; and
+- the accumulation-trigger exclusion is a recommendation on measured evidence,
+  not yet a user confirmation.

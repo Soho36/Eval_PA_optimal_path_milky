@@ -336,10 +336,12 @@ class IntegratedSweepGateTests(unittest.TestCase):
             gate["opportunity_stream"]["evaluation_consumer_mode"],
             "cycle_local_one_position_restarted_at_each_renewal_boundary",
         )
-        self.assertGreater(
-            len(gate["unresolved_before_integrated_sweep"]),
-            0,
-        )
+        # Every contract field is now resolved, so "closed" is carried by the
+        # status and the explicit blocker list rather than by a null count.
+        self.assertEqual(gate["unresolved_before_integrated_sweep"], [])
+        self.assertNotEqual(gate["status"], "open")
+        self.assertIn("still_blocked", gate["status"])
+        self.assertTrue(gate["remaining_blockers_before_the_sweep"])
         self.assertNotIn("router", gate["pa_book"])
         self.assertEqual(
             set(gate["pa_book"]["allowed_roles"]),
@@ -555,6 +557,93 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
         ]
         self.assertFalse(stress["modeled"])
         self.assertEqual(stress["known_bias_direction"], "favors_high_n")
+
+    def test_evaluation_boundaries_match_the_parent_failure_and_day_basis(self) -> None:
+        boundaries = self.gate["evaluation_rule_boundaries"]
+        failure = boundaries["mid_cycle_failure"]
+        self.assertFalse(failure["carries_state"])
+        self.assertIn("dormant_until_the_30_day_boundary", failure["rule"])
+        # Parent parity: a dormant failed Evaluation keeps its pipeline slot,
+        # because the parent never moves its status off "active".
+        self.assertEqual(
+            failure["dormant_slot_release"], "held_until_the_renewal_boundary"
+        )
+        self.assertEqual(
+            failure["dormant_slot_release_status"],
+            "parent_parity_verified_not_an_interpretation",
+        )
+        day = boundaries["trading_day_boundary"]
+        self.assertIn("00:00", day["cutoff"])
+        self.assertEqual(day["evaluation_trading_day_basis"], "entry_local_calendar_date")
+        self.assertEqual(day["pa_realized_pnl_day_basis"], "exit_local_calendar_date")
+
+    def test_objective_is_net_of_external_capital_and_keeps_its_companion(self) -> None:
+        objective = self.gate["economic_objective"]
+        self.assertEqual(
+            objective["primary"], "total_net_cash_withdrawn_into_the_treasury"
+        )
+        # Withdrawn cash alone would reward burning the capital bridge.
+        self.assertIn("external capital", objective["net_of"])
+        self.assertEqual(
+            objective["companion_reported_never_summed"],
+            "surviving_unwithdrawn_pa_equity_at_horizon",
+        )
+
+    def test_horizon_matches_the_parent_and_censoring_never_sums(self) -> None:
+        window = self.gate["reporting"]["horizon_and_right_censoring"]
+        self.assertEqual(window["primary_days"], 720)
+        self.assertGreater(window["diagnostic_days"], window["primary_days"])
+        censoring = window["right_censoring"]
+        self.assertIn("never_summed", censoring["rule"])
+        self.assertIn("sunk", censoring["running_evaluations_at_horizon"])
+
+    def test_regimes_partition_on_an_input_not_on_the_measured_outcome(self) -> None:
+        regimes = self.gate["reporting"]["regime_definitions"]
+        self.assertEqual(regimes["volatility_partition"]["metric"], "candle_range")
+        # Directional regimes need price data the frozen tape does not carry.
+        self.assertEqual(
+            regimes["directional_regimes_not_defined"]["status"],
+            "deferred_pending_a_provenance_tracked_external_price_import",
+        )
+        windows = regimes["calendar_windows"]["windows"]
+        self.assertIsNone(windows[0]["from_date"])
+        self.assertIsNone(windows[-1]["to_date"])
+        self.assertEqual(windows[0]["to_date"], windows[1]["from_date"])
+
+    def test_payout_day_sit_outs_are_measured_not_assumed(self) -> None:
+        payouts = self.gate["payout_candidates"]
+        self.assertIn("does_not_trade", payouts["open_position_handling"]["rule"])
+        # Clustering is policy-dependent, so it must be reported, not asserted.
+        consequence = payouts["open_position_handling"]["consequence_under_copy_to_all"]
+        self.assertIn("no automatic book-wide", consequence)
+        self.assertIn("do not assume either", consequence)
+        # A terminal sweep is a censoring valuation, never a policy.
+        self.assertFalse(payouts["terminal_sweep"]["is_a_policy"])
+        # The six-candidate axis holds; the trigger stays out on measured evidence.
+        self.assertEqual(len(payouts["policy_ids"]), 6)
+        trigger = payouts["accumulation_trigger_candidate"]
+        self.assertEqual(trigger["recommendation"], "do_not_add_as_a_seventh_candidate")
+        self.assertLess(
+            trigger["measured_evidence_1_mnq_720d_window"][
+                "share_of_windows_reaching_5000_usd"
+            ],
+            1.0,
+        )
+
+    def test_declared_event_order_matches_the_lifecycle_code(self) -> None:
+        from milky_cow.lifecycle import _PHASE_RANK
+
+        declared = self.gate["event_order"]["order"]
+        coded = [phase for phase, _ in sorted(_PHASE_RANK.items(), key=lambda kv: kv[1])]
+        self.assertEqual(coded, declared)
+        # Payout must fund the same-timestamp spends that follow it.
+        self.assertLess(declared.index("payout"), declared.index("renewal"))
+        self.assertLess(declared.index("payout"), declared.index("activation"))
+        self.assertLess(declared.index("payout"), declared.index("purchase"))
+        # Everything outstanding settles before any cash decision.
+        self.assertEqual(declared[0], "pa_exit")
+        # New exposure is committed last.
+        self.assertEqual(declared[-1], "pa_entry")
 
     def test_evaluation_consumer_resets_per_cycle_unlike_the_pa_stream(self) -> None:
         stream = self.gate["opportunity_stream"]

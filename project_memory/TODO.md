@@ -27,12 +27,22 @@
       lifetime budget, and skip-the-purchase unfunded behavior.
 - [x] Bind the parent comparison arm, including the mae_first path arm to
       difference against and the K=5 value explicitly not adopted.
-- [ ] Resolve the enumerated Evaluation rule boundaries (renewal at the N cap,
-      mid-cycle failure restart, minimum-day basis at a cycle edge).
-- [ ] Resolve payout lifecycle/open-position handling and same-time event order,
-      and promote `_PHASE_RANK` from a bare fixture constant to a declared,
-      gate-checked ordering.
-- [ ] Define objective, horizon, censoring, rolling cohorts, regimes, and the
-      remaining stresses (prop-firm failure, rule change).
+- [x] Resolve the Evaluation rule boundaries: renewal only below the cap,
+      dormant-to-boundary mid-cycle failure, Tallinn 00:00 trading day.
+- [x] Resolve open-position handling: no trading on a payout day.
+- [x] Define the objective (net cash withdrawn, net of external capital),
+      horizon (720 primary / 1,440 diagnostic), censoring (withdrawn and
+      un-withdrawn reported separately), monthly cohorts, and regimes.
+- [x] Declare prop-firm failure and rule-change stresses non-models.
+- [x] Resolve the payout lifecycle: parent-parity atomic timing, terminal sweep
+      as censoring valuation, six candidates unchanged.
+- [x] Confirm the dormant Evaluation holds its pipeline slot (parent-verified).
+- [x] Resolve same-timestamp event order and bind `_PHASE_RANK` to the gate's
+      declared order by test.
+- [ ] Confirm the accumulation-trigger exclusion; it is a recommendation on
+      measured evidence, not a user decision.
+- [ ] Implement the study-scale lifecycle runner; only the N=1/N=2 fixture
+      slice exists.
+- [ ] Run the ordering-sensitivity arm on selected N with a permuted order.
 - [ ] Only after every gate field is resolved, run the 1..20 x six-payout policy
       study and report rolling cohorts/regimes/stress without inherited claims.

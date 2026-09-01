@@ -37,11 +37,26 @@ Verified and implemented:
   execution non-model, greedy-in-time acquisition, emergent replacement, and
   the through-first-PA capital bridge.
 
-`scripts/run_tests.ps1` currently passes 54 tests. Seven gate fields remain
-unresolved, so the integrated sweep is still prohibited by
-`config/milky_cow_contract_gate.json`.
+`scripts/run_tests.ps1` currently passes 60 tests. Every gate contract field is
+now resolved, so `config/milky_cow_contract_gate.json` reads
+`contracts_resolved_integrated_sweep_still_blocked`. The sweep remains blocked
+by work rather than by decisions, listed in `remaining_blockers_before_the_sweep`:
+no study-scale runner exists, the ordering-sensitivity arm has not been run, and
+the accumulation-trigger exclusion is a recommendation awaiting confirmation.
 
-Two recorded consequences to carry into reporting: the phase-1 no-slippage
-assumption is biased `favors_high_n`, and the through-first-PA bridge leaves
-PAs 2..N funded only from trading profit, so book-fill time and right
-censoring must be reported per N.
+Measured tape baseline, useful for sizing every later result: one PA at 1 MNQ
+taking every accepted opportunity nets a median $6,139 per 720-day window
+(min -$1,430, max $21,024) and $27,683 across the whole 2,384-day tape.
+
+Four recorded consequences to carry into reporting:
+
+- the phase-1 no-slippage assumption is biased `favors_high_n`;
+- high-N book fill is expected to be limited by Evaluation pipeline time, not
+  by cash: a PA nets a median $6,139 per horizon while a new PA costs $160, so
+  attribute any unfilled book explicitly rather than assuming capital;
+- payout-day sit-outs do not blackout the book, but policies that reset
+  accounts to a common balance can re-synchronize them, so the distribution of
+  simultaneous sit-outs is a measured per-arm result; and
+- a withdrawn-cash objective penalises `minimum_500_always`, which is the
+  parent's own baseline policy, so the un-withdrawn companion belongs beside
+  every ranking.
