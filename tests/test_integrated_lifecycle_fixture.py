@@ -535,6 +535,111 @@ class DeterministicLifecycleFixtureTests(unittest.TestCase):
         self.assertEqual(state.treasury.cash_usd, 0.0)
         state.assert_integrity()
 
+    def test_unfunded_replacement_attempt_does_not_pause_pa_stream(self) -> None:
+        offers = [
+            fixture_offer("eval1_pass", 1, "2026-03-01 10:00:00", "2026-03-01 10:30:00", mae=0, mfe=501.05, gross=501.05),
+        ]
+        for day in range(2, 10):
+            offers.append(
+                fixture_offer(
+                    f"pa1_gain_{day:02d}",
+                    len(offers) + 1,
+                    f"2026-03-{day:02d} 10:00:00",
+                    f"2026-03-{day:02d} 10:30:00",
+                    mae=-25,
+                    mfe=201.05,
+                    gross=201.05,
+                )
+            )
+        offers.extend(
+            [
+                fixture_offer("eval2_pass", 10, "2026-03-10 10:00:00", "2026-03-10 10:30:00", mae=0, mfe=501.05, gross=501.05),
+                fixture_offer("pa2_death", 11, "2026-03-11 10:00:00", "2026-03-11 10:30:00", mae=-1_550, mfe=0, gross=0),
+                fixture_offer("stream_continues", 12, "2026-03-12 10:00:00", "2026-03-12 10:30:00", mae=-25, mfe=101.05, gross=101.05),
+            ]
+        )
+        selection, opportunities = opportunity_map(offers)
+        state = lifecycle(
+            2,
+            starting_cash=320,
+            capital_mode="none",
+            selection=selection,
+        )
+
+        state.plan_growth_and_purchase(at("2026-03-01 01:00:00"))
+        run_shared_evaluation_pa_event(
+            state,
+            "eval-1",
+            opportunities["eval1_pass"],
+        )
+        self.assertEqual(
+            state.plan_growth_and_purchase(at("2026-03-01 10:30:00")),
+            ("eval-2",),
+        )
+        for day in range(2, 10):
+            run_pa_event(state, opportunities[f"pa1_gain_{day:02d}"])
+        run_shared_evaluation_pa_event(
+            state,
+            "eval-2",
+            opportunities["eval2_pass"],
+        )
+        self.assertEqual(state.active_pa_ids, (1, 2))
+        self.assertEqual(state.treasury.cash_usd, 0.0)
+
+        deaths = run_pa_event(state, opportunities["pa2_death"])
+        self.assertEqual(
+            tuple((result.pa_id, result.survived) for result in deaths),
+            ((1, True), (2, False)),
+        )
+        death_at = opportunities["pa2_death"].offer.exit_at
+        self.assertEqual(
+            state.plan_death_replacements_and_purchase(death_at, 1),
+            (),
+        )
+        self.assertEqual(state.unprocessed_pa_death_count, 1)
+        self.assertFalse(state.death_replacement_planning_due)
+        with self.assertRaisesRegex(ValueError, "before growth"):
+            state.plan_growth_and_purchase(death_at + timedelta(minutes=1))
+
+        continued = run_pa_event(state, opportunities["stream_continues"])
+        self.assertEqual(tuple(result.pa_id for result in continued), (1,))
+        payout_at = at("2026-03-12 23:59:00")
+        payouts = state.execute_session_close_payouts(payout_at)
+        self.assertEqual(tuple(record.pa_id for record in payouts), (1,))
+        self.assertEqual(state.treasury.cash_usd, 500.0)
+        self.assertEqual(
+            state.plan_death_replacements_and_purchase(payout_at, 1),
+            ("eval-3",),
+        )
+        self.assertEqual(state.unprocessed_pa_death_count, 0)
+        self.assertEqual(state.replacement_intent_count, 1)
+        self.assertEqual(state.treasury.cash_usd, 465.0)
+        self.assertEqual(
+            tuple(
+                event.event_type
+                for event in state.audit
+                if event.reference == "eval-3"
+            ),
+            ("evaluation_purchase_unfunded", "evaluation_purchased"),
+        )
+        state.assert_integrity()
+
+    def test_session_close_payout_rejects_other_clock_times(self) -> None:
+        selection = select_global_one_position(
+            [
+                fixture_offer("future", 1, "2026-07-02 10:00:00", "2026-07-02 10:30:00", mae=0, mfe=1.05, gross=1.05)
+            ]
+        )
+        state = lifecycle(
+            1,
+            starting_cash=0,
+            capital_mode="none",
+            selection=selection,
+        )
+        with self.assertRaisesRegex(ValueError, "exactly 23:59"):
+            state.execute_session_close_payouts(at("2026-07-01 22:00:00"))
+        state.assert_integrity()
+
     def test_open_copy_blocks_fixture_payout_without_mutation(self) -> None:
         offers = [
             fixture_offer("eval_pass", 1, "2026-02-03 10:00:00", "2026-02-03 10:30:00", mae=0, mfe=501.05, gross=501.05),
@@ -609,6 +714,81 @@ class DeterministicLifecycleFixtureTests(unittest.TestCase):
                 state.evaluations["eval-1"].cycle_number,
             ),
         )
+
+    def test_unfunded_renewal_closes_evaluation_and_releases_capacity(self) -> None:
+        selection = select_global_one_position(
+            [
+                fixture_offer("future", 1, "2026-06-01 10:00:00", "2026-06-01 10:30:00", mae=0, mfe=1.05, gross=1.05)
+            ]
+        )
+        state = lifecycle(
+            1,
+            starting_cash=35,
+            capital_mode="none",
+            selection=selection,
+        )
+        state.plan_growth_and_purchase(at("2026-04-01 01:00:00"))
+        due_at = state.evaluations["eval-1"].cycle_due_at(state.evaluation_rules)
+        treasury_before = (
+            state.treasury.cash_usd,
+            state.treasury.external_contributions_usd,
+            state.treasury.fees_paid_usd,
+            tuple(state.treasury.ledger),
+        )
+
+        self.assertFalse(state.fund_and_renew_evaluation("eval-1", due_at))
+
+        self.assertNotIn("eval-1", state.evaluations)
+        self.assertEqual(state.pipeline_state.capacity_commitments, 0)
+        self.assertEqual(state.pipeline_state.open_slots, 1)
+        self.assertEqual(
+            treasury_before,
+            (
+                state.treasury.cash_usd,
+                state.treasury.external_contributions_usd,
+                state.treasury.fees_paid_usd,
+                tuple(state.treasury.ledger),
+            ),
+        )
+        self.assertEqual(
+            (state.audit[-1].event_type, state.audit[-1].reference),
+            ("evaluation_renewal_unfunded", "eval-1"),
+        )
+        state.assert_integrity()
+
+    def test_only_one_purchase_decision_is_allowed_per_timestamp(self) -> None:
+        selection = select_global_one_position(
+            [
+                fixture_offer("future", 1, "2026-08-01 10:00:00", "2026-08-01 10:30:00", mae=0, mfe=1.05, gross=1.05)
+            ]
+        )
+        state = lifecycle(
+            3,
+            starting_cash=105,
+            capital_mode="none",
+            selection=selection,
+        )
+        state.acquisition_policy = AcquisitionPolicy(
+            policy_id="fixture_unbounded_running_evaluations",
+            mode="one_per_decision",
+            max_purchases_per_decision=1,
+            max_running_evaluations=None,
+        )
+        decision_at = at("2026-06-01 01:00:00")
+
+        self.assertEqual(state.plan_growth_and_purchase(decision_at), ("eval-1",))
+        with self.assertRaisesRegex(ValueError, "per timestamp"):
+            state.plan_growth_and_purchase(decision_at)
+        self.assertEqual(tuple(state.evaluations), ("eval-1",))
+        self.assertEqual(state.treasury.cash_usd, 70.0)
+
+        self.assertEqual(
+            state.plan_growth_and_purchase(decision_at + timedelta(seconds=1)),
+            ("eval-2",),
+        )
+        self.assertEqual(tuple(state.evaluations), ("eval-1", "eval-2"))
+        self.assertEqual(state.treasury.cash_usd, 35.0)
+        state.assert_integrity()
 
     def test_payout_and_treasury_receipt_roll_back_together(self) -> None:
         selection, opportunities = opportunity_map(
@@ -935,6 +1115,44 @@ class PayoutCandidateContractTests(unittest.TestCase):
                 unsafe.payout_count,
                 unsafe.cumulative_gross_payouts_usd,
                 unsafe.payout_period_daily_pnl_usd,
+            ),
+        )
+
+    def test_record_construction_failure_leaves_pa_unchanged(self) -> None:
+        maximum = self.policies()["maximum_always"]
+        account = PAAccount(
+            3,
+            at("2026-06-01 10:00:00"),
+            equity_profit_usd=2_600.0,
+            peak_profit_usd=2_600.0,
+            liquidation_floor_profit_usd=100.0,
+            payout_period_daily_pnl_usd=self.eligible_history(),
+        )
+        snapshot = (
+            account.equity_profit_usd,
+            account.payout_count,
+            account.cumulative_gross_payouts_usd,
+            account.cumulative_net_payouts_usd,
+            dict(account.payout_period_daily_pnl_usd),
+        )
+        with patch(
+            "milky_cow.payouts.PayoutRecord",
+            side_effect=ValueError("synthetic record failure"),
+        ):
+            with self.assertRaisesRegex(ValueError, "synthetic record failure"):
+                execute_atomic_payout_if_eligible(
+                    account,
+                    at("2026-06-10 23:59:00"),
+                    maximum,
+                )
+        self.assertEqual(
+            snapshot,
+            (
+                account.equity_profit_usd,
+                account.payout_count,
+                account.cumulative_gross_payouts_usd,
+                account.cumulative_net_payouts_usd,
+                account.payout_period_daily_pnl_usd,
             ),
         )
 

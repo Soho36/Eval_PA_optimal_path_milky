@@ -40,16 +40,23 @@ class StudyContractTests(unittest.TestCase):
             gate["pa_book"]["active_pa_count_values"],
             list(range(1, 21)),
         )
-        self.assertEqual(gate["schema_version"], "milky_cow_contract_gate.v3")
+        self.assertEqual(gate["schema_version"], "milky_cow_contract_gate.v4")
         self.assertEqual(
             gate["pa_book"]["distribution"],
             "copy_to_all_eligible_active_pas",
         )
-        # Every contract field is resolved, but the sweep stays blocked: the
-        # gate is not a green light on its own.
-        self.assertEqual(gate["unresolved_before_integrated_sweep"], [])
         self.assertEqual(
-            gate["status"], "contracts_resolved_integrated_sweep_still_blocked"
+            gate["unresolved_before_integrated_sweep"],
+            [
+                "external_capital_bridge_scope",
+                "headline_economic_objective",
+                "event_order_sensitivity_permutation",
+                "horizon_crossing_trade_treatment",
+            ],
+        )
+        self.assertEqual(
+            gate["status"],
+            "phase_1_contracts_partially_resolved_integrated_sweep_blocked",
         )
         self.assertTrue(gate["remaining_blockers_before_the_sweep"])
         fixture = gate["deterministic_vertical_slice_fixture"]

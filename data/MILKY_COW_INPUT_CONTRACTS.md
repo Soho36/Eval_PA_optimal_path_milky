@@ -1,15 +1,15 @@
 # Milky-cow input and model-contract audit
 
-Audit date: 2026-09-01 (Europe/Tallinn).
+Audit date: 2026-09-02 (Europe/Tallinn).
 
 ## Verdict
 
-The imported evidence is intact, and the PA copy-to-all distribution can be
-implemented and tested in isolation, and a deterministic N=1/N=2 contract
-lifecycle is executable. A study-scale lifecycle or parameter sweep is not
-authorized yet because the scaling schedule, Evaluation consumer mode,
-acquisition/replacement policies, external-capital budget, payout timing, event
-order, and economic objective are unresolved.
+The imported evidence is intact, copy-to-all and a deterministic N=1/N=2
+contract lifecycle are executable, and the phase-1 flat-one-MNQ, close-only,
+greedy-pipeline, atomic-payout baseline is selected. A study-scale sweep remains
+blocked by the bridge-scope, headline-objective, order-sensitivity, and
+horizon-crossing decisions plus implementation of the per-Evaluation consumer,
+gate-to-runtime bundle, real-tape runner, and result manifest.
 
 The controlling PA overlay is
 `rules/MILKY_COW_COPY_TO_ALL_RULES.txt`, and the active executable foundation
@@ -52,8 +52,9 @@ change its own eligibility.
 
 The pinned Evaluation adapter is different: it restarts one-position selection
 at each Evaluation and renewal boundary. Whole-tape selection and cycle-local
-selection differ for some cohorts. Therefore the Evaluation fixture is an
-upstream behavior lock only until `evaluation_consumer_mode` is selected.
+selection differ for some cohorts. That cycle-local three-MNQ adapter is selected
+for phase 1; the fixture is its upstream behavior lock, and the integrated runner
+must still enforce it independently for each Evaluation.
 
 ## Parent fields that are forbidden in the active PA model
 
@@ -80,9 +81,10 @@ fill is absent from the tape.
 A scaling policy must provide a complete, validated schedule and explicitly name
 its metric, inclusive/exclusive comparison, entry-time state snapshot,
 downscaling behavior, per-account or synchronized scope, synchronized
-aggregation, maximum MNQ, and linear/nonlinear outcome assumption. No schedule
-is selected yet. The undated four-mini excerpt does not by itself authorize a
-40-MNQ conversion.
+aggregation, maximum MNQ, and linear/nonlinear outcome assumption. Phase 1 uses
+one per-account MNQ at every entry with a maximum of one and linear outcomes.
+Threshold scaling remains a later phase; the undated four-mini excerpt does not
+authorize a 40-MNQ conversion.
 
 ## Completed-trade path boundary
 
@@ -102,12 +104,21 @@ creates an instant PA. For the headline axis, N is the maintained active-PA
 target acquired from zero, and active + running Evaluation + pending activation
 commitments may never exceed N. Initial-N active is a diagnostic only.
 External contributions must be timestamped, purpose-tagged, budget checked, and
-cash-reconciled. No acquisition, replacement, or capital policy is selected yet.
+cash-reconciled. Phase 1 greedily buys at most one Evaluation per unique
+timestamp toward N; death replacement shares that pipeline, and residual
+unfunded backlog cannot pause trading. The $35 start and irreversible
+first-activation latch are selected, while the user must still choose whether
+the bridge funds every permitted pre-activation obligation or only the first
+PA's chain.
 
 ## Payout and reporting boundary
 
 The six v2 payout definitions are candidates and match the milky contract.
 The older six accumulation-trigger policies named in the copied audit/upstream
-manifest are stale. Atomic versus pending payout timing and its treasury
-availability remain unresolved. The copied 720-day and 2022-regime conclusions
-are candidate design references, not inherited findings.
+manifest are stale and are excluded from the exact six-policy phase-1 axis.
+Payouts are atomic at 23:59 after normal same-day trading; phase 1 has no payout-
+day sit-out. Monthly cohorts require a complete 720-day future interval, giving
+55 starts from 79 represented months. The copied 720-day and regime conclusions
+remain candidate design references, not inherited findings. Treasury components
+and both cash metrics are executable, but the user must choose which metric is
+headline.

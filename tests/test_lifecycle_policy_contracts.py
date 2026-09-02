@@ -304,6 +304,76 @@ class ExternalCapitalContractTests(unittest.TestCase):
         self.assertEqual(treasury.external_contributions_usd, 0.0)
         treasury.assert_integrity()
 
+    def test_owner_capital_and_cash_metrics_follow_distinct_identities(self) -> None:
+        policy = ExternalCapitalPolicy(
+            policy_id="through_first_pa",
+            mode="through_first_pa",
+            permitted_uses=(
+                "evaluation_purchase",
+                "evaluation_renewal",
+                "pa_activation",
+            ),
+            lifetime_cap_usd=None,
+            contribution_timing="just_in_time_exact_shortfall",
+            close_event="first_pa_activated",
+            reopens=False,
+        )
+        treasury = Treasury(starting_cash_usd=35.0)
+        first = at("2026-01-01 01:00:00")
+
+        # Initial owner cash buys the Evaluation; later owner capital funds the
+        # PA activation. Both belong in total owner capital supplied.
+        self.assertTrue(
+            treasury.fund_and_pay_fee(
+                first,
+                35.0,
+                "evaluation_purchase",
+                "eval-1",
+                policy,
+            )
+        )
+        self.assertTrue(
+            treasury.fund_and_pay_fee(
+                first + timedelta(hours=1),
+                125.0,
+                "pa_activation",
+                "pa-1",
+                policy,
+            )
+        )
+        treasury.observe_first_pa_activation(first + timedelta(hours=1))
+        self.assertEqual(treasury.starting_cash_usd, 35.0)
+        self.assertEqual(treasury.external_contributions_usd, 125.0)
+        self.assertEqual(treasury.owner_capital_supplied_usd, 160.0)
+
+        # A later fee is funded entirely from payout cash after the external
+        # bridge has closed. It reduces retained cash, not recorded receipts.
+        treasury.receive_payout(first + timedelta(hours=2), 500.0, "pa-1:payout-1")
+        self.assertTrue(
+            treasury.fund_and_pay_fee(
+                first + timedelta(hours=3),
+                35.0,
+                "evaluation_renewal",
+                "eval-2:renewal-1",
+                policy,
+            )
+        )
+
+        self.assertEqual(treasury.fees_paid_usd, 195.0)
+        self.assertEqual(treasury.cash_usd, 465.0)
+        self.assertEqual(treasury.owner_net_retained_cash_usd, 305.0)
+        self.assertEqual(
+            treasury.owner_net_retained_cash_usd,
+            treasury.payout_receipts_usd - treasury.fees_paid_usd,
+        )
+        self.assertEqual(treasury.payout_receipts_net_of_owner_capital_usd, 340.0)
+        self.assertNotEqual(
+            treasury.owner_net_retained_cash_usd,
+            treasury.payout_receipts_net_of_owner_capital_usd,
+        )
+        self.assertEqual(treasury.reconciliation_error_usd, 0.0)
+        treasury.assert_integrity()
+
     def test_invalid_capital_literals_cannot_authorize_money(self) -> None:
         with self.assertRaisesRegex(ValueError, "external-capital mode"):
             ExternalCapitalPolicy(
@@ -336,11 +406,19 @@ class IntegratedSweepGateTests(unittest.TestCase):
             gate["opportunity_stream"]["evaluation_consumer_mode"],
             "cycle_local_one_position_restarted_at_each_renewal_boundary",
         )
-        # Every contract field is now resolved, so "closed" is carried by the
-        # status and the explicit blocker list rather than by a null count.
-        self.assertEqual(gate["unresolved_before_integrated_sweep"], [])
-        self.assertNotEqual(gate["status"], "open")
-        self.assertIn("still_blocked", gate["status"])
+        self.assertEqual(
+            gate["unresolved_before_integrated_sweep"],
+            [
+                "external_capital_bridge_scope",
+                "headline_economic_objective",
+                "event_order_sensitivity_permutation",
+                "horizon_crossing_trade_treatment",
+            ],
+        )
+        self.assertEqual(
+            gate["status"],
+            "phase_1_contracts_partially_resolved_integrated_sweep_blocked",
+        )
         self.assertTrue(gate["remaining_blockers_before_the_sweep"])
         self.assertNotIn("router", gate["pa_book"])
         self.assertEqual(
@@ -416,9 +494,9 @@ class IntegratedSweepGateTests(unittest.TestCase):
 
 
 class ResolvedParentParityPolicyTests(unittest.TestCase):
-    """The seven fields resolved for parity with the parent must be buildable.
+    """Selected phase-1 fields and explicitly named candidates must be buildable.
 
-    A gate value that cannot construct the primitive it names is prose, not a
+    A gate value that cannot construct the primitive it names remains prose, not a
     contract, so every resolved policy is instantiated from the gate itself.
     """
 
@@ -493,9 +571,10 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
         )
         self.assertEqual(len(intents), 1)
 
-    def test_capital_bridge_funds_before_first_pa_and_never_after(self) -> None:
+    def test_time_based_capital_bridge_candidate_funds_before_first_pa_only(self) -> None:
         block = self.gate["external_capital"]
         self.assertEqual(block["starting_cash_usd"], 35.0)
+        self.assertEqual(block["selection_status"], "proposed_pending_bridge_scope_user_answer")
         self.assertIsNone(block["lifetime_hard_cap_usd"])
         policy = ExternalCapitalPolicy(
             policy_id=block["selected_policy_id"],
@@ -577,13 +656,17 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
         self.assertEqual(day["evaluation_trading_day_basis"], "entry_local_calendar_date")
         self.assertEqual(day["pa_realized_pnl_day_basis"], "exit_local_calendar_date")
 
-    def test_objective_is_net_of_external_capital_and_keeps_its_companion(self) -> None:
+    def test_objective_candidates_are_executable_and_keep_equity_separate(self) -> None:
         objective = self.gate["economic_objective"]
+        self.assertEqual(objective["status"], "headline_metric_requires_user_selection")
         self.assertEqual(
-            objective["primary"], "total_net_cash_withdrawn_into_the_treasury"
+            set(objective["candidate_metrics"]),
+            {"owner_net_retained_cash", "cumulative_payout_harvest"},
         )
-        # Withdrawn cash alone would reward burning the capital bridge.
-        self.assertIn("external capital", objective["net_of"])
+        self.assertEqual(
+            objective["candidate_metrics"]["owner_net_retained_cash"]["equivalent_formula"],
+            "payout_receipts - fees_paid",
+        )
         self.assertEqual(
             objective["companion_reported_never_summed"],
             "surviving_unwithdrawn_pa_equity_at_horizon",
@@ -596,6 +679,10 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
         censoring = window["right_censoring"]
         self.assertIn("never_summed", censoring["rule"])
         self.assertIn("sunk", censoring["running_evaluations_at_horizon"])
+        self.assertEqual(
+            window["horizon_crossing_trade_treatment"],
+            "unresolved_user_decision_no_mark_to_market_exists",
+        )
 
     def test_regimes_partition_on_an_input_not_on_the_measured_outcome(self) -> None:
         regimes = self.gate["reporting"]["regime_definitions"]
@@ -610,19 +697,19 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
         self.assertIsNone(windows[-1]["to_date"])
         self.assertEqual(windows[0]["to_date"], windows[1]["from_date"])
 
-    def test_payout_day_sit_outs_are_measured_not_assumed(self) -> None:
+    def test_phase_1_allows_normal_trading_on_payout_days(self) -> None:
         payouts = self.gate["payout_candidates"]
-        self.assertIn("does_not_trade", payouts["open_position_handling"]["rule"])
-        # Clustering is policy-dependent, so it must be reported, not asserted.
-        consequence = payouts["open_position_handling"]["consequence_under_copy_to_all"]
-        self.assertIn("no automatic book-wide", consequence)
-        self.assertIn("do not assume either", consequence)
+        handling = payouts["open_position_handling"]
+        self.assertEqual(handling["phase_1_rule"], "trading_allowed_on_payout_day")
+        self.assertTrue(handling["same_day_realized_pnl_counts"])
+        self.assertIn("23:59", handling["mechanism"])
+        self.assertIn("deferred", handling["future_sit_out_sensitivity"])
         # A terminal sweep is a censoring valuation, never a policy.
         self.assertFalse(payouts["terminal_sweep"]["is_a_policy"])
-        # The six-candidate axis holds; the trigger stays out on measured evidence.
+        # The exact six-candidate axis holds; the trigger is not a seventh arm.
         self.assertEqual(len(payouts["policy_ids"]), 6)
         trigger = payouts["accumulation_trigger_candidate"]
-        self.assertEqual(trigger["recommendation"], "do_not_add_as_a_seventh_candidate")
+        self.assertIn("excluded_from_phase_1", trigger["status"])
         self.assertLess(
             trigger["measured_evidence_1_mnq_720d_window"][
                 "share_of_windows_reaching_5000_usd"

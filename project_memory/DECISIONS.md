@@ -34,12 +34,12 @@
     Evaluation pass remains pending until the later activation phase spends
     cash; it never activates inside Evaluation settlement.
 
-16. This study is built to be differenced against the parent staggering study
-    at revision `106cfb782c6e573856282095441bb69f23924a55`, arm
-    `greedy_to_target` / K=5 / R=1 / `max_headroom`. Seven mechanics below are
-    adopted from that arm so PA-book management is the only difference. They
-    are adopted for comparability, never as inherited conclusions, and K=5 is
-    explicitly not adopted: N stays this study's swept axis 1..20.
+16. The parent staggering study at revision
+    `106cfb782c6e573856282095441bb69f23924a55` is a descriptive composite
+    benchmark, not a single-difference causal arm. Its PA phase uses 12,658
+    concurrent raw offers and one routed R=1 copy; this study uses 9,299 global
+    opportunities and up to N simultaneous copies. Adopted common mechanics aid
+    comparability, but K=5, routing, and parent conclusions are not adopted.
 17. Evaluations use the parent's cycle-local one-position adapter, re-selected
     at every 30-day renewal boundary, at 3 MNQ. This deliberately differs from
     the PA book's single never-reset whole-tape selection; the two phases never
@@ -54,11 +54,10 @@
     decision, whenever cash allows and the pipeline is below N. Replacement is
     not an independent policy — a death drops the pipeline below N and the
     acquisition rule buys.
-21. External capital is the parent's through-first-PA bridge seeded with one
-    $35 Evaluation fee, just-in-time exact shortfalls only, closing
-    irreversibly at the first activation. Consequence to report: PAs 2..N are
-    funded only from trading profit and payouts, so high-N arms are capital
-    constrained by construction and may not fill the book within the horizon.
+21. Phase 1 starts with $35 owner cash and an irreversible first-activation
+    bridge latch. Whether the bridge is time-based for every permitted
+    obligation before that activation or restricted to the first PA's own
+    Evaluation/renewal/activation chain remains a user decision.
 
 22. Evaluation boundaries: a renewal fee is paid only when the pipeline
     excluding that Evaluation is below N; a mid-cycle drawdown breach stops
@@ -66,21 +65,18 @@
     without carrying state (parent parity); the trading day cuts at
     `Europe/Tallinn` 00:00, with Evaluation days on entry date and PA realized
     P&L on exit date.
-23. A PA does not trade on a day it takes a payout. There is no automatic
-    book-wide blackout: PAs activate at different times and carry different
-    equity offsets. The effect is policy-dependent — policies that reset an
-    account to a common balance (`maximum_always`, `preserve_safety_net`) can
-    re-synchronize accounts onto shared payout days, while
-    `minimum_500_always` preserves the spread. Report the distribution of
-    simultaneous sit-outs per arm rather than assuming either extreme.
-24. The objective is total net cash withdrawn into the treasury, net of
-    external capital contributed. Surviving un-withdrawn PA equity is always
-    reported beside it and never summed into it.
-25. Cohorts start on the first valid session of each calendar month (~78 at a
-    720-day horizon). Daily rolling starts as in the parent would need 199,680
-    lifecycle runs across the 20xN by six-policy grid and are kept only as a
-    robustness check on one arm. Cohorts overlap, so they are not independent
-    samples.
+23. Phase 1 allows normal PA trading on a payout day. All completed trades
+    settle first; eligibility and an atomic payout are evaluated at 23:59
+    Tallinn, and same-day realized P&L counts. There is no sit-out state.
+24. Treasury reports starting owner cash, later contributions, payouts, fees,
+    and ending cash. Owner-net retained cash equals ending cash minus owner
+    capital, or payouts minus fees. Cumulative payout harvest and owner-net
+    retained cash are both executable; the user must choose the headline.
+25. Cohorts start at 01:00 Tallinn on the first accepted-opportunity session of
+    each calendar month and require a complete 720-day future interval. The
+    verified tape gives 55 complete monthly cohorts (79 before filtering) and
+    1,179 complete daily session starts. All three path arms imply 19,800
+    primary grid runs. Cohorts overlap and are not independent samples.
 26. Horizon is 720 days primary, matching the parent so the comparison is
     valid, plus a 1,440-day book-fill diagnostic on selected N. At horizon,
     withdrawn cash and un-withdrawn equity are reported separately and running
@@ -109,18 +105,24 @@
     the gate's declared order by test.
 31. Payout timing is parent parity: atomic request, approval, balance removal
     and treasury receipt, zero delay, no pending state, no denials. A terminal
-    sweep is a censoring valuation, never a policy. The $1k-per-$5k
-    accumulation trigger is not added as a seventh candidate: measured on the
-    tape at 1 MNQ, a 720-day window nets a median $6,139 and reaches $5,000 in
-    only 60.3% of windows, so the trigger would fire about once per PA per
-    horizon — before deaths and before the $26,600 gate consumes the first
-    $1,600. Reconsider only if phase 2 scales above 1 MNQ.
+    sweep is a censoring valuation, never a policy. The $1k-per-$5k trigger is
+    excluded from phase 1 because the requested axis is exactly the six-policy
+    catalog. On 6,482 fully observed accepted-opportunity starts, the descriptive
+    720-day median is about $6,602 and 65.4% reach $5,000; this does not prove a
+    lifecycle ranking. Reconsider only if phase 2 scales above 1 MNQ.
 
 ## Still unresolved before a study-scale lifecycle or sweep
 
-Every contract field is resolved. What remains is work, not decisions:
+Four user decisions remain:
 
-- no study-scale lifecycle runner exists, only the N=1/N=2 fixture slice;
-- the ordering-sensitivity arm has not been run; and
-- the accumulation-trigger exclusion is a recommendation on measured evidence,
-  not yet a user confirmation.
+1. bridge scope: time-based until first activation, or first-PA chain only;
+2. headline cash metric: owner-net retained cash, or cumulative payout harvest;
+3. deterministic order sensitivity: spend-before-payout, or
+   activation-before-renewal; and
+4. horizon-crossing trades: require entry and exit inside the horizon, settle
+   after the horizon and label the cohort extended, or admit the trade causally
+   and leave its still-open outcome unscored at the cutoff.
+
+Implementation still required: a gate-to-runtime bundle, the per-Evaluation
+cycle-local consumer, a configurable event queue, one real-tape N=1 result
+manifest, and then the study runner.

@@ -14,9 +14,10 @@ account-level copies. Lifecycle consumption is bound to the exact selected row
 and ordinal, so a cycle-local or singleton reselection cannot enter the PA book.
 There is no router choosing among accounts.
 
-The upstream Evaluation behavior lock instead resets one-position selection at
-each Evaluation/renewal cycle. The integrated Evaluation consumer remains an
-explicit decision; the behavior lock is not silently the lifecycle baseline.
+The Evaluation phase uses cycle-local one-position selection reset at each
+Evaluation/renewal cycle at 3 MNQ. The upstream behavior lock pins that adapter;
+the study runner must still integrate it per Evaluation rather than accept
+arbitrary caller-selected offers.
 
 Accounts can diverge through activation time, balances and payouts, MNQ count,
 compliance, or prior death. Before those differences, copied accounts remain
@@ -34,12 +35,15 @@ reproducible seeded assignment. The seed is an imputation, not observed truth.
 ## Study dimensions
 
 - every active-PA count from 1 through 20;
-- Evaluation acquisition and dead-PA replacement;
+- phase-1 greedy acquisition and pipeline replacement, followed by explicitly
+  selected alternative acquisition/replacement policies for the full study;
 - all six payout candidates and reinvestment timing;
-- explicitly selected MNQ scaling thresholds and scope;
+- a flat one-MNQ phase-1 baseline, followed by explicitly selected MNQ scaling
+  thresholds and scope;
 - external-capital constraints;
 - rolling cohorts and independently defined regimes; and
-- trading, aggregate-execution, firm-failure, and rule-change stress.
+- the three path-order arms and a full-axis one-tick execution sensitivity;
+  firm-failure and rule-change stresses remain declared non-models.
 
 ## Out of scope
 

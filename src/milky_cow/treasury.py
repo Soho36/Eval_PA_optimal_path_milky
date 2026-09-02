@@ -159,6 +159,42 @@ class Treasury:
     def external_bridge_closed(self) -> bool:
         return self.first_pa_activated_at is not None
 
+    @property
+    def owner_capital_supplied_usd(self) -> float:
+        """Total owner-supplied capital, including the initial cash balance.
+
+        External contributions are the later just-in-time additions recorded by
+        the ledger. Starting cash is owner capital too, even though it is not a
+        ledger event, and therefore must not disappear from capital-adjusted
+        reporting.
+        """
+
+        return money(self.starting_cash_usd + self.external_contributions_usd)
+
+    @property
+    def owner_net_retained_cash_usd(self) -> float:
+        """Treasury cash retained above all owner-supplied capital.
+
+        The accounting identity is ``cash - owner capital``. For a reconciled
+        ledger this is also ``payout receipts - fees paid``; consequently it
+        reflects fees regardless of whether owner capital or earlier payouts
+        supplied the cash used to pay them.
+        """
+
+        return money(self.cash_usd - self.owner_capital_supplied_usd)
+
+    @property
+    def payout_receipts_net_of_owner_capital_usd(self) -> float:
+        """Cumulative payout receipts less all owner-supplied capital.
+
+        This diagnostic is deliberately distinct from retained cash: fees paid
+        from payout proceeds reduce retained cash but do not reduce cumulative
+        payout receipts. It is available for audit and is not the gate's gross
+        payout-harvest candidate.
+        """
+
+        return money(self.payout_receipts_usd - self.owner_capital_supplied_usd)
+
     def observe_first_pa_activation(self, event_at: datetime) -> None:
         if event_at.tzinfo is None:
             raise ValueError("PA activation timestamp must be timezone-aware")
@@ -261,4 +297,10 @@ class Treasury:
         if observed != expected or self.reconciliation_error_usd != 0:
             raise RuntimeError(
                 f"Cash ledger reconciliation mismatch: {observed} != {expected}"
+            )
+        retained_from_flows = money(self.payout_receipts_usd - self.fees_paid_usd)
+        if self.owner_net_retained_cash_usd != retained_from_flows:
+            raise RuntimeError(
+                "Owner-net retained cash identity mismatch: "
+                f"{self.owner_net_retained_cash_usd} != {retained_from_flows}"
             )

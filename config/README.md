@@ -1,8 +1,10 @@
 # Configuration
 
-`milky_cow_contract_gate.json` is the active executable foundation gate. Null
-fields and `unresolved_before_integrated_sweep` keep integration and sweeps
-prohibited.
+`milky_cow_contract_gate.json` is the active executable foundation gate.
+Entries in `unresolved_before_integrated_sweep` and
+`remaining_blockers_before_the_sweep` prohibit a study sweep. A null is valid
+only when the surrounding field explicitly declares it non-binding or
+inapplicable.
 
 `milky_cow_study_contract.json` is the frozen initial scope record transferred
 with the starter bundle. It is evidence of project intent, not a second runtime

@@ -38,6 +38,13 @@ payout, death and non-instant replacement, plus N=2 copied trades followed by
 activation/payout divergence. Its fixed one-MNQ, perfect-linear execution and
 synthetic nonoverlapping offers are fixture assumptions, not study findings.
 
+The accepted opportunity records and digest are materialized once per verified
+selection. The executable cohort generator finds 79 represented monthly starts,
+of which 55 have a complete 720-day future interval; later starts are explicitly
+tape-censored rather than mixed into equal-horizon results.
+
+Treasury identities now expose owner capital, payout harvest and retained cash.
+Payout result validation completes before any mutable PA state is changed.
 ## Candidate evidence, not conclusions
 
 - `config/payout_policies.json`: six policies to retest.

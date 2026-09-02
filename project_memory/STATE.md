@@ -18,45 +18,44 @@ Verified and implemented:
 - copy-to-all parity for N=0..3, strict activation, compliance recording,
   correlated deaths, accepted-stream membership type, entry-state snapshot,
   and one-shot exact-exit settlement;
-- explicit per-account/synchronized scaling primitives and boundary tests,
-  with no schedule selected;
-- pipeline-cap, acquisition, death-count-bounded replacement intent primitives;
-- none/fixed-budget/through-first-PA capital primitives, starting cash,
-  irreversible closure, no partial top-up, and ledger reconciliation;
+- phase-1 flat one-MNQ scaling plus executable threshold, scope, timing and
+  boundary primitives; phase-2 threshold values remain a later user choice;
+- pipeline-cap, acquisition and death-count-bounded replacement primitives,
+  including unfunded-renewal closure, retryable death backlog and one-decision
+  per-timestamp guards;
+- none/fixed-budget/through-first-PA capital primitives, irreversible closure,
+  no partial top-up, ledger reconciliation, and explicit owner-capital,
+  retained-cash and payout-harvest metrics;
 - headline N semantics as a maintained active target acquired from zero with
   active + running Evaluation + pending activation hard-cap accounting;
 - stateful Evaluation, six-candidate payout, and thin lifecycle composition,
-  including explicit pending activation, renewal preflight, payout atomicity,
+  including pending activation, renewal preflight, pre-mutation payout atomicity,
   N=1 replacement, N=2 divergence, and treasury reconciliation fixtures;
 - active gate coverage for every PA count 1..20 and the exact six payout
   candidates;
-- source/local implementation provenance verification; and
-- seven gate fields resolved for parity with the parent baseline arm, each
-  buildable from the gate into the primitive it names: the cycle-local
-  Evaluation consumer, flat 1 MNQ, close-only commission, declared
-  execution non-model, greedy-in-time acquisition, emergent replacement, and
-  the through-first-PA capital bridge.
+- cached accepted-opportunity evidence and deterministic monthly cohort
+  generation: 55 complete 720-day starts from 79 represented months; and
+- source/local implementation provenance verification.
 
-`scripts/run_tests.ps1` currently passes 60 tests. Every gate contract field is
-now resolved, so `config/milky_cow_contract_gate.json` reads
-`contracts_resolved_integrated_sweep_still_blocked`. The sweep remains blocked
-by work rather than by decisions, listed in `remaining_blockers_before_the_sweep`:
-no study-scale runner exists, the ordering-sensitivity arm has not been run, and
-the accumulation-trigger exclusion is a recommendation awaiting confirmation.
+The canonical suite discovers and passes 68 tests, including transfer and
+provenance verification. The active gate remains partially resolved.
+Four user choices remain: bridge scope, headline cash metric, deterministic
+ordering-sensitivity permutation, and horizon-crossing trade treatment. A gate-
+to-runtime bundle, per-Evaluation consumer, real-tape N=1 result manifest and
+study-scale runner also remain to implement.
 
-Measured tape baseline, useful for sizing every later result: one PA at 1 MNQ
-taking every accepted opportunity nets a median $6,139 per 720-day window
-(min -$1,430, max $21,024) and $27,683 across the whole 2,384-day tape.
+The corrected raw accepted-opportunity diagnostic has 6,482 fully observed
+720-day starts with median net gain about $6,602 (min -$259, max $21,024);
+the whole 2,384-day accepted stream nets $27,683 at one MNQ. These figures are
+not lifecycle or monthly-cohort results.
 
-Four recorded consequences to carry into reporting:
+Four consequences to carry into reporting:
 
-- the phase-1 no-slippage assumption is biased `favors_high_n`;
-- high-N book fill is expected to be limited by Evaluation pipeline time, not
-  by cash: a PA nets a median $6,139 per horizon while a new PA costs $160, so
-  attribute any unfilled book explicitly rather than assuming capital;
-- payout-day sit-outs do not blackout the book, but policies that reset
-  accounts to a common balance can re-synchronize them, so the distribution of
-  simultaneous sit-outs is a measured per-arm result; and
-- a withdrawn-cash objective penalises `minimum_500_always`, which is the
-  parent's own baseline policy, so the un-withdrawn companion belongs beside
-  every ranking.
+- frictionless execution is biased `favors_high_n`, so the required one-tick-
+  per-side full-N sensitivity must precede strong N conclusions;
+- book-fill reports must measure cash-bound versus Evaluation-pipeline-bound
+  time rather than infer the answer from raw tape profit;
+- phase 1 has normal payout-day trading and no sit-out state; and
+- both owner-net retained cash and cumulative payout harvest are executable,
+  with surviving unwithdrawn equity separate; the headline cash metric remains
+  a user choice.

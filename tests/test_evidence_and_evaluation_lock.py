@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import unittest
 
+from milky_cow.cohorts import first_session_monthly_cohorts
 from milky_cow.evaluation_lock import simulate_eodmae_evaluation_lock
 from milky_cow.inputs import (
     get_timezone,
@@ -29,16 +30,6 @@ class EvidenceAndEvaluationLockTests(unittest.TestCase):
         cls.dataset = load_verified_rr1_dataset(cls.raw_root)
         cls.offers = cls.dataset.offers
         cls.selection = cls.dataset.selection
-        cls.zone = get_timezone("Europe/Tallinn")
-        cls.fixture = json.loads(
-            (
-                ROOT
-                / "tests"
-                / "fixtures"
-                / "evaluation"
-                / "eodmae_legacy_25k_x3_behavior_lock.json"
-            ).read_text(encoding="utf-8")
-        )
         cls.zone = get_timezone("Europe/Tallinn")
         cls.fixture = json.loads(
             (
@@ -164,6 +155,70 @@ class EvidenceAndEvaluationLockTests(unittest.TestCase):
         fold_one = localize_wall_time(repeated, "Europe/Tallinn", fold=1)
         self.assertEqual(fold_zero.utcoffset(), timedelta(hours=3))
         self.assertEqual(fold_one.utcoffset(), timedelta(hours=2))
+
+    def test_accepted_stream_evidence_records_are_cached_once(self) -> None:
+        first_digest = self.selection.accepted_stream_sha256
+        first_records = self.selection.accepted_opportunities
+        self.assertIs(self.selection.accepted_stream_sha256, first_digest)
+        self.assertIs(self.selection.accepted_opportunities, first_records)
+        self.assertEqual(
+            first_digest,
+            "1175787ba50f0ab9f08a953f60b661e597c70f2bdb9329a517603616aaae6759",
+        )
+        self.assertEqual(len(first_records), 9_299)
+
+    def test_monthly_cohorts_distinguish_complete_from_censored_horizons(self) -> None:
+        accepted = self.selection.accepted_opportunities
+        complete = first_session_monthly_cohorts(
+            accepted,
+            horizon_days=720,
+            require_full_horizon=True,
+        )
+        all_starts = first_session_monthly_cohorts(
+            accepted,
+            horizon_days=720,
+            require_full_horizon=False,
+        )
+
+        self.assertEqual(
+            (
+                complete.all_count,
+                complete.fully_observed_count,
+                complete.tape_censored_count,
+                len(complete.cohorts),
+                len(all_starts.cohorts),
+            ),
+            (79, 55, 24, 55, 79),
+        )
+        self.assertEqual(complete.all_cohorts, all_starts.all_cohorts)
+        self.assertEqual(
+            complete.tape_observation_end_at.isoformat(),
+            "2026-07-13T21:30:40+03:00",
+        )
+        self.assertEqual(
+            complete.cohorts[-1].start_at.isoformat(),
+            "2024-07-01T01:00:00+03:00",
+        )
+        self.assertEqual(
+            complete.all_cohorts[55].start_at.isoformat(),
+            "2024-08-01T01:00:00+03:00",
+        )
+        self.assertTrue(
+            all(
+                cohort.start_at.tzinfo is not None
+                and cohort.horizon_end_at.tzinfo is not None
+                and cohort.horizon_end_at == cohort.start_at + timedelta(days=720)
+                for cohort in complete.all_cohorts
+            )
+        )
+        self.assertEqual(
+            complete.all_cohorts[0].start_at.isoformat(),
+            "2020-01-02T01:00:00+02:00",
+        )
+        self.assertEqual(
+            complete.all_cohorts[-1].start_at.isoformat(),
+            "2026-07-01T01:00:00+03:00",
+        )
 
     def test_three_pinned_eodmae_episodes_are_executable_behavior_locks(self) -> None:
         for expected in self.fixture["representative_episodes"]:

@@ -176,6 +176,44 @@ class PayoutRecord:
         "atomic_pa_debit_and_treasury_receipt"
     )
 
+    def __post_init__(self) -> None:
+        if self.event_at.tzinfo is None:
+            raise ValueError("Payout-record timestamp must be timezone-aware")
+        for name, value in (
+            ("PA ID", self.pa_id),
+            ("payout number", self.payout_number),
+        ):
+            if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
+                raise ValueError(f"Payout-record {name} must be a positive integer")
+        if not self.policy_id:
+            raise ValueError("Payout record requires a policy identity")
+        monetary = (
+            self.gross_request_usd,
+            self.treasury_receipt_usd,
+            self.balance_before_usd,
+            self.balance_after_usd,
+        )
+        if not all(math.isfinite(value) for value in monetary):
+            raise ValueError("Payout-record monetary values must be finite")
+        if self.gross_request_usd <= 0:
+            raise ValueError("Payout-record gross request must be positive")
+        if not 0 <= self.treasury_receipt_usd <= self.gross_request_usd:
+            raise ValueError("Payout receipt must be between zero and gross request")
+        if self.balance_after_usd != money(
+            self.balance_before_usd - self.gross_request_usd
+        ):
+            raise ValueError("Payout-record balances do not reconcile to gross request")
+        for name, value in (
+            ("trading-day count", self.trading_days_in_period),
+            ("profitable-day count", self.profitable_days_in_period),
+        ):
+            if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+                raise ValueError(f"Payout-record {name} must be a non-negative integer")
+        if self.profitable_days_in_period > self.trading_days_in_period:
+            raise ValueError("Profitable payout days cannot exceed trading days")
+        if self.lifecycle_timing != "atomic_pa_debit_and_treasury_receipt":
+            raise ValueError("Unsupported payout-record lifecycle timing")
+
 
 def _floor_cents(value: float) -> float:
     if not math.isfinite(value):
@@ -286,27 +324,48 @@ def execute_atomic_payout_if_eligible(
     reduced_split = amount - full_split
     receipt = money(full_split + reduced_split * rules.split_after_full)
 
-    account.equity_profit_usd = equity_after
-    account.payout_count += 1
-    account.cumulative_gross_payouts_usd = money(
-        account.cumulative_gross_payouts_usd + amount
+    payout_count_after = account.payout_count + 1
+    cumulative_gross_after = money(account.cumulative_gross_payouts_usd + amount)
+    cumulative_net_after = money(account.cumulative_net_payouts_usd + receipt)
+    balance_after = money(before - amount)
+    postcondition_money = (
+        equity_after,
+        receipt,
+        cumulative_gross_after,
+        cumulative_net_after,
+        balance_after,
     )
-    account.cumulative_net_payouts_usd = money(
-        account.cumulative_net_payouts_usd + receipt
-    )
-    account.payout_period_daily_pnl_usd.clear()
-    return PayoutRecord(
+    if not all(math.isfinite(value) for value in postcondition_money):
+        raise ValueError("Payout postcondition monetary values must be finite")
+    if receipt < 0 or receipt > amount:
+        raise ValueError("Payout receipt must be between zero and gross request")
+    if cumulative_gross_after < 0 or cumulative_net_after < 0:
+        raise ValueError("Cumulative payout postconditions must be non-negative")
+    if cumulative_net_after > cumulative_gross_after:
+        raise ValueError("Cumulative net payouts cannot exceed cumulative gross payouts")
+
+    # Construct and validate the complete result before touching mutable PA
+    # state. If any calculation or record postcondition fails, the account is
+    # therefore unchanged without relying on a caller-owned rollback.
+    record = PayoutRecord(
         event_at=event_at,
         pa_id=account.pa_id,
-        payout_number=account.payout_count,
+        payout_number=payout_count_after,
         policy_id=policy.policy_id,
         gross_request_usd=amount,
         treasury_receipt_usd=receipt,
         balance_before_usd=before,
-        balance_after_usd=account.nominal_balance_usd,
+        balance_after_usd=balance_after,
         trading_days_in_period=days,
         profitable_days_in_period=profitable_days,
     )
+
+    account.equity_profit_usd = equity_after
+    account.payout_count = payout_count_after
+    account.cumulative_gross_payouts_usd = cumulative_gross_after
+    account.cumulative_net_payouts_usd = cumulative_net_after
+    account.payout_period_daily_pnl_usd = {}
+    return record
 
 
 def _payout_rule(payload: dict[str, Any]) -> PayoutRule:

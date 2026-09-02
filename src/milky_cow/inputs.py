@@ -17,7 +17,7 @@ from the parent were deliberately not imported.
 from __future__ import annotations
 
 import csv
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta, tzinfo
 from decimal import Decimal, InvalidOperation
 from functools import lru_cache
@@ -208,6 +208,12 @@ class AcceptedOpportunity:
 class OpportunitySelection:
     accepted: tuple[TradeOffer, ...]
     blocked: tuple[TradeOffer, ...]
+    _accepted_stream_sha256: str = field(init=False, repr=False, compare=False)
+    _accepted_opportunities: tuple[AcceptedOpportunity, ...] = field(
+        init=False,
+        repr=False,
+        compare=False,
+    )
 
     def __post_init__(self) -> None:
         combined = self.accepted + self.blocked
@@ -226,31 +232,44 @@ class OpportunitySelection:
         if tuple(expected_accepted) != self.accepted or tuple(expected_blocked) != self.blocked:
             raise ValueError("Opportunity selection is not the causal one-position partition")
 
+        digest = hashlib.sha256()
+        for offer in self.accepted:
+            digest.update(offer.trade_key.encode("utf-8"))
+            digest.update(b"\n")
+        accepted_stream_sha256 = digest.hexdigest()
+        raw_count = len(combined)
+        accepted_opportunities = tuple(
+            AcceptedOpportunity(
+                offer=offer,
+                selector_id="whole_verified_tape_once",
+                accepted_stream_sha256=accepted_stream_sha256,
+                accepted_ordinal=ordinal,
+                raw_offer_count=raw_count,
+            )
+            for ordinal, offer in enumerate(self.accepted, start=1)
+        )
+        object.__setattr__(
+            self,
+            "_accepted_stream_sha256",
+            accepted_stream_sha256,
+        )
+        object.__setattr__(
+            self,
+            "_accepted_opportunities",
+            accepted_opportunities,
+        )
+
     @property
     def raw_count(self) -> int:
         return len(self.accepted) + len(self.blocked)
 
     @property
     def accepted_stream_sha256(self) -> str:
-        digest = hashlib.sha256()
-        for offer in self.accepted:
-            digest.update(offer.trade_key.encode("utf-8"))
-            digest.update(b"\n")
-        return digest.hexdigest()
+        return self._accepted_stream_sha256
 
     @property
     def accepted_opportunities(self) -> tuple[AcceptedOpportunity, ...]:
-        stream_hash = self.accepted_stream_sha256
-        return tuple(
-            AcceptedOpportunity(
-                offer=offer,
-                selector_id="whole_verified_tape_once",
-                accepted_stream_sha256=stream_hash,
-                accepted_ordinal=ordinal,
-                raw_offer_count=self.raw_count,
-            )
-            for ordinal, offer in enumerate(self.accepted, start=1)
-        )
+        return self._accepted_opportunities
 
 
 @dataclass(frozen=True, slots=True)

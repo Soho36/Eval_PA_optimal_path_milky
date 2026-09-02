@@ -220,6 +220,7 @@ def verify_implementation_provenance(
         "rules/MILKY_COW_COPY_TO_ALL_RULES.txt",
         "data/MILKY_COW_INPUT_CONTRACTS.md",
         "src/milky_cow/inputs.py",
+        "src/milky_cow/cohorts.py",
         "src/milky_cow/evaluation_lock.py",
         "src/milky_cow/evaluation.py",
         "src/milky_cow/contracts.py",

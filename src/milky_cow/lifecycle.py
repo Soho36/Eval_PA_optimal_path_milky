@@ -8,7 +8,7 @@ and does not choose the unresolved real-study policies.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, time
 import math
 from typing import Literal
 
@@ -142,6 +142,9 @@ class Lifecycle:
     _next_evaluation_number: int = field(init=False, default=1)
     _next_pa_id: int = field(init=False, default=1)
     _next_pa_opportunity_ordinal: int = field(init=False)
+    _purchase_decision_timestamps: set[datetime] = field(
+        init=False, default_factory=set
+    )
 
     def __post_init__(self) -> None:
         if (
@@ -314,6 +317,14 @@ class Lifecycle:
             self.pipeline_state
         return tuple(purchased)
 
+    def _claim_purchase_decision(self, event_at: datetime) -> None:
+        if event_at in self._purchase_decision_timestamps:
+            raise ValueError(
+                "Only one Evaluation purchase decision is allowed per timestamp"
+            )
+        self._validate_event_order(event_at, "purchase")
+        self._purchase_decision_timestamps.add(event_at)
+
     def plan_growth_and_purchase(self, event_at: datetime) -> tuple[str, ...]:
         if self.unprocessed_pa_death_count:
             raise ValueError("Death replacements must be processed before growth")
@@ -323,6 +334,7 @@ class Lifecycle:
             self.replacement_policy,
             reason="growth",
         )
+        self._claim_purchase_decision(event_at)
         return self._purchase_intents(event_at, intents)
 
     def plan_death_replacements_and_purchase(
@@ -341,14 +353,14 @@ class Lifecycle:
             reason="death_replacement",
             death_count=death_count,
         )
+        self._claim_purchase_decision(event_at)
         purchased = self._purchase_intents(event_at, intents)
         if self.replacement_policy.mode == "never":
             self.unprocessed_pa_death_count = 0
-            self.death_replacement_planning_due = False
         else:
             self.replacement_intent_count += len(purchased)
             self.unprocessed_pa_death_count -= len(purchased)
-            self.death_replacement_planning_due = len(purchased) < len(intents)
+        self.death_replacement_planning_due = False
         return purchased
 
     def begin_evaluation_offer(self, evaluation_id: str, offer: TradeOffer) -> None:
@@ -505,6 +517,10 @@ class Lifecycle:
         executed: list[PayoutRecord] = []
         self._validate_event_order(event_at, "payout")
         self._validate_treasury_event_order(event_at)
+        if event_at.timetz().replace(tzinfo=None) != time(23, 59):
+            raise ValueError(
+                "Session-close payouts must execute at exactly 23:59:00"
+            )
         if self.outstanding_pa_decisions:
             raise ValueError(
                 "Payout with an outstanding PA copy is outside the locked fixture contract"
@@ -589,6 +605,9 @@ class Lifecycle:
         )
         if paid:
             renew_evaluation(account, event_at, self.evaluation_rules)
+        else:
+            del self.evaluations[evaluation_id]
+        self.pipeline_state
         return paid
 
     def assert_integrity(self) -> None:

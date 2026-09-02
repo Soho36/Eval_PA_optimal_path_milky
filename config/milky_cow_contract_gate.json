@@ -1,5 +1,5 @@
 {
-  "schema_version": "milky_cow_contract_gate.v3",
+  "schema_version": "milky_cow_contract_gate.v4",
   "governance": {
     "active_foundation_gate": "config/milky_cow_contract_gate.json",
     "superseded_initial_scope_record": "config/milky_cow_study_contract.json",
@@ -31,7 +31,7 @@
     },
     {
       "path": "config/README.md",
-      "sha256": "aaa9ee0be4a7b9aea5fb2306e5650f0fba879d7de0a5b1726b595b636d136e8c",
+      "sha256": "b104753cf67907b2bbfce16f6a08eaf6b30c35a3a3fa62c4e6f30711c06b373c",
       "role": "active_config_governance_readme"
     },
     {
@@ -41,16 +41,16 @@
     },
     {
       "path": "rules/MILKY_COW_COPY_TO_ALL_RULES.txt",
-      "sha256": "1573a1edd80bb6e4b0d8e42285920f31a61f20ef07bf064d3d0b1454c10375ae",
+      "sha256": "efe15383f54d8becf91b22b9fa413643bb29b281ffdbe947348d538b837a264b",
       "role": "active_pa_book_rule_overlay"
     },
     {
       "path": "src/milky_cow/inputs.py",
-      "sha256": "8d03672f3b0e3175ec7b7f6eec7a9dae7cb93521445955ca82f888673c72d458",
+      "sha256": "9d362794904749099a34e1104979875ce6a61d0b9fced8e9f2449c4ec5e5f139",
       "role": "selector_implementation"
     }
   ],
-  "status": "contracts_resolved_integrated_sweep_still_blocked",
+  "status": "phase_1_contracts_partially_resolved_integrated_sweep_blocked",
   "deterministic_vertical_slice_fixture": {
     "status": "executable_contract_fixture_not_study_baseline",
     "pa_targets": [
@@ -68,7 +68,7 @@
       "through_first_pa_n1",
       "none_with_320_starting_cash_n2"
     ],
-    "payout": "minimum_500_always_atomic_pa_and_treasury_transaction_at_session_close_with_no_open_position",
+    "payout": "minimum_500_always_atomic_pa_and_treasury_transaction_at_session_close_after_normal_same_day_trading",
     "event_order": [
       "settle_pa_exits",
       "settle_evaluation_exits_and_passes",
@@ -263,6 +263,7 @@
   },
   "external_capital": {
     "selected_policy_id": "through_first_pa_parent_baseline",
+    "selection_status": "proposed_pending_bridge_scope_user_answer",
     "mode": "through_first_pa",
     "starting_cash_usd": 35.0,
     "starting_cash_basis": "one_evaluation_purchase_fee_parent_seed_external_capital",
@@ -277,7 +278,11 @@
     "bridge_reopens": false,
     "first_pa_activation_latch": "treasury_owned_timestamped_irreversible",
     "unfunded_obligation_behavior": "skip_the_purchase_atomically_no_partial_funding_and_no_run_failure",
-    "known_consequence_at_high_n": "the bridge closes at the FIRST activation, so PAs 2..N are funded only from trading profit and payouts. Measured against the tape, one PA nets a median $6,139 per 720-day window at 1 MNQ while a new PA costs $160 in fees, so cash is unlikely to be the binding constraint. The binding constraint is expected to be Evaluation pipeline time: each PA must pass a 30-day-cycle Evaluation, at most one purchase per decision, with dormant failures holding their slots. Report book-fill time and right-censoring per N, and attribute any unfilled book to pipeline time or to cash explicitly rather than assuming either."
+    "scope_options": {
+      "time_based_until_first_activation": "every permitted obligation before the first PA activation may receive an exact-shortfall contribution; this can externally fund Evaluations 2..N",
+      "first_pa_chain_only": "only the Evaluation, renewals, and activation that produce PA 1 may receive bridge capital; all other commitments require treasury cash"
+    },
+    "required_reporting": "owner capital, evaluation and activation fees, book-fill time, and pipeline-versus-cash binding must be measured; raw one-PA tape profit does not establish which constraint binds"
   },
   "payout_candidates": {
     "source": "config/payout_policies.json",
@@ -301,9 +306,10 @@
       "candidate_set": "the six request-size policies stand unchanged"
     },
     "open_position_handling": {
-      "rule": "a_pa_does_not_trade_on_a_day_it_takes_a_payout",
-      "mechanism": "the pa is excluded from copy eligibility for the whole Tallinn calendar day of its payout",
-      "consequence_under_copy_to_all": "PAs activate at different times and carry different equity offsets, so they cross the 26,600 gate on different days: there is no automatic book-wide blackout. The effect is policy-dependent. Policies that reset an account to a common balance (maximum_always strips to the floor, preserve_safety_net leaves exactly 26,600) map different pre-payout balances onto the same post-payout balance; because copy-to-all then applies identical per-trade P&L to every PA, those accounts move in lockstep and can re-synchronize onto shared payout days. Policies that leave differing balances, such as minimum_500_always, preserve the spread. Report the distribution of simultaneous sit-outs per arm as a measured result; do not assume either extreme."
+      "phase_1_rule": "trading_allowed_on_payout_day",
+      "mechanism": "settle all completed trades normally, then evaluate and execute any eligible payout atomically at the 23:59 Tallinn session close",
+      "same_day_realized_pnl_counts": true,
+      "future_sit_out_sensitivity": "deferred; any later sit-out arm must decide causally from prior-close or session-open state and may not retroactively suppress trades"
     },
     "terminal_sweep": {
       "is_a_policy": false,
@@ -316,17 +322,18 @@
     },
     "accumulation_trigger_candidate": {
       "proposal": "withdraw $1,000 for each $5,000 of account gain",
-      "recommendation": "do_not_add_as_a_seventh_candidate",
+      "status": "excluded_from_phase_1_the_requested_axis_is_the_exact_six_policy_catalog",
       "measured_evidence_1_mnq_720d_window": {
-        "windows_measured": 9299,
-        "median_net_gain_usd": 6139,
+        "windows_measured": 6482,
+        "window_scope": "accepted-opportunity starts with a complete 720-day future interval",
+        "median_net_gain_usd": 6602,
         "max_net_gain_usd": 21024,
-        "min_net_gain_usd": -1430,
-        "share_of_windows_reaching_5000_usd": 0.603,
+        "min_net_gain_usd": -259,
+        "share_of_windows_reaching_5000_usd": 0.654,
         "median_5000_increments_per_window": 1,
         "method": "cumulative gross_pnl_usd_per_mnq minus commission over the accepted stream, before drawdown deaths and before the 26,600 payout gate"
       },
-      "why": "the trigger would fire about once per PA per 720-day horizon at the median, and not at all in ~40% of windows, while the six existing candidates act at every eligible window. Before deaths and before the 26,600 gate consumes the first 1,600 of gain, so the real figure is lower still. It would rank last trivially and teach nothing, which is the same reason the parent retired this class on 2026-08-30.",
+      "interpretation_limit": "this raw-window diagnostic does not establish a lifecycle policy ranking; exclusion follows the user-requested exact six-policy phase-1 scope",
       "reconsider_if": "phase 2 introduces scaling above 1 MNQ, which would raise per-account gains enough for the trigger to bind"
     }
   },
@@ -354,22 +361,42 @@
       "reason_information": "if order does not matter, randomizing buys nothing but variance; if it does matter, randomizing hides the effect inside that variance instead of exposing it"
     },
     "known_binding_edge": "payout must precede renewal, activation and purchase. The parent makes payout cash available at the same atomic timestamp, so reversing this pair would stall the book for want of cash it actually holds. At least one permutation therefore does change results; 'no variant matters' is not safe in general.",
-    "sensitivity_plan": "run one ordering-sensitivity arm on selected N with a permuted order instead of randomizing every run, which measures the insensitivity once rather than paying for it forever"
+    "sensitivity_plan": "run one ordering-sensitivity arm on selected N with a user-selected deterministic permutation instead of randomizing every run"
   },
   "economic_objective": {
-    "primary": "total_net_cash_withdrawn_into_the_treasury",
-    "net_of": "external capital contributed, so a policy cannot look good by burning the bridge",
-    "formula": "sum(payout receipts) - sum(external capital contributions)",
+    "status": "headline_metric_requires_user_selection",
+    "candidate_metrics": {
+      "owner_net_retained_cash": {
+        "formula": "ending_treasury_cash - starting_owner_cash - later_external_contributions",
+        "equivalent_formula": "payout_receipts - fees_paid",
+        "interpretation": "owner wealth realized and still retained by the treasury after every lifecycle fee"
+      },
+      "cumulative_payout_harvest": {
+        "formula": "sum(payout_receipts)",
+        "interpretation": "gross realized withdrawals before subtracting reinvested Evaluation, renewal, and activation fees"
+      }
+    },
+    "required_components_always_reported": [
+      "starting_owner_cash",
+      "later_external_contributions",
+      "payout_receipts",
+      "fees_paid",
+      "ending_treasury_cash"
+    ],
     "ranking_scope": "each (N, payout policy) arm",
     "companion_reported_never_summed": "surviving_unwithdrawn_pa_equity_at_horizon",
-    "known_bias": "a withdrawn-cash objective systematically favours aggressive payout policies and penalises minimum_500_always, which is the parent's own baseline. Report the companion beside every ranking so the penalty is visible rather than silent."
+    "recommendation": "use owner_net_retained_cash as the headline and cumulative_payout_harvest as a secondary metric; report unwithdrawn equity separately"
   },
   "reporting": {
     "rolling_cohort_rule": {
-      "cadence": "first_valid_session_of_each_calendar_month",
-      "expected_cohort_count_at_720d": 78,
-      "selected_by": "claude_recommendation_2026_09_02_user_delegated",
-      "rationale": "the parent could afford daily rolling starts because it fixed K=5 and swept only 6 payout policies. This study multiplies that by a 20-value N axis: daily starts give 1,664 cohorts x 20 x 6 = 199,680 lifecycle runs of roughly 2,800 opportunities each, which is not tractable in this codebase. Monthly starts give 9,360 runs at the same fidelity per run.",
+      "cadence": "first accepted-opportunity session of each calendar month",
+      "full_horizon_required": true,
+      "expected_cohort_count_at_720d": 55,
+      "all_represented_months_before_horizon_filter": 79,
+      "fully_observed_daily_session_starts_at_720d": 1179,
+      "central_grid_runs": 6600,
+      "all_three_path_arm_grid_runs": 19800,
+      "rationale": "55 complete monthly cohorts x 20 N values x 6 payout policies gives 6,600 central-arm runs and 19,800 runs across all three required path arms. Later tape starts are excluded from equal-horizon comparisons rather than silently right-censored.",
       "parent_comparability_note": "the parent used rolling daily session starts; a daily-start robustness check on one selected arm keeps the comparison honest",
       "independence_caveat": "cohorts overlap, so they are separate historical opportunities and NOT independent samples; no naive confidence interval is valid across them"
     },
@@ -377,8 +404,10 @@
       "primary_days": 720,
       "primary_rationale": "matches the parent horizon; the comparison is invalid at any other length",
       "diagnostic_days": 1440,
-      "diagnostic_rationale": "the through-first-PA bridge closes at the first activation, so PAs 2..N are funded only from trading profit. At high N the book may not fill within 720 days, which would make those arms a measurement of capital constraint. The long horizon is a book-fill diagnostic on selected N values, not a second full grid.",
+      "diagnostic_fully_observed_monthly_cohorts": 32,
+      "diagnostic_rationale": "the long horizon is a book-fill and funding diagnostic on user-selected N values, not a second full grid. It must measure whether cash or Evaluation pipeline time binds rather than assume either.",
       "tape_span_days": 2384,
+      "horizon_crossing_trade_treatment": "unresolved_user_decision_no_mark_to_market_exists",
       "right_censoring": {
         "rule": "report_withdrawn_and_unwithdrawn_separately_never_summed",
         "withdrawn": "cash actually received by the treasury under the policy's own rules",
@@ -434,8 +463,8 @@
         "parent_precedent": "slippage_ticks_per_side 0 and no pending-order model",
         "known_bias_direction": "favors_high_n",
         "why_it_is_not_neutral_here": "the parent filled one MNQ per accepted signal at R=1; copy-to-all fills N MNQ simultaneously, so the error in a perfect-fill assumption grows with N, which is the study axis itself",
-        "cheapest_future_check": "one_tick_per_side_sensitivity_on_the_selected_n_arms",
-        "status": "declared_not_modeled_in_phase_1_by_user_decision_2026_09_02"
+        "required_phase_1_robustness": "one_tick_per_side_full_n_axis_sensitivity_before_headline_n_or_policy_conclusions",
+        "status": "frictionless_central_arm_selected_sensitivity_required_before_conclusions"
       },
       "prop_firm_failure": {
         "modeled": false,
@@ -448,9 +477,14 @@
       "resolution": "path order is locked as three arms; execution/slippage, prop-firm failure and rule change are declared non-models matching the parent"
     }
   },
-  "unresolved_before_integrated_sweep": [],
+  "unresolved_before_integrated_sweep": [
+    "external_capital_bridge_scope",
+    "headline_economic_objective",
+    "event_order_sensitivity_permutation",
+    "horizon_crossing_trade_treatment"
+  ],
   "parent_comparison": {
-    "purpose": "this study exists to be differenced against the parent staggering study; every adopted mechanic below is adopted to hold everything except PA-book management constant",
+    "purpose": "the parent staggering arm is a descriptive composite benchmark, not a single-variable causal counterfactual",
     "parent_repository": "Eval_PA_optimal_path",
     "parent_revision": "106cfb782c6e573856282095441bb69f23924a55",
     "parent_baseline_config": "config/legacy_25k_baseline.json",
@@ -463,7 +497,12 @@
       "pa_intratrade_path": "mae_first",
       "bootstrap_funding_mode": "through_first_pa"
     },
-    "intended_single_difference": "PA-book management only: copy-to-all replaces max_headroom routing at R=1, and payout aggressiveness is not inherited",
+    "comparison_interpretation": "the delta combines a different PA opportunity set, removal of routing, and exposure multiplication: the parent routes one R=1 copy over 12,658 concurrent raw offers, while this study copies each of 9,299 globally selected opportunities to every eligible PA",
+    "causal_claim_allowed": false,
+    "normalized_reporting_required": [
+      "per_active_pa_day",
+      "per_account_copy"
+    ],
     "adopted_for_comparability": [
       "evaluation_consumer_mode",
       "pa_mnq_per_account",
@@ -477,17 +516,12 @@
       "target_pa_count_k": "K=5 is a parent selection; N is this study's swept axis 1..20",
       "routing_policy": "prohibited mechanic in this study",
       "payout_policy_ranking": "the six policies remain candidates, not optima",
-      "horizon_and_regimes": "not yet selected here; see unresolved fields"
+      "horizon_and_regimes": "720-day complete monthly cohorts and reporting-only regimes are selected locally; no parent result is inherited"
     },
     "comparison_arm_for_parent_delta": "source_constrained_then_mae_first",
     "comparison_arm_rationale": "the parent pinned pa_intratrade_path=mae_first. The seeded coin stays this study's internal delta_reference for its own path-order stress, but it is NOT the arm to difference against the parent.",
     "status": "adopted_by_user_decision_2026_09_02_for_a_controlled_comparison_not_inherited_conclusions"
   },
-  "evaluation_rule_boundary_open_questions": [
-    "does a running Evaluation renew when the pipeline is already at the N cap",
-    "does a failed Evaluation inside a cycle wait for its boundary before restarting",
-    "which Evaluation trading-day basis governs the minimum-day test at a cycle edge"
-  ],
   "evaluation_rule_boundaries": {
     "renewal_at_the_hard_cap": {
       "rule": "renew_only_if_the_pipeline_excluding_this_evaluation_is_below_n",
@@ -511,9 +545,57 @@
       "session_clock_filters_completed_fills": false
     }
   },
+  "open_questions_requiring_user_decision": [
+    {
+      "id": "external_capital_bridge_scope",
+      "blocks": "N_greater_than_1_and_sweep",
+      "question": "Does through-first-PA mean a time-based bridge for every permitted obligation before the first activation, or only the first PA chain?",
+      "options": [
+        "time_based_until_first_activation",
+        "first_pa_chain_only"
+      ],
+      "recommendation": "first_pa_chain_only",
+      "reason": "it matches the intended statement that PAs 2..N are earned from treasury proceeds and prevents high N from receiving many externally funded Evaluations before PA 1 exists"
+    },
+    {
+      "id": "headline_economic_objective",
+      "blocks": "rankings_not_simulation",
+      "question": "Which cash metric ranks policies?",
+      "options": [
+        "owner_net_retained_cash",
+        "cumulative_payout_harvest"
+      ],
+      "recommendation": "owner_net_retained_cash",
+      "reason": "it answers whether the book pays after every Evaluation, renewal, and activation fee; cumulative payout harvest remains a useful secondary metric"
+    },
+    {
+      "id": "event_order_sensitivity_permutation",
+      "blocks": "full_sweep",
+      "question": "Which deterministic alternate same-timestamp order should be the sensitivity arm?",
+      "options": [
+        "spend_before_payout",
+        "activation_before_renewal"
+      ],
+      "recommendation": "spend_before_payout",
+      "reason": "it directly stresses the known cash-availability edge without randomizing event order"
+    },
+    {
+      "id": "horizon_crossing_trade_treatment",
+      "blocks": "real_tape_result_manifest",
+      "question": "How should an opportunity entered before but exiting after the cohort horizon be handled when no mark-to-market exists?",
+      "options": [
+        "require_entry_and_exit_within_horizon",
+        "settle_after_horizon_and_label_extended",
+        "admit_before_horizon_leave_open_trade_unscored"
+      ],
+      "recommendation": "admit_before_horizon_leave_open_trade_unscored",
+      "reason": "this preserves causal entry eligibility and the exact 720-day cutoff without inventing mark-to-market; it also matches the parent's event-loop treatment, and the open batch plus affected accounts must be reported"
+    }
+  ],
   "remaining_blockers_before_the_sweep": [
-    "no study-scale lifecycle runner exists; only the deterministic N=1/N=2 fixture slice",
-    "the ordering-sensitivity arm has not been run",
-    "the accumulation-trigger candidate decision is recorded as a recommendation, not a user confirmation"
+    "the four user decisions in open_questions_requiring_user_decision are unanswered",
+    "no gate-to-runtime policy bundle or per-Evaluation cycle-local consumer exists",
+    "no study-scale lifecycle runner or real-tape N=1 result manifest exists",
+    "the deterministic ordering-sensitivity arm is not configurable or executed"
   ]
 }

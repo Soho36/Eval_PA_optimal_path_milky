@@ -1,5 +1,5 @@
 LEGACY 25K MILKY-COW COPY-TO-ALL OVERLAY
-Version: 2026-09-01.copy-to-all.2
+Version: 2026-09-02.copy-to-all.3
 Status: user-authorized project rule; effective for this repository only
 Applicability: [-infinity, +infinity) unless a named scenario overrides a field
 
@@ -51,11 +51,12 @@ copy batch, settle the PA batch, and settle the Evaluation copy, all before
 payouts, renewals, activations, purchases, or positive-duration entries at that
 timestamp. The zero-duration opportunity cannot affect its own entry eligibility.
 
-This section locks the PA-phase opportunity source. Whether the integrated
-Evaluation phase consumes this already-selected stream or retains the pinned
-per-Evaluation/per-renewal fill-time adapter is unresolved. The copied EODMAE
-fixture may be executed only as an upstream behavior lock until that choice is
-made.
+This section locks the PA-phase opportunity source. The Evaluation phase does
+not consume this stream. Each Evaluation uses its own cycle-local one-position
+fill-time adapter, restarted at every funded 30-day renewal boundary, at three
+MNQ. The copied EODMAE fixture remains the upstream behavior lock for that
+adapter. An integrated runner must implement the adapter per Evaluation rather
+than accept arbitrary caller-selected offers.
 
 3. COPY-TO-ALL PA DISTRIBUTION
 
@@ -87,8 +88,10 @@ identical and must survive or die together. The model must report clustered
 deaths rather than collapse them into one book-level death. Because the source
 tape supplies only completed-trade extrema, an intratrade liquidation is
 observed at the exit event and must not be reported as if the source completed
-P&L were realized. Whether round-turn commission is included at MAE/MFE equity
-or only at close remains an explicit, unresolved PA accounting input.
+P&L were realized. In phase 1, the round-turn commission is charged only in
+closing net P&L and is not included in the MAE/MFE liquidation comparison. This
+is a selected accounting convention for parent comparability, not evidence of
+an intratrade broker charge time.
 
 Completed-trade path order is a named lifecycle-wide uncertainty dimension.
 One-sided cases and two-sided cases ending at MAE retain their settlement-
@@ -113,9 +116,12 @@ comparison uses only state known before that entry, after earlier same-timestamp
 events under the versioned event order.
 
 No integrated run may infer thresholds from max_headroom, K, parent rankings, or
-the undated four-mini excerpt. Linear multiplication of one-MNQ P&L/MAE/MFE and
-execution costs is also an explicit study assumption and must receive aggregate-
-size/slippage stress. The initial schedule and scope remain unresolved.
+the undated four-mini excerpt. Phase 1 is the explicit single-level per-account
+schedule: one MNQ at every entry, maximum one MNQ, immediate non-binding
+downscaling, and linear multiplication of one-MNQ P&L/MAE/MFE. It assumes
+perfect aggregate execution and no added slippage. This is a frictionless
+baseline only; a full-axis aggregate-cost sensitivity is required before strong
+conclusions about N, and phase-2 scaling thresholds remain a later study axis.
 
 6. ACQUISITION AND REPLACEMENT
 
@@ -125,10 +131,13 @@ activation-time exclusion. A dead PA cannot reset and no replacement PA appears
 instantly. Replacement creates an Evaluation/acquisition obligation whose delay,
 cash funding, failure, renewal, pass, and activation remain observable.
 
-An active-count target may constrain active PAs plus capacity commitments
-(running Evaluations and paid-or-unpaid pending activations) to prevent accidental
-overshoot. It is not a router capacity K. Exact acquisition and dead-PA
-replacement policy candidates remain unresolved.
+The phase-1 acquisition rule is greedy toward maintained N: at most one
+Evaluation purchase decision per unique event timestamp when cash permits and
+active PAs plus running Evaluations plus pending activations are below N. It is
+not a router capacity K. A death creates a replacement backlog under the same
+Evaluation pipeline; no PA appears instantly. An attempted but unfunded
+replacement remains backlog for a later decision and must not pause already
+funded Evaluations or the exogenous PA stream.
 
 For an Evaluation-pipeline replacement trace, each PA death remains an
 unprocessed replacement obligation until one funded Evaluation commitment
@@ -151,10 +160,30 @@ Every external contribution must be explicit, timestamped, purpose-tagged, and
 included in cash reconciliation. No fee may receive a silent top-up. A policy
 must state whether outside capital is prohibited, capped by a numeric lifetime
 budget, or bridged for explicitly named lifecycle obligations and must state the
-irreversible bridge-closing event. The copied through_first_pa convention is a
-candidate, not a silently inherited baseline for this project.
+irreversible bridge-closing event. Phase 1 uses a $35 starting seed and proposes
+the copied through-first-PA bridge, but its scope still requires an explicit
+user choice: either it may fund every permitted obligation before the first PA
+activation, or it is restricted to the first PA's Evaluation/renewal/activation
+chain. The two meanings produce different owner capital and high-N fill paths.
 
-8. SWEEP GATE
+8. PAYOUT-DAY HANDLING AND ECONOMIC REPORTING
+
+Phase 1 does not impose a payout-day trading sit-out. Completed PA trades settle
+normally throughout the Tallinn calendar day; after all due exits, an eligible
+payout is executed atomically at the 23:59 session close. The day's realized P&L
+may therefore contribute to that close's eligibility. Any future sit-out arm
+must define a causal prior-close or session-open decision snapshot and may not
+retroactively remove trades.
+
+Reports must expose the reconciled treasury components separately: starting
+owner cash, later external contributions, payout receipts, fees paid, and ending
+treasury cash. The headline choice between cumulative payout harvest and owner-
+net retained cash remains a user decision. Under the current ledger identity,
+owner-net retained cash is ending cash minus all owner capital supplied, which
+equals payout receipts minus fees paid. Surviving PA equity is a separate
+right-censoring companion and is never silently added to either cash metric.
+
+9. SWEEP GATE
 
 An integrated parameter sweep is prohibited until executable tests lock:
 
