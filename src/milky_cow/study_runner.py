@@ -11,6 +11,7 @@ not the parameter sweep.
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, time, timedelta
 from typing import Any
@@ -66,6 +67,9 @@ class CohortResult:
 
     horizon_open_batches: int
     horizon_open_copy_count: int
+
+    correlated_death_events: int
+    max_simultaneous_deaths: int
 
     audit_events: int
 
@@ -124,6 +128,14 @@ class CohortResult:
             "payouts": {
                 "executed": self.payouts_executed,
                 "deferred_open_copy": self.payouts_deferred_open_copy,
+            },
+            "correlated_failure": {
+                "death_events_killing_more_than_one_pa": self.correlated_death_events,
+                "max_simultaneous_deaths": self.max_simultaneous_deaths,
+                "note": (
+                    "the copy-to-all signature: one trade can retire several "
+                    "PAs at once, which staggering at R=1 cannot do"
+                ),
             },
             "audit_events": self.audit_events,
         }
@@ -430,6 +442,10 @@ def run_cohort(
     open_copies = sum(
         len(decision.copies) for decision in lifecycle.outstanding_pa_decisions.values()
     )
+    deaths_by_trade = Counter(
+        result.trade_key for result in lifecycle.pa_trade_results if not result.survived
+    )
+    simultaneous = [count for count in deaths_by_trade.values() if count > 1]
     return CohortResult(
         arm_id=bundle.arm_id,
         gate_sha256=bundle.gate_sha256,
@@ -464,5 +480,7 @@ def run_cohort(
         evaluation_boundary_closed_cycles=totals.boundary_closed_cycles,
         horizon_open_batches=len(lifecycle.outstanding_pa_decisions),
         horizon_open_copy_count=open_copies,
+        correlated_death_events=len(simultaneous),
+        max_simultaneous_deaths=max(simultaneous, default=0),
         audit_events=len(lifecycle.audit),
     )

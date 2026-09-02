@@ -48,9 +48,18 @@ and a single-cohort runner (`study_runner.py`) now exist, and the first
 real-tape slice is recorded in `results/n1_real_tape_slice.json`: N=1,
 `minimum_500_always`, 55 monthly cohorts, deterministic across repeat runs.
 
-That slice is not a study result. The sweep remains blocked by four things: no
-parameter-sweep driver, no one-tick-per-side full-N sensitivity, no executed
-ordering arm, and no N>1 book ever simulated. Two runner defects found by the
+The central-arm sweep has now run: 120 arms (N=1..20 x six payout candidates),
+6,600 cohort runs, 12.6 minutes on 7 workers, deterministic across worker
+counts. Descriptively, total owner-net retained cash rises to a plateau near
+N=9-12 and falls by N=19-20, while the share of profitable cohorts falls
+monotonically from 130/330 to 15/330; activations plateau near 2,500-2,700,
+confirming Evaluation pipeline time rather than cash as the large-N constraint.
+These are observations, not conclusions: the median arm is -160 everywhere, the
+cohorts overlap, and only the seeded-coin arm at frictionless execution has
+run.
+
+Still outstanding: the one-tick-per-side full-N sensitivity, the mae_first arm
+required for any parent comparison, and the executed spend_before_payout arm. Two runner defects found by the
 slice and fixed under regression test: session closes were anchored on the
 audit log, so an earning PA with thousands in equity took zero payouts; and an
 unfundable obligation was retried at every timestamp, stalling the clock.

@@ -688,6 +688,31 @@
       "cohorts": 55,
       "entry_point": "scripts/run_n1_manifest.py",
       "purpose": "first contact between the resolved contracts and the real tape; it proves the gate, the cycle-local Evaluation consumer and the lifecycle compose, and it is not evidence about any policy or N"
+    },
+    {
+      "path": "results/sweep_central_summary.json",
+      "cohort_detail": "results/sweep_central_cohorts.csv",
+      "status": "aggregated_grid_not_a_ranked_conclusion",
+      "grid": "N=1..20 x six payout candidates, central path arm, canonical event order",
+      "arms": 120,
+      "cohort_runs": 6600,
+      "runtime_minutes": 12.6,
+      "result_digest_sha256": "5bed99bcd7d235c5c95cd05d2e5e90912ee47a1128a39cb32c93931d8479bbd0",
+      "entry_point": "scripts/run_sweep.py",
+      "reading_limits": [
+        "the median arm is -160 at every N because cohorts that fail before earning dominate the centre; these results are tail-driven and the median carries no signal",
+        "the 55 monthly cohorts overlap, so they are separate historical opportunities and not independent samples; no confidence interval across them is valid",
+        "one path arm and one event order were run, so nothing here is comparable to the parent until the mae_first arm is executed",
+        "execution is frictionless and biased favors_high_n, so the observed decline at large N is if anything understated"
+      ]
     }
-  ]
+  ],
+  "preliminary_observations_not_conclusions": {
+    "status": "descriptive_only_gate_blockers_still_stand",
+    "total_owner_net_retained_cash_by_n": "rises from about $752k at N=1 to a broad plateau near N=9-12 at about $2.33M, then falls to about $1.4-1.5M by N=19-20",
+    "positive_cohort_share_by_n": "declines monotonically from 130/330 at N=1 to 15/330 at N=20",
+    "correlated_deaths_by_n": "peak near N=5 at about 440 events and decline afterwards, because at large N the book rarely fills, so fewer PAs are alive to die together",
+    "activations_by_n": "plateau near 2,500-2,700 across N>=9, which is direct evidence that Evaluation pipeline time rather than cash is the binding constraint at large N, as the capital note predicted",
+    "shape": "an interior optimum in total cash coexists with a monotonically falling probability that any single cohort profits: larger synchronized books buy a fatter right tail with a much higher chance of losing the fees"
+  }
 }

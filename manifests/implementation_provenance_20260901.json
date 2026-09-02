@@ -78,7 +78,7 @@
     },
     {
       "path": "config/milky_cow_contract_gate.json",
-      "sha256": "4ba578d5948ce716893f5b97b26002dbcc9841aa7b6096cf0da70a39a3bb4100",
+      "sha256": "72eb59fcccef1fac0783e4c9ea33d4329fcdca5ea4f800926beec6dfe5c2081f",
       "role": "active_foundation_gate"
     },
     {
@@ -218,12 +218,12 @@
     },
     {
       "path": "project_memory/STATE.md",
-      "sha256": "6cb2dcd277fc61e1703164d3b2d038c4893b263d5678ef2f0354caf5cc5cdc21",
+      "sha256": "c9265bfaa1b8742565aafebbc2457e3f73de0f14a366a6cae3f7713c04b29403",
       "role": "current_project_state_memory"
     },
     {
       "path": "project_memory/TODO.md",
-      "sha256": "ee463c0a072044a0ad1b2fd064a1bcf5fa034fc17ceb2dfeda725dd1f9840e39",
+      "sha256": "04d861020b1035457b4d2943915118b7251d10e034a41cfcf97eeb5a7b356e61",
       "role": "current_gate_work_queue"
     },
     {
@@ -253,7 +253,7 @@
     },
     {
       "path": "src/milky_cow/study_runner.py",
-      "sha256": "1284160bbad5cc530714f682a1a0e55f5e68f8ac83075885056d33c8cc927e76",
+      "sha256": "68b160bc94b62c912e790329a8f6154d06ceb8b4d85fbaec1515e5a7621536ba",
       "role": "single_cohort_lifecycle_runner"
     },
     {
@@ -265,6 +265,21 @@
       "path": "tests/test_study_runner.py",
       "sha256": "ead0723948238e3b96001acd0b26ca73367ec553640a81ea4839eaf5006f3596",
       "role": "runner_and_consumer_contract_tests"
+    },
+    {
+      "path": "src/milky_cow/sweep.py",
+      "sha256": "82cf35f286f36cff03992c3f05cf3612462f5e85b7f823055814fcddc2d57de1",
+      "role": "n_by_payout_policy_sweep_aggregation"
+    },
+    {
+      "path": "scripts/run_sweep.py",
+      "sha256": "19cbde1c88c3dcbb5cbd655bb77cd45626cb69d89fc8798e94f2c910d8da4e26",
+      "role": "sweep_entry_point"
+    },
+    {
+      "path": "tests/test_sweep.py",
+      "sha256": "20180121e4dee728fb30c5a51e8c732f010ec6c300771475ee5721031ec82893",
+      "role": "sweep_aggregation_contract_tests"
     }
   ],
   "derivations": [

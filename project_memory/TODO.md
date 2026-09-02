@@ -59,12 +59,17 @@
       The consumer reproduces the pinned behavior lock exactly on real starts.
 - [x] Implement and verify one real-tape N=1 lifecycle result manifest
       (`results/n1_real_tape_slice.json`, 55 monthly cohorts, deterministic).
-- [ ] Simulate any N>1 book: correlated copy-to-all deaths have never run.
+- [x] Simulate N>1: correlated copy-to-all deaths fire (39 double-kills of 181
+      death events at N=2), and the full N=1..20 grid has been executed.
 - [ ] Implement the one-tick-per-side full-N execution sensitivity; Lifecycle
       still hard-requires `perfect_linear_no_slippage_fixture_only`.
 - [ ] Run the `spend_before_payout` arm on the real tape and report its
       delta; the mode is selectable but has never been executed on a cohort.
-- [ ] Build the parameter-sweep driver over the 20 x 6 grid and aggregate it.
+- [x] Build the parameter-sweep driver and run the 20 x 6 central-arm grid:
+      120 arms, 6,600 cohort runs, 12.6 min on 7 workers, deterministic across
+      worker counts (`results/sweep_central_summary.json`).
+- [ ] Run the `source_constrained_then_mae_first` arm; the parent comparison is
+      invalid against the seeded-coin central arm.
 - [ ] Before phase 2, select explicit MNQ thresholds and the alternative
       acquisition/replacement policy set.
 - [ ] Only after every active gate field is resolved and executable, run the

@@ -1,0 +1,4617 @@
+{
+  "schema_version": "milky_cow_sweep.v1",
+  "status": "aggregated_grid_not_a_ranked_conclusion",
+  "what_this_is_not": [
+    "no parameter-sweep driver exists: the runner executes one (N, payout policy) arm per call, and the 20 x 6 grid across three path arms is not orchestrated, aggregated, or ranked",
+    "the required one-tick-per-side full-N execution sensitivity is not implemented; Lifecycle still hard-requires perfect_linear_no_slippage_fixture_only and cannot express the arm",
+    "the spend_before_payout ordering-sensitivity arm is constructible but has not been executed or reported",
+    "only N=1 has been run on the real tape; no N>1 book has ever been simulated, so copy-to-all correlated deaths are untested at scale"
+  ],
+  "grid": {
+    "n_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "payout_policy_ids": [
+      "minimum_500_always",
+      "maximum_always",
+      "rush_to_uncapped",
+      "cap_maximizer",
+      "preserve_safety_net",
+      "half_of_maximum"
+    ],
+    "path_stress_arm": "source_constrained_then_seeded_coin",
+    "event_order_mode": "canonical_settle_realize_spend_commit",
+    "arms": 120,
+    "cohorts_per_arm": 55,
+    "total_cohort_runs": 6600,
+    "runtime_seconds": 755.7,
+    "workers": 7
+  },
+  "provenance": {
+    "gate_sha256": "4ba578d5948ce716893f5b97b26002dbcc9841aa7b6096cf0da70a39a3bb4100",
+    "accepted_stream_sha256": "1175787ba50f0ab9f08a953f60b661e597c70f2bdb9329a517603616aaae6759",
+    "horizon_days": 720
+  },
+  "arms": [
+    {
+      "arm_id": "n01.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 1,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 5302.5,
+        "min": -265.0,
+        "max": 11310.0,
+        "total": 131705.0,
+        "positive_cohorts": 21
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 12000.0,
+        "total": 154500.0
+      },
+      "book": {
+        "pas_activated": 109,
+        "pa_deaths": 97,
+        "correlated_death_events": 0,
+        "max_simultaneous_deaths": 0,
+        "cohorts_with_a_survivor": 12
+      },
+      "payouts": {
+        "executed": 103,
+        "deferred_open_copy": 546
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 11904.5,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n01.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 1,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -192.5,
+        "p75": 3753.05,
+        "min": -265.0,
+        "max": 11243.77,
+        "total": 106734.32,
+        "positive_cohorts": 22
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 12288.77,
+        "total": 137149.32
+      },
+      "book": {
+        "pas_activated": 147,
+        "pa_deaths": 130,
+        "correlated_death_events": 0,
+        "max_simultaneous_deaths": 0,
+        "cohorts_with_a_survivor": 17
+      },
+      "payouts": {
+        "executed": 232,
+        "deferred_open_copy": 484
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 16028.79,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n01.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 1,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -184.05,
+        "p75": 3642.5,
+        "min": -265.0,
+        "max": 10384.15,
+        "total": 109096.2,
+        "positive_cohorts": 22
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 11464.15,
+        "total": 140801.2
+      },
+      "book": {
+        "pas_activated": 152,
+        "pa_deaths": 138,
+        "correlated_death_events": 0,
+        "max_simultaneous_deaths": 0,
+        "cohorts_with_a_survivor": 14
+      },
+      "payouts": {
+        "executed": 176,
+        "deferred_open_copy": 463
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 7411.2,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n01.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 1,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -192.5,
+        "p75": 5470.0,
+        "min": -265.0,
+        "max": 10630.0,
+        "total": 139085.0,
+        "positive_cohorts": 22
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 11500.0,
+        "total": 167500.0
+      },
+      "book": {
+        "pas_activated": 152,
+        "pa_deaths": 134,
+        "correlated_death_events": 0,
+        "max_simultaneous_deaths": 0,
+        "cohorts_with_a_survivor": 18
+      },
+      "payouts": {
+        "executed": 335,
+        "deferred_open_copy": 564
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 20070.0,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n01.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 1,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 5511.1,
+        "min": -265.0,
+        "max": 11951.65,
+        "total": 141915.35,
+        "positive_cohorts": 21
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 12606.65,
+        "total": 163160.35
+      },
+      "book": {
+        "pas_activated": 105,
+        "pa_deaths": 88,
+        "correlated_death_events": 0,
+        "max_simultaneous_deaths": 0,
+        "cohorts_with_a_survivor": 17
+      },
+      "payouts": {
+        "executed": 236,
+        "deferred_open_copy": 515
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 20923.0,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n01.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 1,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -192.5,
+        "p75": 4597.14,
+        "min": -265.0,
+        "max": 10554.19,
+        "total": 123180.49,
+        "positive_cohorts": 22
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 11564.19,
+        "total": 153920.49
+      },
+      "book": {
+        "pas_activated": 158,
+        "pa_deaths": 139,
+        "correlated_death_events": 0,
+        "max_simultaneous_deaths": 0,
+        "cohorts_with_a_survivor": 19
+      },
+      "payouts": {
+        "executed": 278,
+        "deferred_open_copy": 509
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 17435.95,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n02.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 2,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 7815.0,
+        "min": -265.0,
+        "max": 20800.0,
+        "total": 220670.0,
+        "positive_cohorts": 20
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 22500.0,
+        "total": 259500.0
+      },
+      "book": {
+        "pas_activated": 181,
+        "pa_deaths": 154,
+        "correlated_death_events": 14,
+        "max_simultaneous_deaths": 2,
+        "cohorts_with_a_survivor": 16
+      },
+      "payouts": {
+        "executed": 173,
+        "deferred_open_copy": 829
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 29223.35,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n02.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 2,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 6602.0,
+        "min": -265.0,
+        "max": 15476.02,
+        "total": 184695.78,
+        "positive_cohorts": 22
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 17511.02,
+        "total": 236765.78
+      },
+      "book": {
+        "pas_activated": 248,
+        "pa_deaths": 216,
+        "correlated_death_events": 42,
+        "max_simultaneous_deaths": 2,
+        "cohorts_with_a_survivor": 17
+      },
+      "payouts": {
+        "executed": 397,
+        "deferred_open_copy": 792
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 30637.53,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n02.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 2,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 6434.55,
+        "min": -265.0,
+        "max": 16254.45,
+        "total": 184257.9,
+        "positive_cohorts": 22
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 18414.45,
+        "total": 237927.9
+      },
+      "book": {
+        "pas_activated": 251,
+        "pa_deaths": 223,
+        "correlated_death_events": 59,
+        "max_simultaneous_deaths": 2,
+        "cohorts_with_a_survivor": 14
+      },
+      "payouts": {
+        "executed": 304,
+        "deferred_open_copy": 748
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 13638.6,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n02.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 2,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 7615.0,
+        "min": -265.0,
+        "max": 19260.0,
+        "total": 233410.0,
+        "positive_cohorts": 22
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 21000.0,
+        "total": 282000.0
+      },
+      "book": {
+        "pas_activated": 256,
+        "pa_deaths": 220,
+        "correlated_death_events": 39,
+        "max_simultaneous_deaths": 2,
+        "cohorts_with_a_survivor": 18
+      },
+      "payouts": {
+        "executed": 564,
+        "deferred_open_copy": 916
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 40165.1,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n02.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 2,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 7082.15,
+        "min": -265.0,
+        "max": 21689.7,
+        "total": 218043.15,
+        "positive_cohorts": 18
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 22719.7,
+        "total": 253413.15
+      },
+      "book": {
+        "pas_activated": 169,
+        "pa_deaths": 140,
+        "correlated_death_events": 24,
+        "max_simultaneous_deaths": 2,
+        "cohorts_with_a_survivor": 15
+      },
+      "payouts": {
+        "executed": 360,
+        "deferred_open_copy": 758
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 39091.0,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n02.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 2,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 7615.0,
+        "min": -265.0,
+        "max": 18247.68,
+        "total": 212918.3,
+        "positive_cohorts": 22
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 20302.68,
+        "total": 265218.3
+      },
+      "book": {
+        "pas_activated": 263,
+        "pa_deaths": 227,
+        "correlated_death_events": 25,
+        "max_simultaneous_deaths": 2,
+        "cohorts_with_a_survivor": 20
+      },
+      "payouts": {
+        "executed": 477,
+        "deferred_open_copy": 809
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 35722.2,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n03.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 3,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 8887.5,
+        "min": -265.0,
+        "max": 30290.0,
+        "total": 302200.0,
+        "positive_cohorts": 18
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 33000.0,
+        "total": 355500.0
+      },
+      "book": {
+        "pas_activated": 243,
+        "pa_deaths": 206,
+        "correlated_death_events": 56,
+        "max_simultaneous_deaths": 3,
+        "cohorts_with_a_survivor": 14
+      },
+      "payouts": {
+        "executed": 237,
+        "deferred_open_copy": 1111
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 51004.15,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n03.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 3,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 8984.5,
+        "min": -265.0,
+        "max": 25814.22,
+        "total": 240736.42,
+        "positive_cohorts": 16
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 28824.22,
+        "total": 303666.42
+      },
+      "book": {
+        "pas_activated": 287,
+        "pa_deaths": 257,
+        "correlated_death_events": 68,
+        "max_simultaneous_deaths": 3,
+        "cohorts_with_a_survivor": 11
+      },
+      "payouts": {
+        "executed": 498,
+        "deferred_open_copy": 932
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 29052.79,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n03.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 3,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 6861.88,
+        "min": -265.0,
+        "max": 22852.1,
+        "total": 231170.35,
+        "positive_cohorts": 17
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 26232.1,
+        "total": 299700.35
+      },
+      "book": {
+        "pas_activated": 315,
+        "pa_deaths": 285,
+        "correlated_death_events": 80,
+        "max_simultaneous_deaths": 3,
+        "cohorts_with_a_survivor": 10
+      },
+      "payouts": {
+        "executed": 383,
+        "deferred_open_copy": 950
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 14033.55,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n03.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 3,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 9502.5,
+        "min": -265.0,
+        "max": 27890.0,
+        "total": 299240.0,
+        "positive_cohorts": 16
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 30500.0,
+        "total": 358000.0
+      },
+      "book": {
+        "pas_activated": 299,
+        "pa_deaths": 260,
+        "correlated_death_events": 71,
+        "max_simultaneous_deaths": 3,
+        "cohorts_with_a_survivor": 15
+      },
+      "payouts": {
+        "executed": 716,
+        "deferred_open_copy": 1075
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 45685.6,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n03.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 3,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 8653.2,
+        "min": -265.0,
+        "max": 32006.3,
+        "total": 290128.05,
+        "positive_cohorts": 15
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 33551.3,
+        "total": 335903.05
+      },
+      "book": {
+        "pas_activated": 215,
+        "pa_deaths": 179,
+        "correlated_death_events": 48,
+        "max_simultaneous_deaths": 3,
+        "cohorts_with_a_survivor": 12
+      },
+      "payouts": {
+        "executed": 477,
+        "deferred_open_copy": 913
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 49563.45,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n03.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 3,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 9502.5,
+        "min": -265.0,
+        "max": 25941.17,
+        "total": 272791.11,
+        "positive_cohorts": 16
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 29041.17,
+        "total": 336516.11
+      },
+      "book": {
+        "pas_activated": 304,
+        "pa_deaths": 270,
+        "correlated_death_events": 74,
+        "max_simultaneous_deaths": 3,
+        "cohorts_with_a_survivor": 14
+      },
+      "payouts": {
+        "executed": 596,
+        "deferred_open_copy": 912
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 36658.75,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n04.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 4,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 11382.5,
+        "min": -265.0,
+        "max": 38280.0,
+        "total": 390140.0,
+        "positive_cohorts": 18
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 42000.0,
+        "total": 457500.0
+      },
+      "book": {
+        "pas_activated": 302,
+        "pa_deaths": 251,
+        "correlated_death_events": 54,
+        "max_simultaneous_deaths": 4,
+        "cohorts_with_a_survivor": 14
+      },
+      "payouts": {
+        "executed": 305,
+        "deferred_open_copy": 1305
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 68120.45,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n04.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 4,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 2429.75,
+        "min": -265.0,
+        "max": 33647.64,
+        "total": 273356.82,
+        "positive_cohorts": 14
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 37632.64,
+        "total": 342256.82
+      },
+      "book": {
+        "pas_activated": 309,
+        "pa_deaths": 274,
+        "correlated_death_events": 67,
+        "max_simultaneous_deaths": 4,
+        "cohorts_with_a_survivor": 10
+      },
+      "payouts": {
+        "executed": 561,
+        "deferred_open_copy": 987
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 30727.57,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n04.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 4,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 1772.62,
+        "min": -265.0,
+        "max": 28136.15,
+        "total": 235632.55,
+        "positive_cohorts": 14
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 32456.15,
+        "total": 315402.55
+      },
+      "book": {
+        "pas_activated": 359,
+        "pa_deaths": 323,
+        "correlated_death_events": 78,
+        "max_simultaneous_deaths": 4,
+        "cohorts_with_a_survivor": 9
+      },
+      "payouts": {
+        "executed": 422,
+        "deferred_open_copy": 962
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 13885.4,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n04.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 4,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 5510.0,
+        "min": -265.0,
+        "max": 36520.0,
+        "total": 355380.0,
+        "positive_cohorts": 14
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 40000.0,
+        "total": 419500.0
+      },
+      "book": {
+        "pas_activated": 322,
+        "pa_deaths": 277,
+        "correlated_death_events": 64,
+        "max_simultaneous_deaths": 4,
+        "cohorts_with_a_survivor": 13
+      },
+      "payouts": {
+        "executed": 839,
+        "deferred_open_copy": 1153
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 51495.5,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n04.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 4,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 10224.25,
+        "min": -265.0,
+        "max": 38028.4,
+        "total": 363999.4,
+        "positive_cohorts": 15
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 40088.4,
+        "total": 421124.4
+      },
+      "book": {
+        "pas_activated": 268,
+        "pa_deaths": 220,
+        "correlated_death_events": 54,
+        "max_simultaneous_deaths": 4,
+        "cohorts_with_a_survivor": 12
+      },
+      "payouts": {
+        "executed": 587,
+        "deferred_open_copy": 1132
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 66084.6,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n04.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 4,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 5510.0,
+        "min": -265.0,
+        "max": 33165.56,
+        "total": 322005.54,
+        "positive_cohorts": 14
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 37605.36,
+        "total": 392460.54
+      },
+      "book": {
+        "pas_activated": 329,
+        "pa_deaths": 291,
+        "correlated_death_events": 71,
+        "max_simultaneous_deaths": 4,
+        "cohorts_with_a_survivor": 12
+      },
+      "payouts": {
+        "executed": 689,
+        "deferred_open_copy": 944
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 39130.75,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n05.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 5,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 13152.5,
+        "min": -265.0,
+        "max": 46270.0,
+        "total": 474415.0,
+        "positive_cohorts": 18
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 51000.0,
+        "total": 556500.0
+      },
+      "book": {
+        "pas_activated": 368,
+        "pa_deaths": 305,
+        "correlated_death_events": 74,
+        "max_simultaneous_deaths": 5,
+        "cohorts_with_a_survivor": 14
+      },
+      "payouts": {
+        "executed": 371,
+        "deferred_open_copy": 1505
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 78582.85,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n05.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 5,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -152.5,
+        "min": -265.0,
+        "max": 39632.79,
+        "total": 324308.79,
+        "positive_cohorts": 11
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 44557.79,
+        "total": 400768.79
+      },
+      "book": {
+        "pas_activated": 344,
+        "pa_deaths": 308,
+        "correlated_death_events": 81,
+        "max_simultaneous_deaths": 5,
+        "cohorts_with_a_survivor": 9
+      },
+      "payouts": {
+        "executed": 657,
+        "deferred_open_copy": 1038
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 32991.2,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n05.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 5,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -146.88,
+        "min": -265.0,
+        "max": 36454.45,
+        "total": 210272.85,
+        "positive_cohorts": 8
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 41819.45,
+        "total": 285692.85
+      },
+      "book": {
+        "pas_activated": 327,
+        "pa_deaths": 312,
+        "correlated_death_events": 67,
+        "max_simultaneous_deaths": 5,
+        "cohorts_with_a_survivor": 3
+      },
+      "payouts": {
+        "executed": 375,
+        "deferred_open_copy": 879
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 10200.5,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n05.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 5,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 6297.5,
+        "min": -265.0,
+        "max": 45150.0,
+        "total": 415495.0,
+        "positive_cohorts": 14
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 49500.0,
+        "total": 492000.0
+      },
+      "book": {
+        "pas_activated": 383,
+        "pa_deaths": 327,
+        "correlated_death_events": 81,
+        "max_simultaneous_deaths": 5,
+        "cohorts_with_a_survivor": 13
+      },
+      "payouts": {
+        "executed": 984,
+        "deferred_open_copy": 1373
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 64338.95,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n05.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 5,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -150.65,
+        "min": -265.0,
+        "max": 40252.85,
+        "total": 344257.25,
+        "positive_cohorts": 12
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 44212.5,
+        "total": 408272.25
+      },
+      "book": {
+        "pas_activated": 287,
+        "pa_deaths": 242,
+        "correlated_death_events": 49,
+        "max_simultaneous_deaths": 5,
+        "cohorts_with_a_survivor": 9
+      },
+      "payouts": {
+        "executed": 568,
+        "deferred_open_copy": 1136
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 55239.5,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n05.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 5,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 6297.5,
+        "min": -265.0,
+        "max": 40828.15,
+        "total": 385945.54,
+        "positive_cohorts": 14
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 46018.15,
+        "total": 469840.54
+      },
+      "book": {
+        "pas_activated": 392,
+        "pa_deaths": 344,
+        "correlated_death_events": 88,
+        "max_simultaneous_deaths": 4,
+        "cohorts_with_a_survivor": 12
+      },
+      "payouts": {
+        "executed": 829,
+        "deferred_open_copy": 1116
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 50587.0,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n06.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 6,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 14507.5,
+        "min": -265.0,
+        "max": 48480.0,
+        "total": 503790.0,
+        "positive_cohorts": 15
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 54000.0,
+        "total": 591000.0
+      },
+      "book": {
+        "pas_activated": 388,
+        "pa_deaths": 323,
+        "correlated_death_events": 69,
+        "max_simultaneous_deaths": 6,
+        "cohorts_with_a_survivor": 12
+      },
+      "payouts": {
+        "executed": 394,
+        "deferred_open_copy": 1473
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 71741.65,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n06.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 6,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -150.25,
+        "min": -265.0,
+        "max": 46938.21,
+        "total": 274698.97,
+        "positive_cohorts": 8
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 52838.21,
+        "total": 352393.97
+      },
+      "book": {
+        "pas_activated": 334,
+        "pa_deaths": 307,
+        "correlated_death_events": 69,
+        "max_simultaneous_deaths": 6,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 580,
+        "deferred_open_copy": 923
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 20769.28,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n06.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 6,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -150.27,
+        "min": -267.5,
+        "max": 44797.95,
+        "total": 252427.75,
+        "positive_cohorts": 8
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 51207.95,
+        "total": 331252.75
+      },
+      "book": {
+        "pas_activated": 331,
+        "pa_deaths": 313,
+        "correlated_death_events": 62,
+        "max_simultaneous_deaths": 6,
+        "cohorts_with_a_survivor": 3
+      },
+      "payouts": {
+        "executed": 432,
+        "deferred_open_copy": 935
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 12240.6,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n06.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 6,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -135.0,
+        "min": -265.0,
+        "max": 53280.0,
+        "total": 366170.0,
+        "positive_cohorts": 11
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 58500.0,
+        "total": 446500.0
+      },
+      "book": {
+        "pas_activated": 387,
+        "pa_deaths": 340,
+        "correlated_death_events": 69,
+        "max_simultaneous_deaths": 6,
+        "cohorts_with_a_survivor": 10
+      },
+      "payouts": {
+        "executed": 893,
+        "deferred_open_copy": 1340
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 41696.8,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n06.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 6,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -149.68,
+        "min": -288.5,
+        "max": 48665.8,
+        "total": 392784.25,
+        "positive_cohorts": 12
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 53455.9,
+        "total": 466724.25
+      },
+      "book": {
+        "pas_activated": 337,
+        "pa_deaths": 283,
+        "correlated_death_events": 49,
+        "max_simultaneous_deaths": 6,
+        "cohorts_with_a_survivor": 10
+      },
+      "payouts": {
+        "executed": 648,
+        "deferred_open_copy": 1310
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 64547.7,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n06.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 6,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -135.0,
+        "min": -265.0,
+        "max": 48823.24,
+        "total": 332541.37,
+        "positive_cohorts": 11
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 55113.24,
+        "total": 420066.37
+      },
+      "book": {
+        "pas_activated": 395,
+        "pa_deaths": 353,
+        "correlated_death_events": 75,
+        "max_simultaneous_deaths": 5,
+        "cohorts_with_a_survivor": 10
+      },
+      "payouts": {
+        "executed": 738,
+        "deferred_open_copy": 1079
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 35764.2,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n07.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 7,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 12937.5,
+        "min": -265.0,
+        "max": 56560.0,
+        "total": 533655.0,
+        "positive_cohorts": 15
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 63000.0,
+        "total": 631500.0
+      },
+      "book": {
+        "pas_activated": 435,
+        "pa_deaths": 362,
+        "correlated_death_events": 68,
+        "max_simultaneous_deaths": 7,
+        "cohorts_with_a_survivor": 11
+      },
+      "payouts": {
+        "executed": 421,
+        "deferred_open_copy": 1624
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 83703.55,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n07.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 7,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -152.75,
+        "min": -285.0,
+        "max": 54243.63,
+        "total": 288452.38,
+        "positive_cohorts": 7
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 61118.63,
+        "total": 368267.38
+      },
+      "book": {
+        "pas_activated": 349,
+        "pa_deaths": 318,
+        "correlated_death_events": 70,
+        "max_simultaneous_deaths": 7,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 604,
+        "deferred_open_copy": 983
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 24032.71,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n07.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 7,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -150.27,
+        "min": -287.5,
+        "max": 49891.4,
+        "total": 271688.6,
+        "positive_cohorts": 8
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 57381.4,
+        "total": 359068.6
+      },
+      "book": {
+        "pas_activated": 372,
+        "pa_deaths": 351,
+        "correlated_death_events": 63,
+        "max_simultaneous_deaths": 7,
+        "cohorts_with_a_survivor": 3
+      },
+      "payouts": {
+        "executed": 470,
+        "deferred_open_copy": 1054
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 13893.55,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n07.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 7,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -145.0,
+        "min": -285.0,
+        "max": 61410.0,
+        "total": 373635.0,
+        "positive_cohorts": 10
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 67500.0,
+        "total": 458000.0
+      },
+      "book": {
+        "pas_activated": 412,
+        "pa_deaths": 361,
+        "correlated_death_events": 73,
+        "max_simultaneous_deaths": 7,
+        "cohorts_with_a_survivor": 9
+      },
+      "payouts": {
+        "executed": 916,
+        "deferred_open_copy": 1430
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 45782.45,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n07.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 7,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -273.5,
+        "max": 57036.65,
+        "total": 397675.4,
+        "positive_cohorts": 9
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 62721.65,
+        "total": 472565.4
+      },
+      "book": {
+        "pas_activated": 339,
+        "pa_deaths": 297,
+        "correlated_death_events": 46,
+        "max_simultaneous_deaths": 7,
+        "cohorts_with_a_survivor": 7
+      },
+      "payouts": {
+        "executed": 632,
+        "deferred_open_copy": 1188
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 46829.75,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n07.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 7,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -145.0,
+        "min": -285.0,
+        "max": 56047.63,
+        "total": 339611.95,
+        "positive_cohorts": 10
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 63382.63,
+        "total": 431666.95
+      },
+      "book": {
+        "pas_activated": 422,
+        "pa_deaths": 375,
+        "correlated_death_events": 80,
+        "max_simultaneous_deaths": 6,
+        "cohorts_with_a_survivor": 9
+      },
+      "payouts": {
+        "executed": 756,
+        "deferred_open_copy": 1157
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 39656.45,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n08.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 8,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 3735.0,
+        "min": -265.0,
+        "max": 64640.0,
+        "total": 574490.0,
+        "positive_cohorts": 14
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 72000.0,
+        "total": 678000.0
+      },
+      "book": {
+        "pas_activated": 468,
+        "pa_deaths": 387,
+        "correlated_death_events": 85,
+        "max_simultaneous_deaths": 8,
+        "cohorts_with_a_survivor": 11
+      },
+      "payouts": {
+        "executed": 452,
+        "deferred_open_copy": 1710
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 95871.1,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n08.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 8,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -152.5,
+        "min": -270.0,
+        "max": 61958.03,
+        "total": 329806.61,
+        "positive_cohorts": 7
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 69808.03,
+        "total": 416406.61
+      },
+      "book": {
+        "pas_activated": 389,
+        "pa_deaths": 354,
+        "correlated_death_events": 71,
+        "max_simultaneous_deaths": 8,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 686,
+        "deferred_open_copy": 1093
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 26974.54,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n08.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 8,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -150.27,
+        "min": -267.5,
+        "max": 55665.65,
+        "total": 315928.65,
+        "positive_cohorts": 8
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 64235.65,
+        "total": 411253.65
+      },
+      "book": {
+        "pas_activated": 407,
+        "pa_deaths": 383,
+        "correlated_death_events": 63,
+        "max_simultaneous_deaths": 8,
+        "cohorts_with_a_survivor": 3
+      },
+      "payouts": {
+        "executed": 535,
+        "deferred_open_copy": 1173
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 15546.5,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n08.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 8,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -152.5,
+        "min": -270.0,
+        "max": 69540.0,
+        "total": 333425.0,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 76500.0,
+        "total": 406500.0
+      },
+      "book": {
+        "pas_activated": 362,
+        "pa_deaths": 320,
+        "correlated_death_events": 60,
+        "max_simultaneous_deaths": 8,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 813,
+        "deferred_open_copy": 1164
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 37324.6,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n08.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 8,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -273.5,
+        "max": 64313.0,
+        "total": 396097.6,
+        "positive_cohorts": 8
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 70883.0,
+        "total": 473427.6
+      },
+      "book": {
+        "pas_activated": 349,
+        "pa_deaths": 308,
+        "correlated_death_events": 45,
+        "max_simultaneous_deaths": 8,
+        "cohorts_with_a_survivor": 7
+      },
+      "payouts": {
+        "executed": 633,
+        "deferred_open_copy": 1186
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 43314.9,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n08.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 8,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -152.5,
+        "min": -270.0,
+        "max": 63241.12,
+        "total": 298414.02,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 71621.12,
+        "total": 379244.02
+      },
+      "book": {
+        "pas_activated": 370,
+        "pa_deaths": 334,
+        "correlated_death_events": 68,
+        "max_simultaneous_deaths": 7,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 644,
+        "deferred_open_copy": 877
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 29972.3,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n09.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 9,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": 607.5,
+        "min": -265.0,
+        "max": 72575.0,
+        "total": 617620.0,
+        "positive_cohorts": 14
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 81000.0,
+        "total": 732000.0
+      },
+      "book": {
+        "pas_activated": 511,
+        "pa_deaths": 421,
+        "correlated_death_events": 87,
+        "max_simultaneous_deaths": 9,
+        "cohorts_with_a_survivor": 12
+      },
+      "payouts": {
+        "executed": 488,
+        "deferred_open_copy": 1829
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 109090.9,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n09.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 9,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -157.75,
+        "min": -285.0,
+        "max": 68434.76,
+        "total": 358069.09,
+        "positive_cohorts": 7
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 77294.76,
+        "total": 451719.09
+      },
+      "book": {
+        "pas_activated": 416,
+        "pa_deaths": 377,
+        "correlated_death_events": 66,
+        "max_simultaneous_deaths": 9,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 748,
+        "deferred_open_copy": 1188
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 29916.37,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n09.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 9,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -150.0,
+        "min": -267.5,
+        "max": 60996.85,
+        "total": 341646.1,
+        "positive_cohorts": 8
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 70646.85,
+        "total": 445411.1
+      },
+      "book": {
+        "pas_activated": 444,
+        "pa_deaths": 417,
+        "correlated_death_events": 67,
+        "max_simultaneous_deaths": 9,
+        "cohorts_with_a_survivor": 3
+      },
+      "payouts": {
+        "executed": 583,
+        "deferred_open_copy": 1284
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 17586.6,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n09.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 9,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -285.0,
+        "max": 66875.0,
+        "total": 321420.0,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 75000.0,
+        "total": 401000.0
+      },
+      "book": {
+        "pas_activated": 381,
+        "pa_deaths": 335,
+        "correlated_death_events": 56,
+        "max_simultaneous_deaths": 8,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 802,
+        "deferred_open_copy": 1233
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 40785.85,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n09.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 9,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -273.5,
+        "max": 69070.85,
+        "total": 389682.15,
+        "positive_cohorts": 7
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 76525.85,
+        "total": 466747.15
+      },
+      "book": {
+        "pas_activated": 355,
+        "pa_deaths": 309,
+        "correlated_death_events": 41,
+        "max_simultaneous_deaths": 9,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 622,
+        "deferred_open_copy": 1191
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 51535.05,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n09.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 9,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -285.0,
+        "max": 61481.73,
+        "total": 292664.95,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 70851.73,
+        "total": 379404.95
+      },
+      "book": {
+        "pas_activated": 389,
+        "pa_deaths": 348,
+        "correlated_death_events": 63,
+        "max_simultaneous_deaths": 8,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 652,
+        "deferred_open_copy": 967
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 34275.15,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n10.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 10,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -137.5,
+        "min": -265.0,
+        "max": 77920.0,
+        "total": 623110.0,
+        "positive_cohorts": 12
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 87000.0,
+        "total": 742500.0
+      },
+      "book": {
+        "pas_activated": 513,
+        "pa_deaths": 435,
+        "correlated_death_events": 74,
+        "max_simultaneous_deaths": 9,
+        "cohorts_with_a_survivor": 11
+      },
+      "payouts": {
+        "executed": 495,
+        "deferred_open_copy": 1664
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 91852.8,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n10.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 10,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -300.0,
+        "max": 75030.51,
+        "total": 352638.62,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 84900.51,
+        "total": 443198.62
+      },
+      "book": {
+        "pas_activated": 405,
+        "pa_deaths": 364,
+        "correlated_death_events": 58,
+        "max_simultaneous_deaths": 10,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 732,
+        "deferred_open_copy": 1203
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 32804.8,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n10.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 10,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -152.6,
+        "min": -282.5,
+        "max": 61373.05,
+        "total": 308205.15,
+        "positive_cohorts": 7
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 72153.05,
+        "total": 411265.15
+      },
+      "book": {
+        "pas_activated": 435,
+        "pa_deaths": 405,
+        "correlated_death_events": 60,
+        "max_simultaneous_deaths": 10,
+        "cohorts_with_a_survivor": 3
+      },
+      "payouts": {
+        "executed": 538,
+        "deferred_open_copy": 1244
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 19181.65,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n10.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 10,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -300.0,
+        "max": 74505.0,
+        "total": 354275.0,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 83500.0,
+        "total": 439000.0
+      },
+      "book": {
+        "pas_activated": 409,
+        "pa_deaths": 358,
+        "correlated_death_events": 55,
+        "max_simultaneous_deaths": 9,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 878,
+        "deferred_open_copy": 1350
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 45382.4,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n10.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 10,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -288.5,
+        "max": 72087.85,
+        "total": 367503.15,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 80427.85,
+        "total": 441868.15
+      },
+      "book": {
+        "pas_activated": 346,
+        "pa_deaths": 297,
+        "correlated_death_events": 41,
+        "max_simultaneous_deaths": 10,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 596,
+        "deferred_open_copy": 1143
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 52033.7,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n10.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 10,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -300.0,
+        "max": 68175.22,
+        "total": 321782.4,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 78590.22,
+        "total": 414597.4
+      },
+      "book": {
+        "pas_activated": 418,
+        "pa_deaths": 372,
+        "correlated_death_events": 62,
+        "max_simultaneous_deaths": 9,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 710,
+        "deferred_open_copy": 1050
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 38166.55,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n11.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 11,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -157.5,
+        "min": -270.0,
+        "max": 78820.0,
+        "total": 500710.0,
+        "positive_cohorts": 9
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 88500.0,
+        "total": 613500.0
+      },
+      "book": {
+        "pas_activated": 449,
+        "pa_deaths": 388,
+        "correlated_death_events": 72,
+        "max_simultaneous_deaths": 10,
+        "cohorts_with_a_survivor": 9
+      },
+      "payouts": {
+        "executed": 409,
+        "deferred_open_copy": 1321
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 65840.15,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n11.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 11,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -155.0,
+        "min": -280.0,
+        "max": 82223.2,
+        "total": 377473.96,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 93068.2,
+        "total": 473843.96
+      },
+      "book": {
+        "pas_activated": 433,
+        "pa_deaths": 387,
+        "correlated_death_events": 57,
+        "max_simultaneous_deaths": 11,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 788,
+        "deferred_open_copy": 1253
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 35969.84,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n11.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 11,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -152.5,
+        "min": -282.5,
+        "max": 66606.35,
+        "total": 346574.5,
+        "positive_cohorts": 7
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 78466.35,
+        "total": 456454.5
+      },
+      "book": {
+        "pas_activated": 468,
+        "pa_deaths": 435,
+        "correlated_death_events": 61,
+        "max_simultaneous_deaths": 11,
+        "cohorts_with_a_survivor": 3
+      },
+      "payouts": {
+        "executed": 597,
+        "deferred_open_copy": 1306
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 20834.6,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n11.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 11,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -155.0,
+        "min": -280.0,
+        "max": 77565.0,
+        "total": 373290.0,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 87500.0,
+        "total": 463500.0
+      },
+      "book": {
+        "pas_activated": 433,
+        "pa_deaths": 376,
+        "correlated_death_events": 59,
+        "max_simultaneous_deaths": 10,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 927,
+        "deferred_open_copy": 1413
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 50492.05,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n11.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 11,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -288.5,
+        "max": 81428.35,
+        "total": 405564.75,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 90443.35,
+        "total": 484084.75
+      },
+      "book": {
+        "pas_activated": 370,
+        "pa_deaths": 316,
+        "correlated_death_events": 40,
+        "max_simultaneous_deaths": 11,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 651,
+        "deferred_open_copy": 1201
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 57563.55,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n11.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 11,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -155.0,
+        "min": -280.0,
+        "max": 71235.22,
+        "total": 340139.38,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 82590.22,
+        "total": 438574.38
+      },
+      "book": {
+        "pas_activated": 440,
+        "pa_deaths": 389,
+        "correlated_death_events": 71,
+        "max_simultaneous_deaths": 10,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 753,
+        "deferred_open_copy": 1098
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 42469.4,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n12.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 12,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -155.0,
+        "min": -270.0,
+        "max": 76070.0,
+        "total": 503660.0,
+        "positive_cohorts": 9
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 87000.0,
+        "total": 622500.0
+      },
+      "book": {
+        "pas_activated": 461,
+        "pa_deaths": 395,
+        "correlated_death_events": 62,
+        "max_simultaneous_deaths": 11,
+        "cohorts_with_a_survivor": 9
+      },
+      "payouts": {
+        "executed": 415,
+        "deferred_open_copy": 1335
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 68899.5,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n12.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 12,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -285.0,
+        "max": 82068.76,
+        "total": 331573.96,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 93853.76,
+        "total": 424293.96
+      },
+      "book": {
+        "pas_activated": 422,
+        "pa_deaths": 382,
+        "correlated_death_events": 59,
+        "max_simultaneous_deaths": 12,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 703,
+        "deferred_open_copy": 1184
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 37739.72,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n12.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 12,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -155.52,
+        "min": -282.5,
+        "max": 76195.2,
+        "total": 393642.35,
+        "positive_cohorts": 7
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 89065.2,
+        "total": 510172.35
+      },
+      "book": {
+        "pas_activated": 496,
+        "pa_deaths": 460,
+        "correlated_death_events": 60,
+        "max_simultaneous_deaths": 12,
+        "cohorts_with_a_survivor": 3
+      },
+      "payouts": {
+        "executed": 664,
+        "deferred_open_copy": 1354
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 22656.9,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n12.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 12,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -285.0,
+        "max": 74625.0,
+        "total": 365615.0,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 85500.0,
+        "total": 461000.0
+      },
+      "book": {
+        "pas_activated": 466,
+        "pa_deaths": 403,
+        "correlated_death_events": 56,
+        "max_simultaneous_deaths": 11,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 922,
+        "deferred_open_copy": 1449
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 55756.3,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n12.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 12,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -288.5,
+        "max": 85432.6,
+        "total": 421178.75,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 95137.6,
+        "total": 503993.75
+      },
+      "book": {
+        "pas_activated": 387,
+        "pa_deaths": 328,
+        "correlated_death_events": 38,
+        "max_simultaneous_deaths": 12,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 676,
+        "deferred_open_copy": 1247
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 64683.3,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n12.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 12,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -285.0,
+        "max": 65771.32,
+        "total": 318853.78,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 78046.32,
+        "total": 422398.78
+      },
+      "book": {
+        "pas_activated": 468,
+        "pa_deaths": 413,
+        "correlated_death_events": 68,
+        "max_simultaneous_deaths": 11,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 725,
+        "deferred_open_copy": 1129
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 46305.15,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n13.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 13,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -270.0,
+        "max": 84060.0,
+        "total": 409860.0,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 96000.0,
+        "total": 517500.0
+      },
+      "book": {
+        "pas_activated": 419,
+        "pa_deaths": 363,
+        "correlated_death_events": 49,
+        "max_simultaneous_deaths": 12,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 345,
+        "deferred_open_copy": 1159
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 65923.95,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n13.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 13,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -158.22,
+        "min": -285.0,
+        "max": 83498.89,
+        "total": 338285.1,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 96188.89,
+        "total": 435480.1
+      },
+      "book": {
+        "pas_activated": 448,
+        "pa_deaths": 402,
+        "correlated_death_events": 63,
+        "max_simultaneous_deaths": 13,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 723,
+        "deferred_open_copy": 1246
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 44019.71,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n13.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 13,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -157.23,
+        "min": -282.5,
+        "max": 85807.55,
+        "total": 362036.55,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 99687.55,
+        "total": 474466.55
+      },
+      "book": {
+        "pas_activated": 487,
+        "pa_deaths": 448,
+        "correlated_death_events": 57,
+        "max_simultaneous_deaths": 13,
+        "cohorts_with_a_survivor": 3
+      },
+      "payouts": {
+        "executed": 614,
+        "deferred_open_copy": 1286
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 24903.15,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n13.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 13,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -155.0,
+        "min": -285.0,
+        "max": 69805.0,
+        "total": 304125.0,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 81500.0,
+        "total": 406000.0
+      },
+      "book": {
+        "pas_activated": 493,
+        "pa_deaths": 424,
+        "correlated_death_events": 56,
+        "max_simultaneous_deaths": 12,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 812,
+        "deferred_open_copy": 1521
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 61068.8,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n13.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 13,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -288.5,
+        "max": 77663.05,
+        "total": 400324.9,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 88338.05,
+        "total": 488409.9
+      },
+      "book": {
+        "pas_activated": 402,
+        "pa_deaths": 337,
+        "correlated_death_events": 42,
+        "max_simultaneous_deaths": 12,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 662,
+        "deferred_open_copy": 1295
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 71323.95,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n13.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 13,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -155.0,
+        "min": -285.0,
+        "max": 64380.83,
+        "total": 273373.87,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 77320.83,
+        "total": 380313.87
+      },
+      "book": {
+        "pas_activated": 496,
+        "pa_deaths": 430,
+        "correlated_death_events": 64,
+        "max_simultaneous_deaths": 12,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 689,
+        "deferred_open_copy": 1334
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 57591.45,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n14.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 14,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -290.0,
+        "max": 90620.0,
+        "total": 425400.0,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 103500.0,
+        "total": 532500.0
+      },
+      "book": {
+        "pas_activated": 399,
+        "pa_deaths": 337,
+        "correlated_death_events": 39,
+        "max_simultaneous_deaths": 13,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 355,
+        "deferred_open_copy": 1152
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 70828.8,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n14.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 14,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -300.0,
+        "max": 83708.89,
+        "total": 340522.52,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 97373.89,
+        "total": 442717.52
+      },
+      "book": {
+        "pas_activated": 474,
+        "pa_deaths": 424,
+        "correlated_death_events": 51,
+        "max_simultaneous_deaths": 14,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 742,
+        "deferred_open_copy": 1298
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 46906.2,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n14.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 14,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -158.82,
+        "min": -282.5,
+        "max": 88736.0,
+        "total": 345169.9,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 103591.0,
+        "total": 451399.9
+      },
+      "book": {
+        "pas_activated": 457,
+        "pa_deaths": 429,
+        "correlated_death_events": 53,
+        "max_simultaneous_deaths": 14,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 582,
+        "deferred_open_copy": 1201
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 22861.0,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n14.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 14,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -300.0,
+        "max": 76275.0,
+        "total": 131105.0,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 89000.0,
+        "total": 203000.0
+      },
+      "book": {
+        "pas_activated": 345,
+        "pa_deaths": 325,
+        "correlated_death_events": 38,
+        "max_simultaneous_deaths": 13,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 406,
+        "deferred_open_copy": 982
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 6815.75,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n14.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 14,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -268.5,
+        "max": 95857.2,
+        "total": 440021.95,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 106817.2,
+        "total": 531236.95
+      },
+      "book": {
+        "pas_activated": 408,
+        "pa_deaths": 338,
+        "correlated_death_events": 44,
+        "max_simultaneous_deaths": 13,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 716,
+        "deferred_open_copy": 1255
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 75376.15,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n14.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 14,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -300.0,
+        "max": 69914.32,
+        "total": 114690.48,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 84059.32,
+        "total": 189690.48
+      },
+      "book": {
+        "pas_activated": 348,
+        "pa_deaths": 328,
+        "correlated_death_events": 42,
+        "max_simultaneous_deaths": 12,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 335,
+        "deferred_open_copy": 872
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 6815.75,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n15.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 15,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -275.0,
+        "max": 97110.0,
+        "total": 450030.0,
+        "positive_cohorts": 6
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 111000.0,
+        "total": 562500.0
+      },
+      "book": {
+        "pas_activated": 426,
+        "pa_deaths": 358,
+        "correlated_death_events": 41,
+        "max_simultaneous_deaths": 14,
+        "cohorts_with_a_survivor": 6
+      },
+      "payouts": {
+        "executed": 375,
+        "deferred_open_copy": 1207
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 75513.6,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n15.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 15,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -157.95,
+        "min": -280.0,
+        "max": 81604.08,
+        "total": 298753.93,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 96514.08,
+        "total": 404993.93
+      },
+      "book": {
+        "pas_activated": 496,
+        "pa_deaths": 437,
+        "correlated_death_events": 55,
+        "max_simultaneous_deaths": 15,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 689,
+        "deferred_open_copy": 1400
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 56494.27,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n15.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 15,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -158.82,
+        "min": -297.5,
+        "max": 96993.65,
+        "total": 373084.2,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 112788.65,
+        "total": 483809.2
+      },
+      "book": {
+        "pas_activated": 477,
+        "pa_deaths": 447,
+        "correlated_death_events": 56,
+        "max_simultaneous_deaths": 15,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 625,
+        "deferred_open_copy": 1258
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 24967.25,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n15.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 15,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -295.0,
+        "max": 82745.0,
+        "total": 144055.0,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 96500.0,
+        "total": 221500.0
+      },
+      "book": {
+        "pas_activated": 374,
+        "pa_deaths": 352,
+        "correlated_death_events": 42,
+        "max_simultaneous_deaths": 14,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 443,
+        "deferred_open_copy": 1042
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 7540.45,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n15.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 15,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -268.5,
+        "max": 94262.9,
+        "total": 410802.85,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 106087.9,
+        "total": 496072.85
+      },
+      "book": {
+        "pas_activated": 375,
+        "pa_deaths": 315,
+        "correlated_death_events": 40,
+        "max_simultaneous_deaths": 14,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 668,
+        "deferred_open_copy": 1224
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 76489.75,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n15.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 15,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -295.0,
+        "max": 74947.81,
+        "total": 124802.46,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 90297.81,
+        "total": 205667.46
+      },
+      "book": {
+        "pas_activated": 377,
+        "pa_deaths": 355,
+        "correlated_death_events": 48,
+        "max_simultaneous_deaths": 13,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 362,
+        "deferred_open_copy": 918
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 7540.45,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n16.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 16,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -295.0,
+        "max": 105100.0,
+        "total": 391910.0,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 120000.0,
+        "total": 499500.0
+      },
+      "book": {
+        "pas_activated": 406,
+        "pa_deaths": 336,
+        "correlated_death_events": 36,
+        "max_simultaneous_deaths": 15,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 333,
+        "deferred_open_copy": 1095
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 78758.75,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n16.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 16,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -157.95,
+        "min": -280.0,
+        "max": 87004.83,
+        "total": 322729.22,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 103049.83,
+        "total": 433359.22
+      },
+      "book": {
+        "pas_activated": 516,
+        "pa_deaths": 453,
+        "correlated_death_events": 55,
+        "max_simultaneous_deaths": 16,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 736,
+        "deferred_open_copy": 1433
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 59893.3,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n16.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 16,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -158.82,
+        "min": -277.5,
+        "max": 98611.4,
+        "total": 381626.1,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 115486.4,
+        "total": 497091.1
+      },
+      "book": {
+        "pas_activated": 497,
+        "pa_deaths": 465,
+        "correlated_death_events": 58,
+        "max_simultaneous_deaths": 16,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 648,
+        "deferred_open_copy": 1305
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 26423.55,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n16.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 16,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -295.0,
+        "max": 88645.0,
+        "total": 156835.0,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 103500.0,
+        "total": 236000.0
+      },
+      "book": {
+        "pas_activated": 383,
+        "pa_deaths": 359,
+        "correlated_death_events": 42,
+        "max_simultaneous_deaths": 14,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 472,
+        "deferred_open_copy": 1080
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 8265.15,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n16.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 16,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -268.5,
+        "max": 96984.9,
+        "total": 425745.45,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 109729.9,
+        "total": 515390.45
+      },
+      "book": {
+        "pas_activated": 389,
+        "pa_deaths": 324,
+        "correlated_death_events": 36,
+        "max_simultaneous_deaths": 15,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 697,
+        "deferred_open_copy": 1265
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 82659.45,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n16.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 16,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -295.0,
+        "max": 79981.3,
+        "total": 136935.13,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 96536.3,
+        "total": 219870.13
+      },
+      "book": {
+        "pas_activated": 386,
+        "pa_deaths": 362,
+        "correlated_death_events": 47,
+        "max_simultaneous_deaths": 13,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 383,
+        "deferred_open_copy": 923
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 7997.9,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n17.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 17,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -295.0,
+        "max": 95625.0,
+        "total": 407805.0,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 112500.0,
+        "total": 517500.0
+      },
+      "book": {
+        "pas_activated": 415,
+        "pa_deaths": 344,
+        "correlated_death_events": 38,
+        "max_simultaneous_deaths": 16,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 345,
+        "deferred_open_copy": 1147
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 83689.65,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n17.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 17,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -157.95,
+        "min": -280.0,
+        "max": 92405.58,
+        "total": 346627.8,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 109585.58,
+        "total": 461632.8
+      },
+      "book": {
+        "pas_activated": 537,
+        "pa_deaths": 470,
+        "correlated_death_events": 56,
+        "max_simultaneous_deaths": 17,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 783,
+        "deferred_open_copy": 1476
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 63003.49,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n17.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 17,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -158.82,
+        "min": -292.5,
+        "max": 106666.15,
+        "total": 414302.85,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 124551.15,
+        "total": 534472.85
+      },
+      "book": {
+        "pas_activated": 517,
+        "pa_deaths": 483,
+        "correlated_death_events": 55,
+        "max_simultaneous_deaths": 17,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 677,
+        "deferred_open_copy": 1360
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 28169.1,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n17.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 17,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -295.0,
+        "max": 94545.0,
+        "total": 163885.0,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 110500.0,
+        "total": 245000.0
+      },
+      "book": {
+        "pas_activated": 393,
+        "pa_deaths": 367,
+        "correlated_death_events": 46,
+        "max_simultaneous_deaths": 14,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 490,
+        "deferred_open_copy": 1120
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 8989.85,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n17.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 17,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -268.5,
+        "max": 103300.55,
+        "total": 455709.9,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 116895.55,
+        "total": 549264.9
+      },
+      "book": {
+        "pas_activated": 406,
+        "pa_deaths": 336,
+        "correlated_death_events": 41,
+        "max_simultaneous_deaths": 16,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 743,
+        "deferred_open_copy": 1313
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 88829.15,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n17.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 17,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -295.0,
+        "max": 85014.79,
+        "total": 143688.62,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 102774.79,
+        "total": 228608.62
+      },
+      "book": {
+        "pas_activated": 396,
+        "pa_deaths": 370,
+        "correlated_death_events": 48,
+        "max_simultaneous_deaths": 13,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 398,
+        "deferred_open_copy": 944
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 8794.05,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n18.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 18,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -275.0,
+        "max": 101390.0,
+        "total": 435835.0,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 120000.0,
+        "total": 549000.0
+      },
+      "book": {
+        "pas_activated": 431,
+        "pa_deaths": 355,
+        "correlated_death_events": 42,
+        "max_simultaneous_deaths": 17,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 366,
+        "deferred_open_copy": 1208
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 88238.0,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n18.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 18,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -157.95,
+        "min": -280.0,
+        "max": 98348.23,
+        "total": 371414.35,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 116413.23,
+        "total": 490544.35
+      },
+      "book": {
+        "pas_activated": 556,
+        "pa_deaths": 486,
+        "correlated_death_events": 56,
+        "max_simultaneous_deaths": 18,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 830,
+        "deferred_open_copy": 1542
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 65748.67,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n18.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 18,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -154.55,
+        "min": -272.5,
+        "max": 107831.15,
+        "total": 407232.75,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 125126.15,
+        "total": 532022.75
+      },
+      "book": {
+        "pas_activated": 531,
+        "pa_deaths": 495,
+        "correlated_death_events": 52,
+        "max_simultaneous_deaths": 18,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 667,
+        "deferred_open_copy": 1408
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 29625.4,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n18.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 18,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -280.0,
+        "max": 97125.0,
+        "total": 167695.0,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 114500.0,
+        "total": 251000.0
+      },
+      "book": {
+        "pas_activated": 401,
+        "pa_deaths": 373,
+        "correlated_death_events": 47,
+        "max_simultaneous_deaths": 15,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 502,
+        "deferred_open_copy": 1160
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 9643.1,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n18.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 18,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -268.5,
+        "max": 109363.2,
+        "total": 482950.95,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 123738.2,
+        "total": 580100.95
+      },
+      "book": {
+        "pas_activated": 423,
+        "pa_deaths": 348,
+        "correlated_death_events": 41,
+        "max_simultaneous_deaths": 17,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 783,
+        "deferred_open_copy": 1365
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 94998.85,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n18.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 18,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -280.0,
+        "max": 88963.19,
+        "total": 151570.51,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 107913.19,
+        "total": 238485.51
+      },
+      "book": {
+        "pas_activated": 403,
+        "pa_deaths": 375,
+        "correlated_death_events": 48,
+        "max_simultaneous_deaths": 14,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 415,
+        "deferred_open_copy": 965
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 9518.75,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n19.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 19,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -290.0,
+        "max": 109700.0,
+        "total": 365685.0,
+        "positive_cohorts": 4
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 124500.0,
+        "total": 471000.0
+      },
+      "book": {
+        "pas_activated": 392,
+        "pa_deaths": 318,
+        "correlated_death_events": 32,
+        "max_simultaneous_deaths": 16,
+        "cohorts_with_a_survivor": 4
+      },
+      "payouts": {
+        "executed": 314,
+        "deferred_open_copy": 1068
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 95665.15,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n19.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 19,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -170.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -280.0,
+        "max": 104080.07,
+        "total": 94196.84,
+        "positive_cohorts": 1
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 123030.07,
+        "total": 161556.84
+      },
+      "book": {
+        "pas_activated": 295,
+        "pa_deaths": 288,
+        "correlated_death_events": 29,
+        "max_simultaneous_deaths": 19,
+        "cohorts_with_a_survivor": 1
+      },
+      "payouts": {
+        "executed": 273,
+        "deferred_open_copy": 867
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 3176.95,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n19.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 19,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.8,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -292.65,
+        "max": 115679.9,
+        "total": 105864.05,
+        "positive_cohorts": 1
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 133894.9,
+        "total": 175434.05
+      },
+      "book": {
+        "pas_activated": 269,
+        "pa_deaths": 269,
+        "correlated_death_events": 19,
+        "max_simultaneous_deaths": 19,
+        "cohorts_with_a_survivor": 0
+      },
+      "payouts": {
+        "executed": 221,
+        "deferred_open_copy": 773
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 0.0,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n19.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 19,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -280.0,
+        "max": 99435.0,
+        "total": 167065.0,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 118000.0,
+        "total": 252500.0
+      },
+      "book": {
+        "pas_activated": 413,
+        "pa_deaths": 383,
+        "correlated_death_events": 49,
+        "max_simultaneous_deaths": 15,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 505,
+        "deferred_open_copy": 1200
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 10296.35,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n19.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 19,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -268.5,
+        "max": 115425.85,
+        "total": 510207.0,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 130580.85,
+        "total": 610937.0
+      },
+      "book": {
+        "pas_activated": 441,
+        "pa_deaths": 361,
+        "correlated_death_events": 38,
+        "max_simultaneous_deaths": 18,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 823,
+        "deferred_open_copy": 1417
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 101168.55,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n19.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 19,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -280.0,
+        "max": 92188.1,
+        "total": 157635.31,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 112313.1,
+        "total": 246630.31
+      },
+      "book": {
+        "pas_activated": 416,
+        "pa_deaths": 386,
+        "correlated_death_events": 49,
+        "max_simultaneous_deaths": 15,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 431,
+        "deferred_open_copy": 998
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 10116.6,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n20.cap_maximizer.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 20,
+      "payout_policy_id": "cap_maximizer",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -290.0,
+        "max": 117850.0,
+        "total": 390545.0,
+        "positive_cohorts": 4
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 133500.0,
+        "total": 499500.0
+      },
+      "book": {
+        "pas_activated": 413,
+        "pa_deaths": 335,
+        "correlated_death_events": 36,
+        "max_simultaneous_deaths": 17,
+        "cohorts_with_a_survivor": 4
+      },
+      "payouts": {
+        "executed": 333,
+        "deferred_open_copy": 1118
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 99985.2,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n20.half_of_maximum.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 20,
+      "payout_policy_id": "half_of_maximum",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -170.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -280.0,
+        "max": 108837.89,
+        "total": 98934.66,
+        "positive_cohorts": 1
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 128727.89,
+        "total": 167254.66
+      },
+      "book": {
+        "pas_activated": 301,
+        "pa_deaths": 294,
+        "correlated_death_events": 29,
+        "max_simultaneous_deaths": 20,
+        "cohorts_with_a_survivor": 1
+      },
+      "payouts": {
+        "executed": 283,
+        "deferred_open_copy": 888
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 3176.95,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n20.maximum_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 20,
+      "payout_policy_id": "maximum_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.8,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -277.65,
+        "max": 123132.25,
+        "total": 113331.4,
+        "positive_cohorts": 1
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 142267.25,
+        "total": 183806.4
+      },
+      "book": {
+        "pas_activated": 274,
+        "pa_deaths": 274,
+        "correlated_death_events": 19,
+        "max_simultaneous_deaths": 20,
+        "cohorts_with_a_survivor": 0
+      },
+      "payouts": {
+        "executed": 231,
+        "deferred_open_copy": 764
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 0.0,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n20.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 20,
+      "payout_policy_id": "minimum_500_always",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -290.0,
+        "max": 100245.0,
+        "total": 172515.0,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 120000.0,
+        "total": 260000.0
+      },
+      "book": {
+        "pas_activated": 421,
+        "pa_deaths": 390,
+        "correlated_death_events": 51,
+        "max_simultaneous_deaths": 17,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 520,
+        "deferred_open_copy": 1223
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 10590.9,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n20.preserve_safety_net.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 20,
+      "payout_policy_id": "preserve_safety_net",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -268.5,
+        "max": 121488.5,
+        "total": 537463.05,
+        "positive_cohorts": 5
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 137423.5,
+        "total": 641773.05
+      },
+      "book": {
+        "pas_activated": 459,
+        "pa_deaths": 374,
+        "correlated_death_events": 38,
+        "max_simultaneous_deaths": 19,
+        "cohorts_with_a_survivor": 5
+      },
+      "payouts": {
+        "executed": 863,
+        "deferred_open_copy": 1469
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 107338.25,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    },
+    {
+      "arm_id": "n20.rush_to_uncapped.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "n": 20,
+      "payout_policy_id": "rush_to_uncapped",
+      "path_stress_arm": "source_constrained_then_seeded_coin",
+      "event_order_mode": "canonical_settle_realize_spend_commit",
+      "cohort_count": 55,
+      "owner_net_retained_cash_usd": {
+        "median": -160.0,
+        "p25": -195.0,
+        "p75": -160.0,
+        "min": -290.0,
+        "max": 95301.12,
+        "total": 164521.82,
+        "positive_cohorts": 2
+      },
+      "cumulative_payout_harvest_usd": {
+        "median": 0.0,
+        "max": 116336.12,
+        "total": 255391.82
+      },
+      "book": {
+        "pas_activated": 424,
+        "pa_deaths": 393,
+        "correlated_death_events": 49,
+        "max_simultaneous_deaths": 16,
+        "cohorts_with_a_survivor": 2
+      },
+      "payouts": {
+        "executed": 451,
+        "deferred_open_copy": 1027
+      },
+      "right_censoring": {
+        "unwithdrawn_equity_total_usd": 10313.25,
+        "horizon_open_batches": 5,
+        "note": "never summed into the headline metric"
+      }
+    }
+  ],
+  "result_digest_sha256": "5bed99bcd7d235c5c95cd05d2e5e90912ee47a1128a39cb32c93931d8479bbd0"
+}
