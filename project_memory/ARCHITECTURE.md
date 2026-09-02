@@ -9,7 +9,20 @@
   fully observed horizons from tape-censored starts, and classifies the selected
   leave-open-unscored horizon crossing.
 - `evaluation_lock.py`: executes the pinned upstream cycle-local Evaluation
-  behavior fixture; it is not yet the integrated consumer.
+  behavior fixture. It is the parity reference for `evaluation_consumer.py`,
+  not the integrated consumer itself.
+- `evaluation_consumer.py`: the integrated per-Evaluation cycle-local selector.
+  Each Evaluation runs its own one-position selector over the whole tape and
+  restarts it at every renewal boundary, which is deliberately not the PA
+  book's single never-reset selection. Verified against the behavior lock.
+- `policy_bundle.py`: the single seam from gate JSON to constructed policy
+  objects. It refuses to build when a contract field is unresolved, a user
+  decision is open, or bound evidence no longer hashes, so no priced term can
+  reach the runtime as a dataclass default.
+- `study_runner.py`: drives one cohort. It owns sequencing only: it computes
+  the next event time from every live source and processes phases in the gate's
+  declared rank order, leaving pre-cutoff entries open and unscored at the
+  horizon. It is not the parameter sweep.
 - `contracts.py`: explicit scaling, pipeline-cap accounting, acquisition, and
   death-count-bounded replacement primitives.
 - `copy_to_all.py`: copies accepted opportunities to every eligible PA,

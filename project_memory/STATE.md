@@ -40,11 +40,20 @@ Verified and implemented:
 - canonical and `spend_before_payout` deterministic event-order modes; and
 - source/local implementation provenance verification.
 
-The canonical suite discovers and passes 81 tests, including transfer and
-provenance verification. All phase-1 user choices are resolved, but the
-integrated sweep remains blocked. A gate-to-runtime bundle, per-Evaluation
-consumer, study-scale horizon/reporting integration, real-tape N=1 result
-manifest, one-tick-per-side full-N sensitivity, and runner remain to implement.
+The canonical suite discovers and passes 92 tests, including transfer and
+provenance verification. All phase-1 user choices are resolved. The
+gate-to-runtime bundle (`policy_bundle.py`), the per-Evaluation cycle-local
+consumer (`evaluation_consumer.py`, verified equal to the pinned behavior lock)
+and a single-cohort runner (`study_runner.py`) now exist, and the first
+real-tape slice is recorded in `results/n1_real_tape_slice.json`: N=1,
+`minimum_500_always`, 55 monthly cohorts, deterministic across repeat runs.
+
+That slice is not a study result. The sweep remains blocked by four things: no
+parameter-sweep driver, no one-tick-per-side full-N sensitivity, no executed
+ordering arm, and no N>1 book ever simulated. Two runner defects found by the
+slice and fixed under regression test: session closes were anchored on the
+audit log, so an earning PA with thousands in equity took zero payouts; and an
+unfundable obligation was retried at every timestamp, stalling the clock.
 
 The corrected raw accepted-opportunity diagnostic has 6,482 fully observed
 720-day starts with median net gain about $6,602 (min -$259, max $21,024);

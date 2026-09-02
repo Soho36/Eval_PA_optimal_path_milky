@@ -78,7 +78,7 @@
     },
     {
       "path": "config/milky_cow_contract_gate.json",
-      "sha256": "b6071e79279c6fae5256a665cecf63c3d3f55c3d66e5c0e7c7e122d0d64e92e4",
+      "sha256": "4ba578d5948ce716893f5b97b26002dbcc9841aa7b6096cf0da70a39a3bb4100",
       "role": "active_foundation_gate"
     },
     {
@@ -213,17 +213,17 @@
     },
     {
       "path": "project_memory/ARCHITECTURE.md",
-      "sha256": "33f4dfdf72048aba1b460e2eb18e1fe9c2b6fe3b1e36426b499cb38311a69e67",
+      "sha256": "082d45355421a02f0211ef371340c9ca9e1d46bd153fa4076cbf948701025b14",
       "role": "foundation_architecture_memory"
     },
     {
       "path": "project_memory/STATE.md",
-      "sha256": "883faf816ec0f410b5a36c6d6a066912c99a027216972042ff8c13c24bfb4abb",
+      "sha256": "6cb2dcd277fc61e1703164d3b2d038c4893b263d5678ef2f0354caf5cc5cdc21",
       "role": "current_project_state_memory"
     },
     {
       "path": "project_memory/TODO.md",
-      "sha256": "236a14fc6b35d5ea73c5d9e10eb14de375d13ccbce217f72645a8393986524b1",
+      "sha256": "ee463c0a072044a0ad1b2fd064a1bcf5fa034fc17ceb2dfeda725dd1f9840e39",
       "role": "current_gate_work_queue"
     },
     {
@@ -240,6 +240,31 @@
       "path": "tests/test_study_contract.py",
       "sha256": "067e0b1a0f490613f2e899fa8840103c46223332c6635736f5d02d6c81eb52a4",
       "role": "active_vs_frozen_scope_governance_fixture"
+    },
+    {
+      "path": "src/milky_cow/policy_bundle.py",
+      "sha256": "bce8090063f96e23f0ec191c81c98688d41a8c49f5336a30e3bf5a39afadabef",
+      "role": "gate_to_runtime_policy_bundle"
+    },
+    {
+      "path": "src/milky_cow/evaluation_consumer.py",
+      "sha256": "ee86cbf0b06e0ebee70ae9c82c7ad4ef8a948cc171a387578de8a028c76a9b60",
+      "role": "per_evaluation_cycle_local_consumer"
+    },
+    {
+      "path": "src/milky_cow/study_runner.py",
+      "sha256": "1284160bbad5cc530714f682a1a0e55f5e68f8ac83075885056d33c8cc927e76",
+      "role": "single_cohort_lifecycle_runner"
+    },
+    {
+      "path": "scripts/run_n1_manifest.py",
+      "sha256": "28184bb7cc571ba95e3f08306e270bd70dd3de824314e4e16e0f6907bcebcdcf",
+      "role": "n1_real_tape_slice_entry_point"
+    },
+    {
+      "path": "tests/test_study_runner.py",
+      "sha256": "ead0723948238e3b96001acd0b26ca73367ec553640a81ea4839eaf5006f3596",
+      "role": "runner_and_consumer_contract_tests"
     }
   ],
   "derivations": [

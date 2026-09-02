@@ -48,6 +48,11 @@
       "path": "src/milky_cow/inputs.py",
       "sha256": "9d362794904749099a34e1104979875ce6a61d0b9fced8e9f2449c4ec5e5f139",
       "role": "selector_implementation"
+    },
+    {
+      "path": "rules/25k_legacy_rules.txt",
+      "sha256": "e749f745e7d5d8a2a99ba4cb8bedf7275b2ae9047ba650e4655de075e663713d",
+      "role": "effective_dated_commercial_terms_source"
     }
   ],
   "status": "phase_1_contracts_resolved_integrated_sweep_still_blocked",
@@ -596,6 +601,16 @@
       "pa_realized_pnl_day_basis": "exit_local_calendar_date",
       "basis_source": "parent legacy_25k_baseline.json time block; the user set the cutoff, the entry/exit basis is parent parity",
       "session_clock_filters_completed_fills": false
+    },
+    "evaluation_account_terms": {
+      "source": "rules/25k_legacy_rules.txt and parent legacy_25k_baseline.json",
+      "target_profit_usd": 1500.0,
+      "trailing_drawdown_usd": 1500.0,
+      "contracts_mnq": 3,
+      "minimum_trading_days": 1,
+      "cycle_days": 30,
+      "threshold_touch_fails": true,
+      "carries_if_alive_at_renewal": true
     }
   },
   "resolved_user_decisions_2026_09_02": [
@@ -650,9 +665,29 @@
     }
   ],
   "remaining_blockers_before_the_sweep": [
-    "no gate-to-runtime policy bundle or per-Evaluation cycle-local consumer exists",
-    "no study-scale lifecycle runner or real-tape N=1 result manifest exists",
-    "the selected horizon-open-state and open-copy payout-deferral reporting are not integrated into a study runner",
-    "the required one-tick-per-side full-N execution sensitivity is not implemented"
+    "no parameter-sweep driver exists: the runner executes one (N, payout policy) arm per call, and the 20 x 6 grid across three path arms is not orchestrated, aggregated, or ranked",
+    "the required one-tick-per-side full-N execution sensitivity is not implemented; Lifecycle still hard-requires perfect_linear_no_slippage_fixture_only and cannot express the arm",
+    "the spend_before_payout ordering-sensitivity arm is constructible but has not been executed or reported",
+    "only N=1 has been run on the real tape; no N>1 book has ever been simulated, so copy-to-all correlated deaths are untested at scale"
+  ],
+  "commercial_terms": {
+    "source": "rules/25k_legacy_rules.txt",
+    "source_lines": "90-92 fees, 114 execution baseline",
+    "evaluation_purchase_fee_usd": 35.0,
+    "evaluation_renewal_fee_usd": 35.0,
+    "pa_activation_fee_usd": 125.0,
+    "commission_roundturn_usd_per_mnq": 1.05,
+    "slippage_ticks_per_side": 0,
+    "why_explicit": "the runtime bundle must not fall back to a dataclass default for a priced term; every fee that moves cash is named here with its rule source"
+  },
+  "executed_slices": [
+    {
+      "path": "results/n1_real_tape_slice.json",
+      "status": "executable_slice_not_a_study_result",
+      "arm": "n01.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
+      "cohorts": 55,
+      "entry_point": "scripts/run_n1_manifest.py",
+      "purpose": "first contact between the resolved contracts and the real tape; it proves the gate, the cycle-local Evaluation consumer and the lifecycle compose, and it is not evidence about any policy or N"
+    }
   ]
 }

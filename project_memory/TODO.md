@@ -55,9 +55,16 @@
 - [x] Select and execute the deterministic `spend_before_payout` ordering arm.
 - [x] Replace the open-copy payout fixture guard with per-PA deferral through
       settlement, preserving payout-period state and unaffected-PA eligibility.
-- [ ] Build the gate-to-runtime bundle and per-Evaluation cycle-local consumer.
-- [ ] Implement and verify one real-tape N=1 lifecycle result manifest, then the
-      study-scale runner.
+- [x] Build the gate-to-runtime bundle and per-Evaluation cycle-local consumer.
+      The consumer reproduces the pinned behavior lock exactly on real starts.
+- [x] Implement and verify one real-tape N=1 lifecycle result manifest
+      (`results/n1_real_tape_slice.json`, 55 monthly cohorts, deterministic).
+- [ ] Simulate any N>1 book: correlated copy-to-all deaths have never run.
+- [ ] Implement the one-tick-per-side full-N execution sensitivity; Lifecycle
+      still hard-requires `perfect_linear_no_slippage_fixture_only`.
+- [ ] Run the `spend_before_payout` arm on the real tape and report its
+      delta; the mode is selectable but has never been executed on a cohort.
+- [ ] Build the parameter-sweep driver over the 20 x 6 grid and aggregate it.
 - [ ] Before phase 2, select explicit MNQ thresholds and the alternative
       acquisition/replacement policy set.
 - [ ] Only after every active gate field is resolved and executable, run the
