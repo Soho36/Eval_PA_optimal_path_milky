@@ -237,6 +237,9 @@ def verify_implementation_provenance(
         "tests/test_copy_to_all_and_scaling.py",
         "tests/test_lifecycle_policy_contracts.py",
         "tests/test_integrated_lifecycle_fixture.py",
+        "tests/test_first_pa_chain_capital.py",
+        "tests/test_event_order_sensitivity.py",
+        "tests/test_horizon_contract.py",
     }
     required_derivatives = {
         "src/milky_cow/inputs.py",

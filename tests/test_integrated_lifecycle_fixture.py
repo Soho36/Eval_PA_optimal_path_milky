@@ -12,7 +12,7 @@ from milky_cow.contracts import (
     ScalingLevel,
     ScalingSchedule,
 )
-from milky_cow.copy_to_all import PAAccount
+from milky_cow.copy_to_all import PAAccount, copy_to_all
 from milky_cow.evaluation import (
     EvaluationAccount,
     EvaluationRules,
@@ -115,7 +115,18 @@ def lifecycle(
     payout = next(
         policy for policy in policies if policy.policy_id == "minimum_500_always"
     )
-    if capital_mode == "through_first_pa":
+    if capital_mode == "first_pa_chain_only":
+        capital = ExternalCapitalPolicy(
+            policy_id="fixture_first_pa_chain_only",
+            mode="first_pa_chain_only",
+            permitted_uses=("evaluation_renewal", "pa_activation"),
+            lifetime_cap_usd=None,
+            contribution_timing="just_in_time_exact_shortfall",
+            close_event="bridge_evaluation_activated",
+            reopens=False,
+            bridge_evaluation_id="eval-1",
+        )
+    elif capital_mode == "through_first_pa":
         capital = ExternalCapitalPolicy(
             policy_id="fixture_through_first_pa",
             mode="through_first_pa",
@@ -234,8 +245,8 @@ class DeterministicLifecycleFixtureTests(unittest.TestCase):
 
         state = lifecycle(
             1,
-            starting_cash=0,
-            capital_mode="through_first_pa",
+            starting_cash=35,
+            capital_mode="first_pa_chain_only",
             selection=selection,
         )
         self.assertEqual(state.plan_growth_and_purchase(at("2026-01-01 01:00:00")), ("eval-1",))
@@ -246,6 +257,10 @@ class DeterministicLifecycleFixtureTests(unittest.TestCase):
         self.assertEqual(evaluation_result.status, "passed")
         self.assertEqual(state.active_pa_ids, (1,))
         self.assertTrue(state.treasury.external_bridge_closed)
+        self.assertEqual(
+            state.treasury.pa_activations_by_evaluation,
+            {"eval-1": opportunities["eval1_pass"].offer.exit_at},
+        )
 
         tie = state.begin_pa_opportunity(opportunities["activation_tie_1"])
         self.assertEqual(tie.account_copy_count, 0)
@@ -294,7 +309,7 @@ class DeterministicLifecycleFixtureTests(unittest.TestCase):
         self.assertEqual(state.pas[1].equity_profit_usd, 1_100.0)
         self.assertTrue(state.pas[2].alive)
         self.assertEqual(state.pas[2].equity_profit_usd, 100.0)
-        self.assertEqual(state.treasury.external_contributions_usd, 160.0)
+        self.assertEqual(state.treasury.external_contributions_usd, 125.0)
         self.assertEqual(state.treasury.payout_receipts_usd, 500.0)
         self.assertEqual(state.treasury.fees_paid_usd, 320.0)
         self.assertEqual(state.treasury.cash_usd, 340.0)
@@ -640,10 +655,22 @@ class DeterministicLifecycleFixtureTests(unittest.TestCase):
             state.execute_session_close_payouts(at("2026-07-01 22:00:00"))
         state.assert_integrity()
 
-    def test_open_copy_blocks_fixture_payout_without_mutation(self) -> None:
+    def test_open_copy_defers_payout_then_next_close_includes_settlement(self) -> None:
         offers = [
-            fixture_offer("eval_pass", 1, "2026-02-03 10:00:00", "2026-02-03 10:30:00", mae=0, mfe=501.05, gross=501.05),
-            fixture_offer("open_copy", 2, "2026-02-04 10:00:00", "2026-02-05 10:00:00", mae=0, mfe=101.05, gross=101.05),
+            fixture_offer("eval_pass", 1, "2026-02-01 10:00:00", "2026-02-01 10:30:00", mae=0, mfe=501.05, gross=501.05),
+            *[
+                fixture_offer(
+                    f"eligible_day_{day}",
+                    day,
+                    f"2026-02-{day:02d} 10:00:00",
+                    f"2026-02-{day:02d} 10:30:00",
+                    mae=0,
+                    mfe=201.05,
+                    gross=201.05,
+                )
+                for day in range(2, 10)
+            ],
+            fixture_offer("open_copy", 10, "2026-02-10 10:00:00", "2026-02-11 10:00:00", mae=0, mfe=501.05, gross=501.05),
         ]
         selection, opportunities = opportunity_map(offers)
         state = lifecycle(
@@ -652,33 +679,129 @@ class DeterministicLifecycleFixtureTests(unittest.TestCase):
             capital_mode="none",
             selection=selection,
         )
-        state.plan_growth_and_purchase(at("2026-02-03 01:00:00"))
+        state.payout_policy = next(
+            policy
+            for policy in load_payout_policies(
+                ROOT / "config" / "payout_policies.json"
+            )
+            if policy.policy_id == "maximum_always"
+        )
+        state.plan_growth_and_purchase(at("2026-02-01 01:00:00"))
         run_shared_evaluation_pa_event(state, "eval-1", opportunities["eval_pass"])
+        for day in range(2, 10):
+            run_pa_event(state, opportunities[f"eligible_day_{day}"])
+
         account = state.pas[1]
-        account.equity_profit_usd = 2_600.0
-        account.peak_profit_usd = 2_600.0
-        account.liquidation_floor_profit_usd = 100.0
-        account.payout_period_daily_pnl_usd = {
-            (at("2026-01-20 10:00:00") + timedelta(days=offset)).date(): 100.0
-            for offset in range(8)
-        }
+        self.assertEqual(account.equity_profit_usd, 1_600.0)
+        self.assertEqual(len(account.payout_period_daily_pnl_usd), 8)
+        self.assertEqual(
+            choose_payout_amount(account, state.payout_policy),
+            500.0,
+        )
         state.begin_pa_opportunity(opportunities["open_copy"])
         snapshot = (
             account.equity_profit_usd,
             account.payout_count,
+            account.cumulative_gross_payouts_usd,
+            account.cumulative_net_payouts_usd,
             dict(account.payout_period_daily_pnl_usd),
             state.treasury.cash_usd,
+            state.treasury.payout_receipts_usd,
+            tuple(state.payouts),
         )
-        with self.assertRaisesRegex(ValueError, "outstanding PA copy"):
-            state.execute_session_close_payouts(at("2026-02-04 23:59:00"))
+        self.assertEqual(
+            state.execute_session_close_payouts(at("2026-02-10 23:59:00")),
+            (),
+        )
         self.assertEqual(
             snapshot,
             (
                 account.equity_profit_usd,
                 account.payout_count,
+                account.cumulative_gross_payouts_usd,
+                account.cumulative_net_payouts_usd,
                 account.payout_period_daily_pnl_usd,
                 state.treasury.cash_usd,
+                state.treasury.payout_receipts_usd,
+                tuple(state.payouts),
             ),
+        )
+        self.assertEqual(state.audit[-1].event_type, "payout_deferred_open_copy")
+        self.assertEqual(state.audit[-1].reference, "pa-1:open_copy")
+
+        results = state.settle_pa_opportunity(
+            "open_copy",
+            at("2026-02-11 10:00:00"),
+        )
+        self.assertEqual(results[0].net_pnl_usd, 500.0)
+        self.assertEqual(account.equity_profit_usd, 2_100.0)
+        self.assertEqual(
+            account.payout_period_daily_pnl_usd[at("2026-02-11 10:00:00").date()],
+            500.0,
+        )
+
+        payouts = state.execute_session_close_payouts(
+            at("2026-02-11 23:59:00")
+        )
+        self.assertEqual(len(payouts), 1)
+        self.assertEqual(payouts[0].gross_request_usd, 1_000.0)
+        self.assertEqual(account.equity_profit_usd, 1_100.0)
+        self.assertEqual(account.payout_period_daily_pnl_usd, {})
+        self.assertEqual(state.treasury.payout_receipts_usd, 1_000.0)
+        state.assert_integrity()
+
+    def test_open_copy_deferral_is_scoped_to_the_copied_pa(self) -> None:
+        offers = [
+            fixture_offer(
+                "open_copy",
+                1,
+                "2026-03-10 10:00:00",
+                "2026-03-11 10:00:00",
+                mae=0,
+                mfe=101.05,
+                gross=101.05,
+            )
+        ]
+        selection, opportunities = opportunity_map(offers)
+        state = lifecycle(
+            2,
+            starting_cash=0,
+            capital_mode="none",
+            selection=selection,
+        )
+        eligible_history = {
+            (at("2026-03-01 10:00:00") + timedelta(days=offset)).date(): 200.0
+            for offset in range(8)
+        }
+        for pa_id in (1, 2):
+            state.pas[pa_id] = PAAccount(
+                pa_id=pa_id,
+                activated_at=at("2026-02-01 10:00:00"),
+                equity_profit_usd=1_600.0,
+                peak_profit_usd=1_600.0,
+                liquidation_floor_profit_usd=100.0,
+                payout_period_daily_pnl_usd=dict(eligible_history),
+            )
+        decision = copy_to_all(
+            opportunities["open_copy"],
+            list(state.pas.values()),
+            state.scaling,
+            compliance_blocks={2: "fixture_account_copy_block"},
+        )
+        state.outstanding_pa_decisions[decision.opportunity_key] = decision
+
+        payouts = state.execute_session_close_payouts(
+            at("2026-03-10 23:59:00")
+        )
+
+        self.assertEqual(tuple(record.pa_id for record in payouts), (2,))
+        self.assertEqual(state.pas[1].payout_count, 0)
+        self.assertEqual(state.pas[1].payout_period_daily_pnl_usd, eligible_history)
+        self.assertEqual(state.pas[2].payout_count, 1)
+        self.assertEqual(state.pas[2].payout_period_daily_pnl_usd, {})
+        self.assertEqual(
+            tuple(event.event_type for event in state.audit),
+            ("payout_deferred_open_copy", "payout_executed"),
         )
 
     def test_invalid_renewal_does_not_spend_treasury_cash(self) -> None:

@@ -45,6 +45,15 @@ tape-censored rather than mixed into equal-horizon results.
 
 Treasury identities now expose owner capital, payout harvest and retained cash.
 Payout result validation completes before any mutable PA state is changed.
+The selected horizon-crossing disposition and both deterministic event orders
+now have executable boundary fixtures. The first-PA-chain bridge is keyed to
+`eval-1` and tested against cross-lineage funding.
+
+The verified accepted stream contains 67 trades open across at least one
+Tallinn 23:59 payout phase. They cross 97 payout phases in total: 52 cross one,
+while 15 weekend-spanning trades cross three. This directly motivates the
+per-PA payout-deferral rule and is not an inferred frequency from a synthetic
+fixture.
 ## Candidate evidence, not conclusions
 
 - `config/payout_policies.json`: six policies to retest.

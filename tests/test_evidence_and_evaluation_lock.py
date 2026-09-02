@@ -6,7 +6,12 @@ import json
 from pathlib import Path
 import unittest
 
-from milky_cow.cohorts import first_session_monthly_cohorts
+from collections import Counter
+
+from milky_cow.cohorts import (
+    first_session_monthly_cohorts,
+    session_closes_strictly_inside_trade,
+)
 from milky_cow.evaluation_lock import simulate_eodmae_evaluation_lock
 from milky_cow.inputs import (
     get_timezone,
@@ -166,6 +171,21 @@ class EvidenceAndEvaluationLockTests(unittest.TestCase):
             "1175787ba50f0ab9f08a953f60b661e597c70f2bdb9329a517603616aaae6759",
         )
         self.assertEqual(len(first_records), 9_299)
+
+    def test_accepted_overnight_trades_cross_97_payout_phases(self) -> None:
+        close_counts = [
+            len(
+                session_closes_strictly_inside_trade(
+                    offer.entry_at,
+                    offer.exit_at,
+                )
+            )
+            for offer in self.selection.accepted
+        ]
+        affected = [count for count in close_counts if count]
+        self.assertEqual(len(affected), 67)
+        self.assertEqual(sum(affected), 97)
+        self.assertEqual(Counter(affected), {1: 52, 3: 15})
 
     def test_monthly_cohorts_distinguish_complete_from_censored_horizons(self) -> None:
         accepted = self.selection.accepted_opportunities

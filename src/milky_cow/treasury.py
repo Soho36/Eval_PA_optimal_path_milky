@@ -15,10 +15,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 import math
-from typing import Literal
+from typing import AbstractSet, Literal
 
 
-CapitalMode = Literal["none", "fixed_budget", "through_first_pa"]
+CapitalMode = Literal[
+    "none", "fixed_budget", "through_first_pa", "first_pa_chain_only"
+]
 FeePurpose = Literal[
     "evaluation_purchase", "evaluation_renewal", "pa_activation"
 ]
@@ -39,17 +41,29 @@ class ExternalCapitalPolicy:
     permitted_uses: tuple[FeePurpose, ...]
     lifetime_cap_usd: float | None
     contribution_timing: Literal["just_in_time_exact_shortfall"]
-    close_event: Literal["never", "first_pa_activated"]
+    close_event: Literal[
+        "never", "first_pa_activated", "bridge_evaluation_activated"
+    ]
     reopens: bool
+    bridge_evaluation_id: str | None = None
 
     def __post_init__(self) -> None:
         if not self.policy_id:
             raise ValueError("External-capital policy_id is required")
-        if self.mode not in {"none", "fixed_budget", "through_first_pa"}:
+        if self.mode not in {
+            "none",
+            "fixed_budget",
+            "through_first_pa",
+            "first_pa_chain_only",
+        }:
             raise ValueError("Unsupported external-capital mode")
         if self.contribution_timing != "just_in_time_exact_shortfall":
             raise ValueError("Unsupported external-capital contribution timing")
-        if self.close_event not in {"never", "first_pa_activated"}:
+        if self.close_event not in {
+            "never",
+            "first_pa_activated",
+            "bridge_evaluation_activated",
+        }:
             raise ValueError("Unsupported external-capital close event")
         if len(self.permitted_uses) != len(set(self.permitted_uses)):
             raise ValueError("External-capital permitted uses must be unique")
@@ -74,6 +88,33 @@ class ExternalCapitalPolicy:
                 raise ValueError("fixed_budget closes only through budget exhaustion")
         if self.mode == "through_first_pa" and self.close_event != "first_pa_activated":
             raise ValueError("through_first_pa must close at first PA activation")
+        if self.mode == "first_pa_chain_only":
+            if self.close_event != "bridge_evaluation_activated":
+                raise ValueError(
+                    "first_pa_chain_only must close when its bridge Evaluation activates"
+                )
+            if not self.bridge_evaluation_id:
+                raise ValueError(
+                    "first_pa_chain_only requires an explicit bridge Evaluation id"
+                )
+            if set(self.permitted_uses) != {
+                "evaluation_renewal",
+                "pa_activation",
+            }:
+                raise ValueError(
+                    "first_pa_chain_only permits only bootstrap renewal and activation"
+                )
+        elif self.bridge_evaluation_id is not None:
+            raise ValueError(
+                "Only first_pa_chain_only may name a bridge Evaluation id"
+            )
+        if (
+            self.mode != "first_pa_chain_only"
+            and self.close_event == "bridge_evaluation_activated"
+        ):
+            raise ValueError(
+                "Only first_pa_chain_only may close at bridge Evaluation activation"
+            )
         if self.reopens:
             raise ValueError("External-capital bridges may not silently reopen")
 
@@ -84,6 +125,8 @@ class ExternalCapitalPolicy:
         bridge_closed: bool,
         contributed_usd: float,
         shortfall_usd: float,
+        reference: str | None = None,
+        activated_evaluation_ids: AbstractSet[str] = frozenset(),
     ) -> bool:
         if any(
             not math.isfinite(value) or value < 0
@@ -94,6 +137,16 @@ class ExternalCapitalPolicy:
             return True
         if self.mode == "none" or purpose not in self.permitted_uses:
             return False
+        if self.mode == "first_pa_chain_only":
+            return (
+                reference == self.bridge_evaluation_id
+                and self.bridge_evaluation_id not in activated_evaluation_ids
+                and (
+                    self.lifetime_cap_usd is None
+                    or contributed_usd + shortfall_usd
+                    <= self.lifetime_cap_usd + 1e-9
+                )
+            )
         if self.close_event == "first_pa_activated" and bridge_closed:
             return False
         if self.lifetime_cap_usd is None:
@@ -119,6 +172,9 @@ class Treasury:
     payout_receipts_usd: float = field(init=False, default=0.0)
     fees_paid_usd: float = field(init=False, default=0.0)
     first_pa_activated_at: datetime | None = field(init=False, default=None)
+    pa_activations_by_evaluation: dict[str, datetime] = field(
+        init=False, default_factory=dict
+    )
     ledger: list[CashLedgerEntry] = field(init=False, default_factory=list)
 
     def __post_init__(self) -> None:
@@ -157,7 +213,22 @@ class Treasury:
 
     @property
     def external_bridge_closed(self) -> bool:
+        """Whether the legacy time-based bridge saw any PA activation."""
+
         return self.first_pa_activated_at is not None
+
+    def external_bridge_closed_for(
+        self,
+        capital_policy: ExternalCapitalPolicy,
+    ) -> bool:
+        """Resolve closure using the selected policy's own identity contract."""
+
+        if capital_policy.mode == "first_pa_chain_only":
+            return (
+                capital_policy.bridge_evaluation_id
+                in self.pa_activations_by_evaluation
+            )
+        return self.external_bridge_closed
 
     @property
     def owner_capital_supplied_usd(self) -> float:
@@ -205,6 +276,28 @@ class Treasury:
         elif self.first_pa_activated_at != event_at:
             raise ValueError("First PA activation timestamp is immutable")
 
+    def observe_pa_activation(self, event_at: datetime, evaluation_id: str) -> None:
+        """Record the Evaluation lineage that produced a funded PA activation."""
+
+        if not evaluation_id:
+            raise ValueError("PA activation requires an Evaluation id")
+        if event_at.tzinfo is None:
+            raise ValueError("PA activation timestamp must be timezone-aware")
+        if self.ledger and event_at < self.ledger[-1].event_at:
+            raise ValueError("PA activation cannot precede recorded cash events")
+        if (
+            self.first_pa_activated_at is not None
+            and event_at < self.first_pa_activated_at
+        ):
+            raise ValueError("PA activation cannot precede the first PA activation")
+        prior = self.pa_activations_by_evaluation.get(evaluation_id)
+        if prior is not None and prior != event_at:
+            raise ValueError("Evaluation activation timestamp is immutable")
+        if prior is None:
+            self.pa_activations_by_evaluation[evaluation_id] = event_at
+        if self.first_pa_activated_at is None:
+            self.first_pa_activated_at = event_at
+
     def receive_payout(
         self, event_at: datetime, amount_usd: float, reference: str
     ) -> None:
@@ -232,9 +325,11 @@ class Treasury:
         shortfall = money(max(0.0, amount - self.cash_usd))
         if shortfall and not capital_policy.authorizes(
             purpose,
-            bridge_closed=self.external_bridge_closed,
+            bridge_closed=self.external_bridge_closed_for(capital_policy),
             contributed_usd=self.external_contributions_usd,
             shortfall_usd=shortfall,
+            reference=reference,
+            activated_evaluation_ids=self.pa_activations_by_evaluation.keys(),
         ):
             return False
         if shortfall:
@@ -304,3 +399,12 @@ class Treasury:
                 "Owner-net retained cash identity mismatch: "
                 f"{self.owner_net_retained_cash_usd} != {retained_from_flows}"
             )
+        if self.pa_activations_by_evaluation:
+            first_activation = min(self.pa_activations_by_evaluation.values())
+            if (
+                self.first_pa_activated_at is None
+                or self.first_pa_activated_at > first_activation
+            ):
+                raise RuntimeError(
+                    "First PA activation is later than a PA lineage record"
+                )

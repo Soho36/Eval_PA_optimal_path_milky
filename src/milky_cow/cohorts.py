@@ -5,9 +5,69 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta
 import hashlib
-from typing import Iterable
+from typing import Iterable, Literal
 
 from .inputs import AcceptedOpportunity, get_timezone, localize_wall_time
+
+
+HorizonTradeDisposition = Literal[
+    "outside_entry_window",
+    "settle_within_horizon",
+    "leave_open_unscored",
+]
+
+
+def session_closes_strictly_inside_trade(
+    entry_at: datetime,
+    exit_at: datetime,
+    *,
+    timezone: str = "Europe/Tallinn",
+    session_close: time = time(23, 59),
+) -> tuple[datetime, ...]:
+    """Return payout phases at which the completed-trade copy is still open."""
+
+    if entry_at.tzinfo is None or exit_at.tzinfo is None:
+        raise ValueError("Trade timestamps must be timezone-aware")
+    if exit_at < entry_at:
+        raise ValueError("Trade exit cannot precede entry")
+    if session_close.tzinfo is not None:
+        raise ValueError("session_close must be a naive local wall-clock time")
+    zone = get_timezone(timezone)
+    first_date = entry_at.astimezone(zone).date()
+    last_date = exit_at.astimezone(zone).date()
+    close_dates = (
+        first_date + timedelta(days=offset)
+        for offset in range((last_date - first_date).days + 1)
+    )
+    closes = tuple(
+        localize_wall_time(datetime.combine(close_date, session_close), timezone)
+        for close_date in close_dates
+    )
+    return tuple(close_at for close_at in closes if entry_at < close_at < exit_at)
+
+
+def classify_horizon_trade(
+    entry_at: datetime,
+    exit_at: datetime,
+    horizon_end_at: datetime,
+) -> HorizonTradeDisposition:
+    """Apply the selected causal horizon-crossing contract.
+
+    Entries at or after the horizon are outside the cohort. An opportunity
+    entered before the horizon is admitted; its completed outcome is settled
+    when exit_at is no later than horizon_end_at and otherwise remains open and
+    unscored. No mark-to-market or post-horizon outcome is invented.
+    """
+
+    if any(value.tzinfo is None for value in (entry_at, exit_at, horizon_end_at)):
+        raise ValueError("Horizon classification timestamps must be timezone-aware")
+    if exit_at < entry_at:
+        raise ValueError("Trade exit cannot precede entry")
+    if entry_at >= horizon_end_at:
+        return "outside_entry_window"
+    if exit_at > horizon_end_at:
+        return "leave_open_unscored"
+    return "settle_within_horizon"
 
 
 @dataclass(frozen=True, slots=True)

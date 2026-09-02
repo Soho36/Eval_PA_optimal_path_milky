@@ -67,6 +67,11 @@ LifecyclePhase = Literal[
     "evaluation_entry",
     "pa_entry",
 ]
+EventOrderMode = Literal[
+    "canonical_settle_realize_spend_commit",
+    "spend_before_payout",
+]
+
 _PHASE_RANK: dict[LifecyclePhase, int] = {
     "pa_exit": 10,
     "evaluation_exit": 20,
@@ -81,6 +86,35 @@ _PHASE_RANK: dict[LifecyclePhase, int] = {
     "evaluation_entry": 70,
     "pa_entry": 80,
 }
+
+_SPEND_BEFORE_PAYOUT_PHASE_RANK: dict[LifecyclePhase, int] = {
+    "pa_exit": 10,
+    "evaluation_exit": 20,
+    "zero_duration_evaluation_entry": 22,
+    "zero_duration_pa_entry": 24,
+    "zero_duration_pa_exit": 26,
+    "zero_duration_evaluation_exit": 28,
+    "renewal": 30,
+    "activation": 40,
+    "purchase": 50,
+    "payout": 60,
+    "evaluation_entry": 70,
+    "pa_entry": 80,
+}
+
+EVENT_ORDER_PHASE_RANKS: dict[EventOrderMode, dict[LifecyclePhase, int]] = {
+    "canonical_settle_realize_spend_commit": _PHASE_RANK,
+    "spend_before_payout": _SPEND_BEFORE_PAYOUT_PHASE_RANK,
+}
+
+
+def event_order_phase_ranks(mode: str) -> dict[LifecyclePhase, int]:
+    """Resolve one declared deterministic same-timestamp phase ranking."""
+
+    phase_ranks = EVENT_ORDER_PHASE_RANKS.get(mode)  # type: ignore[arg-type]
+    if phase_ranks is None:
+        raise ValueError("Unsupported lifecycle event-order mode")
+    return phase_ranks
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,6 +148,7 @@ class Lifecycle:
     expected_pa_stream_sha256: str
     expected_pa_raw_offer_count: int
     first_pa_opportunity_ordinal: int = 1
+    event_order_mode: EventOrderMode = "canonical_settle_realize_spend_commit"
     evaluation_rules: EvaluationRules = field(default_factory=EvaluationRules)
     payout_rules: Legacy25KPayoutRules = field(default_factory=Legacy25KPayoutRules)
     evaluation_fee_usd: float = 35.0
@@ -161,6 +196,7 @@ class Lifecycle:
             raise ValueError("Unsupported lifecycle path policy")
         if self.commission_timing not in {"close_only", "intratrade_and_close"}:
             raise ValueError("Unsupported lifecycle commission timing")
+        event_order_phase_ranks(self.event_order_mode)
         if any(
             not math.isfinite(value) or value <= 0
             for value in (self.evaluation_fee_usd, self.activation_fee_usd)
@@ -221,6 +257,15 @@ class Lifecycle:
             )
         )
 
+    @property
+    def event_order_phases(self) -> tuple[LifecyclePhase, ...]:
+        """Return the selected deterministic same-timestamp phase order."""
+
+        phase_ranks = event_order_phase_ranks(self.event_order_mode)
+        return tuple(
+            phase for phase, _ in sorted(phase_ranks.items(), key=lambda item: item[1])
+        )
+
     def _record(
         self,
         event_at: datetime,
@@ -240,7 +285,8 @@ class Lifecycle:
     ) -> None:
         if event_at.tzinfo is None:
             raise ValueError("Lifecycle events must be timezone-aware")
-        requested_rank = _PHASE_RANK[phase]
+        phase_ranks = event_order_phase_ranks(self.event_order_mode)
+        requested_rank = phase_ranks[phase]
         due_exits: list[tuple[datetime, int]] = []
         for decision in self.outstanding_pa_decisions.values():
             due_phase: LifecyclePhase = (
@@ -248,7 +294,7 @@ class Lifecycle:
                 if decision.entry_at == decision.exit_at
                 else "pa_exit"
             )
-            due_exits.append((decision.exit_at, _PHASE_RANK[due_phase]))
+            due_exits.append((decision.exit_at, phase_ranks[due_phase]))
         for account in self.evaluations.values():
             if account.outstanding_trade is None:
                 continue
@@ -258,7 +304,7 @@ class Lifecycle:
                 if offer.entry_at == offer.exit_at
                 else "evaluation_exit"
             )
-            due_exits.append((offer.exit_at, _PHASE_RANK[due_phase]))
+            due_exits.append((offer.exit_at, phase_ranks[due_phase]))
         if any(
             event_at > due_at
             or (event_at == due_at and requested_rank > due_rank)
@@ -269,7 +315,7 @@ class Lifecycle:
             prior = self.audit[-1]
             if event_at < prior.event_at:
                 raise ValueError("Lifecycle events must be chronological")
-            if event_at == prior.event_at and requested_rank < _PHASE_RANK[prior.phase]:
+            if event_at == prior.event_at and requested_rank < phase_ranks[prior.phase]:
                 raise ValueError("Same-timestamp lifecycle phase order regressed")
 
     def _validate_treasury_event_order(self, event_at: datetime) -> None:
@@ -508,8 +554,7 @@ class Lifecycle:
         self.pas[pa.pa_id] = pa
         self._next_pa_id += 1
         del self.pending_activations[evaluation_id]
-        if self.treasury.first_pa_activated_at is None:
-            self.treasury.observe_first_pa_activation(event_at)
+        self.treasury.observe_pa_activation(event_at, evaluation_id)
         self.pipeline_state
         return pa
 
@@ -521,11 +566,19 @@ class Lifecycle:
             raise ValueError(
                 "Session-close payouts must execute at exactly 23:59:00"
             )
-        if self.outstanding_pa_decisions:
-            raise ValueError(
-                "Payout with an outstanding PA copy is outside the locked fixture contract"
-            )
+        open_copy_keys_by_pa: dict[int, list[str]] = {}
+        for copy_key, decision in self.outstanding_pa_decisions.items():
+            for pa_id in decision.eligible_pa_ids:
+                open_copy_keys_by_pa.setdefault(pa_id, []).append(copy_key)
         for pa_id in self.active_pa_ids:
+            if pa_id in open_copy_keys_by_pa:
+                self._record(
+                    event_at,
+                    "payout",
+                    "payout_deferred_open_copy",
+                    f"pa-{pa_id}:{'|'.join(sorted(open_copy_keys_by_pa[pa_id]))}",
+                )
+                continue
             account = self.pas[pa_id]
             account_snapshot = (
                 account.equity_profit_usd,
@@ -613,6 +666,7 @@ class Lifecycle:
     def assert_integrity(self) -> None:
         self.treasury.assert_integrity()
         self.pipeline_state
+        phase_ranks = event_order_phase_ranks(self.event_order_mode)
         if len(self.pas) != len(set(self.pas)) or len(self.evaluations) != len(
             set(self.evaluations)
         ):
@@ -653,7 +707,7 @@ class Lifecycle:
             if prior is not None:
                 if event.event_at < prior.event_at or (
                     event.event_at == prior.event_at
-                    and _PHASE_RANK[event.phase] < _PHASE_RANK[prior.phase]
+                    and phase_ranks[event.phase] < phase_ranks[prior.phase]
                 ):
                     raise RuntimeError("Lifecycle audit order is inconsistent")
             prior = event

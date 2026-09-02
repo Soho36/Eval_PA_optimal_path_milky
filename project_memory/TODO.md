@@ -25,18 +25,21 @@
       replacement (emergent from the pipeline cap, not an independent policy).
 - [x] Select starting cash ($35), the through-first-PA bridge family, no lifetime
       budget, and skip-the-purchase unfunded behavior.
-- [ ] Choose whether the bridge is time-based until first activation or limited
-      to the first PA's Evaluation/renewal/activation chain.
+- [x] Select and execute the first-PA-chain bridge: the $35 seed buys
+      `eval-1`; only its renewals and activation may receive exact-shortfall
+      external capital.
 - [x] Bind the parent comparison arm, including the mae_first path arm to
       difference against and the K=5 value explicitly not adopted.
 - [x] Resolve the Evaluation rule boundaries: renewal only below the cap,
       dormant-to-boundary mid-cycle failure, Tallinn 00:00 trading day.
 - [x] Remove payout-day sit-outs from phase 1: trade normally and pay at 23:59.
 - [x] Implement owner-net retained cash and cumulative payout harvest.
-- [ ] Choose which executable cash metric is the headline ranking objective.
+- [x] Select owner-net retained cash as headline and cumulative payout harvest
+      as secondary.
 - [x] Define the 720-day primary / 1,440-day diagnostic horizons, separate
       withdrawn and unwithdrawn reporting, monthly cohorts, and regimes.
-- [ ] Choose how a trade entered before but exiting after the horizon is scored.
+- [x] Select and test causal admission with the post-horizon outcome left open
+      and unscored.
 - [x] Declare prop-firm failure and rule-change stresses non-models.
 - [x] Resolve the payout lifecycle: parent-parity atomic timing, terminal sweep
       as censoring valuation, six candidates unchanged.
@@ -49,7 +52,9 @@
 - [x] Fix unfunded-renewal capacity release, retryable replacement backlog, and
       repeated same-timestamp purchase decisions.
 - [x] Validate payout results before any PA mutation.
-- [ ] Choose the deterministic ordering-sensitivity permutation.
+- [x] Select and execute the deterministic `spend_before_payout` ordering arm.
+- [x] Replace the open-copy payout fixture guard with per-PA deferral through
+      settlement, preserving payout-period state and unaffected-PA eligibility.
 - [ ] Build the gate-to-runtime bundle and per-Evaluation cycle-local consumer.
 - [ ] Implement and verify one real-tape N=1 lifecycle result manifest, then the
       study-scale runner.

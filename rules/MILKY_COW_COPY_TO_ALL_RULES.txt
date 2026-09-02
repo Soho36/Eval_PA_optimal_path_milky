@@ -1,5 +1,5 @@
 LEGACY 25K MILKY-COW COPY-TO-ALL OVERLAY
-Version: 2026-09-02.copy-to-all.3
+Version: 2026-09-02.copy-to-all.4
 Status: user-authorized project rule; effective for this repository only
 Applicability: [-infinity, +infinity) unless a named scenario overrides a field
 
@@ -160,11 +160,13 @@ Every external contribution must be explicit, timestamped, purpose-tagged, and
 included in cash reconciliation. No fee may receive a silent top-up. A policy
 must state whether outside capital is prohibited, capped by a numeric lifetime
 budget, or bridged for explicitly named lifecycle obligations and must state the
-irreversible bridge-closing event. Phase 1 uses a $35 starting seed and proposes
-the copied through-first-PA bridge, but its scope still requires an explicit
-user choice: either it may fund every permitted obligation before the first PA
-activation, or it is restricted to the first PA's Evaluation/renewal/activation
-chain. The two meanings produce different owner capital and high-N fill paths.
+irreversible bridge-closing event. Phase 1 uses a $35 starting seed and the
+first-PA-chain bridge keyed explicitly to `eval-1`. The $35 owner seed buys
+`eval-1` without a bridge contribution. Only that Evaluation's later renewals
+and resulting PA activation may receive exact-shortfall external capital. Fees
+for every other Evaluation or activation require treasury cash even when they
+occur before `eval-1` activates. The bridge closes irreversibly when
+`eval-1` activates.
 
 8. PAYOUT-DAY HANDLING AND ECONOMIC REPORTING
 
@@ -175,13 +177,35 @@ may therefore contribute to that close's eligibility. Any future sit-out arm
 must define a causal prior-close or session-open decision snapshot and may not
 retroactively remove trades.
 
+If a PA still belongs to an outstanding copied batch at the 23:59 payout phase,
+defer only that PA's payout check. Preserve its balance, payout counters,
+cumulative payout totals, and payout-period daily-P&L history unchanged. Repeat
+the deferral at every crossed 23:59 close until the copy settles; then evaluate
+the PA at the first scheduled 23:59 payout phase with no outstanding copy. A
+copy settling exactly at 23:59 settles first and its realized P&L counts.
+Accounts absent from every outstanding batch remain independently eligible.
+The verified RR1 stream contains 67 accepted trades with this condition,
+crossing 97 total 23:59 closes, so this is a study-scale rule rather than a
+fixture guard.
+
 Reports must expose the reconciled treasury components separately: starting
 owner cash, later external contributions, payout receipts, fees paid, and ending
-treasury cash. The headline choice between cumulative payout harvest and owner-
-net retained cash remains a user decision. Under the current ledger identity,
-owner-net retained cash is ending cash minus all owner capital supplied, which
-equals payout receipts minus fees paid. Surviving PA equity is a separate
-right-censoring companion and is never silently added to either cash metric.
+treasury cash. Owner-net retained cash is the headline metric; cumulative payout
+harvest is secondary. Under the current ledger identity, owner-net retained cash
+is ending cash minus all owner capital supplied, which equals payout receipts
+minus fees paid. Surviving PA equity is a separate right-censoring companion and
+is never silently added to either cash metric.
+
+The canonical event order remains settle, realize payout cash, spend, then
+commit new exposure. The deterministic ordering sensitivity is
+`spend_before_payout`: after every due positive- and zero-duration settlement,
+process renewal, activation, and purchase before payout, then allow new
+Evaluation and PA entries. No randomized ordering is permitted.
+
+At a cohort horizon, admit opportunities whose entry is strictly before the
+cutoff. If such a trade exits strictly after the cutoff, leave its batch open
+and unscored: apply no post-horizon P&L, death, or payout consequence and invent
+no mark-to-market. Report the open batch and affected-account counts.
 
 9. SWEEP GATE
 
@@ -196,6 +220,11 @@ An integrated parameter sweep is prohibited until executable tests lock:
 - external-capital authorization, exhaustion, closure, and reconciliation;
 - the selected Evaluation adapter and its parity fixture; and
 - deterministic event ordering and provenance.
+
+The phase-1 choices are now resolved, but the sweep remains prohibited until
+the gate-to-runtime policy bundle, cycle-local Evaluation consumer,
+study-scale runner, horizon-open-state reporting, real-tape N=1 result manifest,
+and required execution-cost sensitivity are executable.
 
 The eventual policy space includes every integer active-PA target from 1 through
 20 and all six payout-policy candidates. No active count, payout policy, scaling

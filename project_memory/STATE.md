@@ -23,26 +23,28 @@ Verified and implemented:
 - pipeline-cap, acquisition and death-count-bounded replacement primitives,
   including unfunded-renewal closure, retryable death backlog and one-decision
   per-timestamp guards;
-- none/fixed-budget/through-first-PA capital primitives, irreversible closure,
-  no partial top-up, ledger reconciliation, and explicit owner-capital,
-  retained-cash and payout-harvest metrics;
+- none/fixed-budget/time-based and selected first-PA-chain capital primitives,
+  explicit Evaluation lineage, irreversible closure, no partial top-up, ledger
+  reconciliation, and owner-capital, retained-cash and payout-harvest metrics;
 - headline N semantics as a maintained active target acquired from zero with
   active + running Evaluation + pending activation hard-cap accounting;
 - stateful Evaluation, six-candidate payout, and thin lifecycle composition,
   including pending activation, renewal preflight, pre-mutation payout atomicity,
-  N=1 replacement, N=2 divergence, and treasury reconciliation fixtures;
+  per-PA open-copy payout deferral, N=1 replacement, N=2 divergence, and
+  treasury reconciliation fixtures;
 - active gate coverage for every PA count 1..20 and the exact six payout
   candidates;
 - cached accepted-opportunity evidence and deterministic monthly cohort
-  generation: 55 complete 720-day starts from 79 represented months; and
+  generation: 55 complete 720-day starts from 79 represented months, plus an
+  executable leave-open-unscored horizon classifier;
+- canonical and `spend_before_payout` deterministic event-order modes; and
 - source/local implementation provenance verification.
 
-The canonical suite discovers and passes 68 tests, including transfer and
-provenance verification. The active gate remains partially resolved.
-Four user choices remain: bridge scope, headline cash metric, deterministic
-ordering-sensitivity permutation, and horizon-crossing trade treatment. A gate-
-to-runtime bundle, per-Evaluation consumer, real-tape N=1 result manifest and
-study-scale runner also remain to implement.
+The canonical suite discovers and passes 81 tests, including transfer and
+provenance verification. All phase-1 user choices are resolved, but the
+integrated sweep remains blocked. A gate-to-runtime bundle, per-Evaluation
+consumer, study-scale horizon/reporting integration, real-tape N=1 result
+manifest, one-tick-per-side full-N sensitivity, and runner remain to implement.
 
 The corrected raw accepted-opportunity diagnostic has 6,482 fully observed
 720-day starts with median net gain about $6,602 (min -$259, max $21,024);
@@ -55,7 +57,8 @@ Four consequences to carry into reporting:
   per-side full-N sensitivity must precede strong N conclusions;
 - book-fill reports must measure cash-bound versus Evaluation-pipeline-bound
   time rather than infer the answer from raw tape profit;
-- phase 1 has normal payout-day trading and no sit-out state; and
-- both owner-net retained cash and cumulative payout harvest are executable,
-  with surviving unwithdrawn equity separate; the headline cash metric remains
-  a user choice.
+- phase 1 has normal payout-day trading and no sit-out state; 67 accepted trades
+  cross at least one payout close and create 97 per-night deferral points before
+  multiplying by the number of copied PAs; and
+- owner-net retained cash is headline, cumulative payout harvest is secondary,
+  and surviving unwithdrawn equity remains separate.

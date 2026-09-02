@@ -28,6 +28,11 @@ acquired from zero through paid Evaluations and activations. Alive active PAs,
 running Evaluations, and pending activations count toward a hard capacity cap of
 N. An initial-N active book is diagnostic only.
 
+Phase 1 starts with $35 owner cash for `eval-1`; only that Evaluation's
+renewals and activation may receive bridge capital. Owner-net retained cash is
+the headline economic measure, with cumulative payout harvest secondary and
+unwithdrawn PA equity reported separately.
+
 Completed-trade path order is reported in three lifecycle-wide scenarios:
 source-constrained plus all ambiguous MAE-first, all ambiguous MFE-first, or a
 reproducible seeded assignment. The seed is an imputation, not observed truth.
@@ -40,10 +45,11 @@ reproducible seeded assignment. The seed is an imputation, not observed truth.
 - all six payout candidates and reinvestment timing;
 - a flat one-MNQ phase-1 baseline, followed by explicitly selected MNQ scaling
   thresholds and scope;
-- external-capital constraints;
+- the selected first-PA-chain external-capital constraint;
 - rolling cohorts and independently defined regimes; and
 - the three path-order arms and a full-axis one-tick execution sensitivity;
-  firm-failure and rule-change stresses remain declared non-models.
+  the deterministic `spend_before_payout` ordering arm; and firm-failure and
+  rule-change stresses remain declared non-models.
 
 ## Out of scope
 

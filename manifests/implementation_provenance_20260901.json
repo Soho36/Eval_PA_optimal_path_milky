@@ -1,7 +1,7 @@
 {
   "schema_version": "milky_cow_implementation_provenance.v1",
   "verified_on": "2026-09-02",
-  "status": "phase_1_contracts_partially_resolved_integrated_sweep_prohibited",
+  "status": "phase_1_contracts_resolved_integrated_sweep_still_prohibited",
   "source_repository": {
     "path": "I:/PycharmProjects/Eval_PA_optimal_path",
     "revision": "106cfb782c6e573856282095441bb69f23924a55"
@@ -78,7 +78,7 @@
     },
     {
       "path": "config/milky_cow_contract_gate.json",
-      "sha256": "a039fe230c370b7120883e6c999f0b6ca3e07e758a331b72de020fe6bb9ded6d",
+      "sha256": "b6071e79279c6fae5256a665cecf63c3d3f55c3d66e5c0e7c7e122d0d64e92e4",
       "role": "active_foundation_gate"
     },
     {
@@ -88,12 +88,12 @@
     },
     {
       "path": "rules/MILKY_COW_COPY_TO_ALL_RULES.txt",
-      "sha256": "efe15383f54d8becf91b22b9fa413643bb29b281ffdbe947348d538b837a264b",
+      "sha256": "0e7b481fe729c3c6e7b121474d380a5f00de00640aa1ad80d4e898b72623d8a7",
       "role": "active_pa_book_rule_overlay"
     },
     {
       "path": "data/MILKY_COW_INPUT_CONTRACTS.md",
-      "sha256": "80a52563edea841f09a4cacbf1ce882fa95297e8be2dd6a5b1d68447c0629502",
+      "sha256": "7fc1d908f69bc7b99bc3cc6840a17cd9934169258ef034d5d43efac83809f7ac",
       "role": "input_contract_audit"
     },
     {
@@ -103,7 +103,7 @@
     },
     {
       "path": "src/milky_cow/cohorts.py",
-      "sha256": "f1519583524e4cb459441010b099eba52c18b9e6e083a273cb4e628579ae0527",
+      "sha256": "333976c9b124e9d2ea7d4ed8b8b332d926a64dca95b42c3846f511bdc8757a67",
       "role": "rolling_cohort_boundary_contract"
     },
     {
@@ -133,17 +133,17 @@
     },
     {
       "path": "src/milky_cow/lifecycle.py",
-      "sha256": "00c3b24af34e92df1182daa0fad33a1256993c5be9f42b53bbd6e1e35ca34886",
+      "sha256": "4adfd0855c0b3accbabc12bf1fec97190d9049bcfd2afbe784769c9471e3c662",
       "role": "deterministic_contract_lifecycle_composition"
     },
     {
       "path": "src/milky_cow/treasury.py",
-      "sha256": "e03e3d42768abc94e109eedf4675302f271c158e51699c85e868b3017afbc7e9",
+      "sha256": "df151ad49df7d8b6bb8d9a0b72b403ca4d4be6993e78f339f8ca56499948764d",
       "role": "external_capital_and_cash_reconciliation_contract"
     },
     {
       "path": "src/milky_cow/provenance.py",
-      "sha256": "3a5a13736d7e4d398c2d4d62c8c1d55b158ee9302295b3140984e3c7f1906329",
+      "sha256": "704dc6741fff9a0336495c24bbafc9a02f90b490d50b700fe9bae30437a8a5f8",
       "role": "evidence_verifier"
     },
     {
@@ -158,7 +158,7 @@
     },
     {
       "path": "tests/test_evidence_and_evaluation_lock.py",
-      "sha256": "5deac3a07d3e104d6eebcc75256a89c8e0bbf5d924959125edbd1333a6c06c00",
+      "sha256": "bfaa6f4fbb4f4d0b88ce3ecd4546c14a7d4cb07bbbb13a69d51236f8efe598d0",
       "role": "evidence_and_evaluation_fixtures"
     },
     {
@@ -168,13 +168,28 @@
     },
     {
       "path": "tests/test_lifecycle_policy_contracts.py",
-      "sha256": "0dd4add67696efd11524797cf12952bcd39eb8649f16909cfe26a7d79fc21bd9",
+      "sha256": "4fae9bc1fd3032861c9c8373b327bf028ff54794ffb2af8c01f450e526376d71",
       "role": "acquisition_replacement_capital_and_gate_fixtures"
     },
     {
       "path": "tests/test_integrated_lifecycle_fixture.py",
-      "sha256": "73ae03a8619f4a52643a066398347bb4794e02d62eaa3ab3c0ba309da9c45131",
+      "sha256": "5627e3b26ed40542492b9d78ed6d577a384fa31f782f7e20e32bcd81aec11267",
       "role": "deterministic_n1_n2_lifecycle_and_payout_fixtures"
+    },
+    {
+      "path": "tests/test_first_pa_chain_capital.py",
+      "sha256": "fd37a019a66ac692f8d1abceefd833a6375fe4cf4c3ee55545687807749e2c3f",
+      "role": "selected_first_pa_chain_external_capital_fixture"
+    },
+    {
+      "path": "tests/test_event_order_sensitivity.py",
+      "sha256": "3eefc246864ac56178fe7957ba62976ac7b04ae53264f412da7d4b69be37a907",
+      "role": "canonical_and_spend_before_payout_order_fixture"
+    },
+    {
+      "path": "tests/test_horizon_contract.py",
+      "sha256": "1b732a99ade8689f14d1c509610645fe2aba33c921737fabc6475bbc0e4e7d6a",
+      "role": "selected_horizon_crossing_boundary_fixture"
     },
     {
       "path": "project_memory/BEGINNING_OF_A_WORK_SESSION.md",
@@ -183,37 +198,37 @@
     },
     {
       "path": "project_memory/PROJECT.md",
-      "sha256": "c2cef3b76e1a8283871cc1d9208c44262a000c09a47c4e855c39361dbb88ca46",
+      "sha256": "c11d9e5caf5b400ba0f999719c23ba6ce9980b5e6ac12769e4459f0f4ea73a0c",
       "role": "project_scope_memory"
     },
     {
       "path": "project_memory/EVIDENCE.md",
-      "sha256": "6987f766bcdd594e1812b06acd434ac83680511f69b030e4ff2e669941f47dde",
+      "sha256": "c95fe0832a3ff7121291d3e6e59b8c426b5aef21e6720d04ff351ebdc388c3eb",
       "role": "evidence_memory"
     },
     {
       "path": "project_memory/DECISIONS.md",
-      "sha256": "72d8902700edaad099fa539d6d48514e8e957f5fdf93b82a906a249b78d575a6",
+      "sha256": "2712513b3a69fcf50fa40bef743bc3f5c8e5d875391e72a28034e38656b8404a",
       "role": "locked_and_unresolved_decisions_memory"
     },
     {
       "path": "project_memory/ARCHITECTURE.md",
-      "sha256": "7d1d3e1c1fa5dbf38c6dd2e50c200f3be1c7f380c3fb9c130f43b7672215c857",
+      "sha256": "33f4dfdf72048aba1b460e2eb18e1fe9c2b6fe3b1e36426b499cb38311a69e67",
       "role": "foundation_architecture_memory"
     },
     {
       "path": "project_memory/STATE.md",
-      "sha256": "6894380428cd6ee0ebb29d5357271e695c1491c745229ae1fd7275435f70d2fd",
+      "sha256": "883faf816ec0f410b5a36c6d6a066912c99a027216972042ff8c13c24bfb4abb",
       "role": "current_project_state_memory"
     },
     {
       "path": "project_memory/TODO.md",
-      "sha256": "9799baa12f7204cd202c79835c0bd7422ed5a9599e01d9ac70a0df4b3683fdf6",
+      "sha256": "236a14fc6b35d5ea73c5d9e10eb14de375d13ccbce217f72645a8393986524b1",
       "role": "current_gate_work_queue"
     },
     {
       "path": "project_memory/TESTING.md",
-      "sha256": "1235d4b939fe9e46b96407a97f18676f2dbc7091df9de4b0919d7294b029a3ed",
+      "sha256": "3842d5b4572ff2016796d9a7b2d56e9346a4db6a799e68629b2c7cac4e17b70f",
       "role": "executable_testing_memory"
     },
     {
@@ -223,7 +238,7 @@
     },
     {
       "path": "tests/test_study_contract.py",
-      "sha256": "044b070420c6b70be40e5011b2865a96ae77848532eef589df47089c5deab09e",
+      "sha256": "067e0b1a0f490613f2e899fa8840103c46223332c6635736f5d02d6c81eb52a4",
       "role": "active_vs_frozen_scope_governance_fixture"
     }
   ],
@@ -305,7 +320,8 @@
       ],
       "excluded_parent_mechanics": [
         "implicit_external_top_up",
-        "caller_controlled_bridge_reopening"
+        "caller_controlled_bridge_reopening",
+        "time_based_bridge_scope_for_selected_phase_1"
       ]
     }
   ]

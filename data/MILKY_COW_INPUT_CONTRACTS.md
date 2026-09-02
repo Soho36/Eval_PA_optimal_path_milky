@@ -6,10 +6,11 @@ Audit date: 2026-09-02 (Europe/Tallinn).
 
 The imported evidence is intact, copy-to-all and a deterministic N=1/N=2
 contract lifecycle are executable, and the phase-1 flat-one-MNQ, close-only,
-greedy-pipeline, atomic-payout baseline is selected. A study-scale sweep remains
-blocked by the bridge-scope, headline-objective, order-sensitivity, and
-horizon-crossing decisions plus implementation of the per-Evaluation consumer,
-gate-to-runtime bundle, real-tape runner, and result manifest.
+greedy-pipeline, first-chain-capital, atomic-payout baseline is selected. The
+phase-1 user decisions are resolved. A study-scale sweep remains blocked by
+implementation of the per-Evaluation consumer, gate-to-runtime bundle,
+study-scale horizon/reporting integration, real-tape N=1 manifest, execution-
+cost sensitivity, and runner.
 
 The controlling PA overlay is
 `rules/MILKY_COW_COPY_TO_ALL_RULES.txt`, and the active executable foundation
@@ -106,10 +107,10 @@ commitments may never exceed N. Initial-N active is a diagnostic only.
 External contributions must be timestamped, purpose-tagged, budget checked, and
 cash-reconciled. Phase 1 greedily buys at most one Evaluation per unique
 timestamp toward N; death replacement shares that pipeline, and residual
-unfunded backlog cannot pause trading. The $35 start and irreversible
-first-activation latch are selected, while the user must still choose whether
-the bridge funds every permitted pre-activation obligation or only the first
-PA's chain.
+unfunded backlog cannot pause trading. The $35 owner seed buys `eval-1`.
+Only that Evaluation's renewal and activation shortfalls may receive bridge
+capital; every other obligation requires treasury cash, and `eval-1`
+activation closes the bridge irreversibly.
 
 ## Payout and reporting boundary
 
@@ -117,8 +118,16 @@ The six v2 payout definitions are candidates and match the milky contract.
 The older six accumulation-trigger policies named in the copied audit/upstream
 manifest are stale and are excluded from the exact six-policy phase-1 axis.
 Payouts are atomic at 23:59 after normal same-day trading; phase 1 has no payout-
-day sit-out. Monthly cohorts require a complete 720-day future interval, giving
 55 starts from 79 represented months. The copied 720-day and regime conclusions
 remain candidate design references, not inherited findings. Treasury components
-and both cash metrics are executable, but the user must choose which metric is
-headline.
+and both cash metrics are executable; owner-net retained cash is headline and
+cumulative payout harvest is secondary.
+
+If a PA has an outstanding copy at 23:59, only that PA's payout check defers and
+its payout-period state remains unchanged; an unaffected active PA can still
+pay. The verified stream has 67 such trades crossing 97 total 23:59 phases.
+After settlement, same-day realized P&L counts at the next payout phase.
+
+The deterministic ordering sensitivity is `spend_before_payout`. At the
+720-day cutoff, a causally admitted trade exiting later remains open and
+unscored, with no invented mark-to-market or post-horizon outcome.

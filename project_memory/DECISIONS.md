@@ -54,10 +54,12 @@
     decision, whenever cash allows and the pipeline is below N. Replacement is
     not an independent policy — a death drops the pipeline below N and the
     acquisition rule buys.
-21. Phase 1 starts with $35 owner cash and an irreversible first-activation
-    bridge latch. Whether the bridge is time-based for every permitted
-    obligation before that activation or restricted to the first PA's own
-    Evaluation/renewal/activation chain remains a user decision.
+21. Phase 1 starts with $35 owner cash, which purchases `eval-1` without an
+    external contribution. The selected first-PA-chain bridge is keyed to that
+    explicit Evaluation lineage: only `eval-1` renewals and activation may
+    receive exact-shortfall capital. Every other purchase, renewal, or
+    activation requires treasury cash. The lineage bridge closes irreversibly
+    when `eval-1` activates.
 
 22. Evaluation boundaries: a renewal fee is paid only when the pipeline
     excluding that Evaluation is below N; a mid-cycle drawdown breach stops
@@ -67,11 +69,15 @@
     P&L on exit date.
 23. Phase 1 allows normal PA trading on a payout day. All completed trades
     settle first; eligibility and an atomic payout are evaluated at 23:59
-    Tallinn, and same-day realized P&L counts. There is no sit-out state.
+    Tallinn, and same-day realized P&L counts. There is no sit-out state. A PA
+    holding an open copied batch at that phase defers independently, without
+    changing payout-period state, until the first 23:59 phase after settlement;
+    unaffected PAs remain eligible. The 67 affected RR1 trades cross 97 total
+    payout closes because 15 weekend-spanning trades cross three each.
 24. Treasury reports starting owner cash, later contributions, payouts, fees,
     and ending cash. Owner-net retained cash equals ending cash minus owner
-    capital, or payouts minus fees. Cumulative payout harvest and owner-net
-    retained cash are both executable; the user must choose the headline.
+    capital, or payouts minus fees. Owner-net retained cash is the selected
+    headline; cumulative payout harvest is secondary.
 25. Cohorts start at 01:00 Tallinn on the first accepted-opportunity session of
     each calendar month and require a complete 720-day future interval. The
     verified tape gives 55 complete monthly cohorts (79 before filtering) and
@@ -80,7 +86,10 @@
 26. Horizon is 720 days primary, matching the parent so the comparison is
     valid, plus a 1,440-day book-fill diagnostic on selected N. At horizon,
     withdrawn cash and un-withdrawn equity are reported separately and running
-    Evaluations are sunk fees, never an asset.
+    Evaluations are sunk fees, never an asset. An opportunity entered before
+    the cutoff but exiting after it remains open and unscored: no mark-to-market
+    and no post-horizon P&L, death, or payout consequence. Open batches and
+    affected PAs must be reported.
 27. Regimes are a reporting partition only: the parent's two calendar windows
     plus a `candle_range` volatility tercile. Directional bull/bear/sideways
     regimes are deferred — the frozen tape has no price series, and deriving
@@ -101,8 +110,10 @@
     and hide any real ordering effect inside variance. At least one pair does
     bind: payout must precede renewal, activation and purchase, because payout
     cash funds those same-instant fees. Insensitivity is measured once with a
-    permuted-order arm rather than assumed. `_PHASE_RANK` is asserted equal to
-    the gate's declared order by test.
+    permuted-order arm rather than assumed. The selected sensitivity is
+    `spend_before_payout`: settle first, then renewal, activation, purchase,
+    payout, and only then new entries. Both executable rank maps are asserted
+    equal to the gate's declared orders by test.
 31. Payout timing is parent parity: atomic request, approval, balance removal
     and treasury receipt, zero delay, no pending state, no denials. A terminal
     sweep is a censoring valuation, never a policy. The $1k-per-$5k trigger is
@@ -111,18 +122,10 @@
     720-day median is about $6,602 and 65.4% reach $5,000; this does not prove a
     lifecycle ranking. Reconsider only if phase 2 scales above 1 MNQ.
 
-## Still unresolved before a study-scale lifecycle or sweep
+## Remaining implementation gates
 
-Four user decisions remain:
-
-1. bridge scope: time-based until first activation, or first-PA chain only;
-2. headline cash metric: owner-net retained cash, or cumulative payout harvest;
-3. deterministic order sensitivity: spend-before-payout, or
-   activation-before-renewal; and
-4. horizon-crossing trades: require entry and exit inside the horizon, settle
-   after the horizon and label the cohort extended, or admit the trade causally
-   and leave its still-open outcome unscored at the cutoff.
-
-Implementation still required: a gate-to-runtime bundle, the per-Evaluation
-cycle-local consumer, a configurable event queue, one real-tape N=1 result
-manifest, and then the study runner.
+The phase-1 user decisions are resolved. Implementation still required before
+the sweep: a gate-to-runtime bundle, the per-Evaluation cycle-local consumer,
+the study-scale event queue and horizon-open-state reporting, one real-tape N=1
+result manifest, the one-tick-per-side full-N execution sensitivity, and then
+the runner.

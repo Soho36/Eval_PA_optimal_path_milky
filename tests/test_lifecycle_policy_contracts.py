@@ -408,16 +408,11 @@ class IntegratedSweepGateTests(unittest.TestCase):
         )
         self.assertEqual(
             gate["unresolved_before_integrated_sweep"],
-            [
-                "external_capital_bridge_scope",
-                "headline_economic_objective",
-                "event_order_sensitivity_permutation",
-                "horizon_crossing_trade_treatment",
-            ],
+            [],
         )
         self.assertEqual(
             gate["status"],
-            "phase_1_contracts_partially_resolved_integrated_sweep_blocked",
+            "phase_1_contracts_resolved_integrated_sweep_still_blocked",
         )
         self.assertTrue(gate["remaining_blockers_before_the_sweep"])
         self.assertNotIn("router", gate["pa_book"])
@@ -571,10 +566,12 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
         )
         self.assertEqual(len(intents), 1)
 
-    def test_time_based_capital_bridge_candidate_funds_before_first_pa_only(self) -> None:
+    def test_selected_capital_bridge_is_limited_to_eval_1_lineage(self) -> None:
         block = self.gate["external_capital"]
         self.assertEqual(block["starting_cash_usd"], 35.0)
-        self.assertEqual(block["selection_status"], "proposed_pending_bridge_scope_user_answer")
+        self.assertEqual(block["selection_status"], "selected_by_user_2026_09_02")
+        self.assertEqual(block["mode"], "first_pa_chain_only")
+        self.assertEqual(block["bridge_chain_identity"], "eval-1")
         self.assertIsNone(block["lifetime_hard_cap_usd"])
         policy = ExternalCapitalPolicy(
             policy_id=block["selected_policy_id"],
@@ -584,15 +581,35 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
             contribution_timing=block["contribution_timing"],
             close_event=block["bridge_close_event"],
             reopens=block["bridge_reopens"],
+            bridge_evaluation_id=block["bridge_chain_identity"],
         )
         self.assertFalse(policy.reopens)
-        for purpose in ("evaluation_purchase", "evaluation_renewal", "pa_activation"):
+        self.assertFalse(
+            policy.authorizes(
+                "evaluation_purchase",
+                bridge_closed=False,
+                contributed_usd=0.0,
+                shortfall_usd=35.0,
+                reference="eval-1",
+            )
+        )
+        for purpose in ("evaluation_renewal", "pa_activation"):
             self.assertTrue(
                 policy.authorizes(
                     purpose,
                     bridge_closed=False,
                     contributed_usd=0.0,
                     shortfall_usd=125.0,
+                    reference="eval-1",
+                )
+            )
+            self.assertFalse(
+                policy.authorizes(
+                    purpose,
+                    bridge_closed=False,
+                    contributed_usd=0.0,
+                    shortfall_usd=125.0,
+                    reference="eval-2",
                 )
             )
             self.assertFalse(
@@ -601,6 +618,8 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
                     bridge_closed=True,
                     contributed_usd=160.0,
                     shortfall_usd=125.0,
+                    reference="eval-1",
+                    activated_evaluation_ids={"eval-1"},
                 )
             )
 
@@ -658,7 +677,12 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
 
     def test_objective_candidates_are_executable_and_keep_equity_separate(self) -> None:
         objective = self.gate["economic_objective"]
-        self.assertEqual(objective["status"], "headline_metric_requires_user_selection")
+        self.assertEqual(objective["status"], "selected_by_user_2026_09_02")
+        self.assertEqual(objective["headline_metric"], "owner_net_retained_cash")
+        self.assertEqual(
+            objective["secondary_metric"],
+            "cumulative_payout_harvest",
+        )
         self.assertEqual(
             set(objective["candidate_metrics"]),
             {"owner_net_retained_cash", "cumulative_payout_harvest"},
@@ -679,10 +703,13 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
         censoring = window["right_censoring"]
         self.assertIn("never_summed", censoring["rule"])
         self.assertIn("sunk", censoring["running_evaluations_at_horizon"])
+        treatment = window["horizon_crossing_trade_treatment"]
+        self.assertEqual(treatment["status"], "selected_by_user_2026_09_02")
         self.assertEqual(
-            window["horizon_crossing_trade_treatment"],
-            "unresolved_user_decision_no_mark_to_market_exists",
+            treatment["selected"],
+            "admit_before_horizon_leave_open_trade_unscored",
         )
+        self.assertIn("open_batch_count_at_horizon", treatment["required_reporting"])
 
     def test_regimes_partition_on_an_input_not_on_the_measured_outcome(self) -> None:
         regimes = self.gate["reporting"]["regime_definitions"]
@@ -703,6 +730,18 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
         self.assertEqual(handling["phase_1_rule"], "trading_allowed_on_payout_day")
         self.assertTrue(handling["same_day_realized_pnl_counts"])
         self.assertIn("23:59", handling["mechanism"])
+        self.assertEqual(handling["deferral_scope"], "per_pa_not_whole_book")
+        self.assertIn("leave balance", handling["deferred_pa_state"])
+        self.assertEqual(
+            handling["verified_rr1_exposure"][
+                "accepted_trades_open_at_one_or_more_23_59_closes"
+            ],
+            67,
+        )
+        self.assertEqual(
+            handling["verified_rr1_exposure"]["total_23_59_closes_crossed"],
+            97,
+        )
         self.assertIn("deferred", handling["future_sit_out_sensitivity"])
         # A terminal sweep is a censoring valuation, never a policy.
         self.assertFalse(payouts["terminal_sweep"]["is_a_policy"])
@@ -718,7 +757,7 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
         )
 
     def test_declared_event_order_matches_the_lifecycle_code(self) -> None:
-        from milky_cow.lifecycle import _PHASE_RANK
+        from milky_cow.lifecycle import EVENT_ORDER_PHASE_RANKS, _PHASE_RANK
 
         declared = self.gate["event_order"]["order"]
         coded = [phase for phase, _ in sorted(_PHASE_RANK.items(), key=lambda kv: kv[1])]
@@ -731,6 +770,20 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
         self.assertEqual(declared[0], "pa_exit")
         # New exposure is committed last.
         self.assertEqual(declared[-1], "pa_entry")
+        sensitivity = self.gate["event_order"]["sensitivity_plan"]
+        self.assertEqual(sensitivity["selected"], "spend_before_payout")
+        sensitivity_coded = [
+            phase
+            for phase, _ in sorted(
+                EVENT_ORDER_PHASE_RANKS["spend_before_payout"].items(),
+                key=lambda kv: kv[1],
+            )
+        ]
+        self.assertEqual(sensitivity_coded, sensitivity["order"])
+        self.assertLess(
+            sensitivity["order"].index("purchase"),
+            sensitivity["order"].index("payout"),
+        )
 
     def test_evaluation_consumer_resets_per_cycle_unlike_the_pa_stream(self) -> None:
         stream = self.gate["opportunity_stream"]
