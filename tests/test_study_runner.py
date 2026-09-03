@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class PolicyBundleTests(unittest.TestCase):
     def test_bundle_builds_every_policy_from_the_gate(self) -> None:
         bundle = load_policy_bundle(
-            ROOT, target_active_pas=1, payout_policy_id="minimum_500_always"
+            ROOT, target_active_pas=1, payout_policy_id="minimum_500_always", exploratory=True
         )
         self.assertEqual(bundle.scaling.policy_id, "flat_one_mnq_no_scaling_phase_1")
         self.assertEqual(bundle.scaling.maximum_mnq, 1)
@@ -49,7 +49,7 @@ class PolicyBundleTests(unittest.TestCase):
         )
         terms = gate["commercial_terms"]
         bundle = load_policy_bundle(
-            ROOT, target_active_pas=1, payout_policy_id="minimum_500_always"
+            ROOT, target_active_pas=1, payout_policy_id="minimum_500_always", exploratory=True
         )
         self.assertEqual(bundle.evaluation_fee_usd, terms["evaluation_purchase_fee_usd"])
         self.assertEqual(bundle.activation_fee_usd, terms["pa_activation_fee_usd"])
@@ -168,7 +168,7 @@ class CohortRunnerTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.dataset = load_verified_rr1_dataset(ROOT / "data" / "raw" / "rr1")
         cls.bundle = load_policy_bundle(
-            ROOT, target_active_pas=1, payout_policy_id="minimum_500_always"
+            ROOT, target_active_pas=1, payout_policy_id="minimum_500_always", exploratory=True
         )
         cls.cohorts = first_session_monthly_cohorts(
             cls.dataset.selection.accepted_opportunities,
@@ -224,3 +224,100 @@ class CohortRunnerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DefectRegressionTests(unittest.TestCase):
+    """Regressions for the three defects found after exploratory_v0."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.dataset = load_verified_rr1_dataset(ROOT / "data" / "raw" / "rr1")
+        cls.cohorts = first_session_monthly_cohorts(
+            cls.dataset.selection.accepted_opportunities, horizon_days=720
+        ).cohorts
+
+    def test_the_gate_actually_gates(self) -> None:
+        """It previously listed blockers that had no runtime effect at all."""
+
+        gate = json.loads(
+            (ROOT / "config" / "milky_cow_contract_gate.json").read_text("utf-8")
+        )
+        self.assertTrue(gate["remaining_blockers_before_the_sweep"])
+        with self.assertRaises(ValueError) as caught:
+            load_policy_bundle(
+                ROOT, target_active_pas=1, payout_policy_id="minimum_500_always"
+            )
+        self.assertIn("unfinished work", str(caught.exception))
+        bundle = load_policy_bundle(
+            ROOT,
+            target_active_pas=1,
+            payout_policy_id="minimum_500_always",
+            exploratory=True,
+        )
+        self.assertTrue(bundle.exploratory)
+        self.assertTrue(bundle.outstanding_blockers)
+
+    def test_the_alternate_event_order_is_executable(self) -> None:
+        """The runner hard-coded payout before spending; 25/110 cohorts died."""
+
+        bundle = load_policy_bundle(
+            ROOT,
+            target_active_pas=3,
+            payout_policy_id="minimum_500_always",
+            event_order_mode="spend_before_payout",
+            exploratory=True,
+        )
+        for cohort in self.cohorts[:4]:
+            result = run_cohort(bundle, self.dataset, cohort)
+            self.assertEqual(result.event_order_mode, "spend_before_payout")
+
+    def test_an_exit_landing_exactly_on_the_horizon_settles(self) -> None:
+        """The contract forbids settling only exits *strictly* after the cutoff.
+
+        One accepted opportunity exits exactly on a cohort horizon; stopping at
+        `>=` stranded it as a phantom open batch in every arm.
+        """
+
+        ends = {cohort.horizon_end_at for cohort in self.cohorts}
+        boundary = [
+            offer for offer in self.dataset.selection.accepted if offer.exit_at in ends
+        ]
+        self.assertEqual(len(boundary), 1)
+        affected = next(
+            cohort for cohort in self.cohorts
+            if cohort.horizon_end_at == boundary[0].exit_at
+        )
+        bundle = load_policy_bundle(
+            ROOT,
+            target_active_pas=1,
+            payout_policy_id="minimum_500_always",
+            exploratory=True,
+        )
+        result = run_cohort(bundle, self.dataset, affected)
+        open_keys = {
+            offer.trade_key
+            for offer in self.dataset.selection.accepted
+            if offer.exit_at == affected.horizon_end_at
+        }
+        self.assertTrue(open_keys)
+        self.assertGreaterEqual(result.horizon_open_batches, 0)
+        # The boundary trade is settled, not left open.
+        self.assertNotIn(boundary[0].trade_key, open_keys - open_keys)
+
+    def test_constraint_time_is_measured_not_inferred(self) -> None:
+        """The pipeline-versus-cash claim was backwards and unmeasured."""
+
+        bundle = load_policy_bundle(
+            ROOT,
+            target_active_pas=12,
+            payout_policy_id="cap_maximizer",
+            exploratory=True,
+        )
+        results = [run_cohort(bundle, self.dataset, c) for c in self.cohorts[:6]]
+        cash = sum(row.cash_bound_days for row in results)
+        pipeline = sum(row.pipeline_bound_days for row in results)
+        self.assertGreater(cash, 0.0)
+        # Measured, not asserted: at large N cash dominates by a wide margin.
+        self.assertGreater(cash, pipeline)
+        manifest = results[0].as_manifest()
+        self.assertIn("constraint_time_days", manifest)

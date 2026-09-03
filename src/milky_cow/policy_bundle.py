@@ -55,6 +55,8 @@ class StudyPolicyBundle:
     horizon_days: int
     expected_pa_stream_sha256: str
     expected_pa_raw_offer_count: int
+    exploratory: bool
+    outstanding_blockers: tuple[str, ...]
 
     @property
     def arm_id(self) -> str:
@@ -70,7 +72,7 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _require_resolved(gate: dict[str, Any]) -> None:
+def _require_resolved(gate: dict[str, Any], *, allow_blockers: bool) -> None:
     unresolved = gate.get("unresolved_before_integrated_sweep")
     if unresolved:
         raise ValueError(
@@ -82,6 +84,16 @@ def _require_resolved(gate: dict[str, Any]) -> None:
         raise ValueError(
             "Gate carries open user decisions; refusing to build a runtime "
             f"bundle: {sorted(q['id'] for q in open_questions)}"
+        )
+    # The blocker list previously had no runtime effect at all, so the gate did
+    # not actually gate the sweep it claimed to block. Enforce it, and make
+    # exploratory runs say so explicitly rather than pass silently.
+    blockers = gate.get("remaining_blockers_before_the_sweep") or ()
+    if blockers and not allow_blockers:
+        raise ValueError(
+            "Gate lists unfinished work before the sweep; pass "
+            "exploratory=True to run anyway and have the result labelled "
+            f"exploratory: {list(blockers)}"
         )
 
 
@@ -137,13 +149,14 @@ def load_policy_bundle(
     path_stress_arm: PathStressArm | None = None,
     event_order_mode: EventOrderMode | None = None,
     gate_relative_path: str = DEFAULT_GATE,
+    exploratory: bool = False,
 ) -> StudyPolicyBundle:
     """Build one executable arm from the gate, or refuse and say why."""
 
     root = Path(root)
     gate_path = root / gate_relative_path
     gate = json.loads(gate_path.read_text(encoding="utf-8"))
-    _require_resolved(gate)
+    _require_resolved(gate, allow_blockers=exploratory)
     _verify_evidence(root, gate)
 
     if target_active_pas not in gate["pa_book"]["active_pa_count_values"]:
@@ -216,4 +229,8 @@ def load_policy_bundle(
         horizon_days=gate["reporting"]["horizon_and_right_censoring"]["primary_days"],
         expected_pa_stream_sha256=stream["accepted_stream_key_sha256"],
         expected_pa_raw_offer_count=stream["expected_raw_offers"],
+        exploratory=exploratory,
+        outstanding_blockers=tuple(
+            gate.get("remaining_blockers_before_the_sweep") or ()
+        ),
     )

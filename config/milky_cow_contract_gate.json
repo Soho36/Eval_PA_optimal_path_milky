@@ -55,7 +55,7 @@
       "role": "effective_dated_commercial_terms_source"
     }
   ],
-  "status": "phase_1_contracts_resolved_integrated_sweep_still_blocked",
+  "status": "exploratory_v0_produced_defects_found_reruns_required",
   "deterministic_vertical_slice_fixture": {
     "status": "executable_contract_fixture_not_study_baseline",
     "pa_targets": [
@@ -665,10 +665,11 @@
     }
   ],
   "remaining_blockers_before_the_sweep": [
-    "no parameter-sweep driver exists: the runner executes one (N, payout policy) arm per call, and the 20 x 6 grid across three path arms is not orchestrated, aggregated, or ranked",
-    "the required one-tick-per-side full-N execution sensitivity is not implemented; Lifecycle still hard-requires perfect_linear_no_slippage_fixture_only and cannot express the arm",
-    "the spend_before_payout ordering-sensitivity arm is constructible but has not been executed or reported",
-    "only N=1 has been run on the real tape; no N>1 book has ever been simulated, so copy-to-all correlated deaths are untested at scale"
+    "the one-tick-per-side execution sensitivity is not implemented; Lifecycle still hard-requires perfect_linear_no_slippage_fixture_only, so the arm the gate demands before any headline N conclusion cannot be constructed",
+    "no regime split is computed or reported, though the contract requires one; the exploratory_v0 run showed strong regime dependence that is unquantified",
+    "the source_constrained_then_mae_first arm has not been run, so no parent comparison is legal",
+    "the spend_before_payout arm is now executable but has not been run and reported on the real tape",
+    "no Pareto reporting exists: results are reported as single aggregates rather than as the average-cash / profitable-share / downside / worst-period trade-off the economics actually present"
   ],
   "commercial_terms": {
     "source": "rules/25k_legacy_rules.txt",
@@ -687,7 +688,8 @@
       "arm": "n01.minimum_500_always.source_constrained_then_seeded_coin.canonical_settle_realize_spend_commit",
       "cohorts": 55,
       "entry_point": "scripts/run_n1_manifest.py",
-      "purpose": "first contact between the resolved contracts and the real tape; it proves the gate, the cycle-local Evaluation consumer and the lifecycle compose, and it is not evidence about any policy or N"
+      "purpose": "first contact between the resolved contracts and the real tape; it proves the gate, the cycle-local Evaluation consumer and the lifecycle compose, and it is not evidence about any policy or N",
+      "superseded": "results/exploratory_v0/ - produced before the defects above were known"
     },
     {
       "path": "results/sweep_central_summary.json",
@@ -704,15 +706,35 @@
         "the 55 monthly cohorts overlap, so they are separate historical opportunities and not independent samples; no confidence interval across them is valid",
         "one path arm and one event order were run, so nothing here is comparable to the parent until the mae_first arm is executed",
         "execution is frictionless and biased favors_high_n, so the observed decline at large N is if anything understated"
-      ]
+      ],
+      "superseded": "results/exploratory_v0/ - produced before the defects above were known"
     }
   ],
-  "preliminary_observations_not_conclusions": {
-    "status": "descriptive_only_gate_blockers_still_stand",
-    "total_owner_net_retained_cash_by_n": "rises from about $752k at N=1 to a broad plateau near N=9-12 at about $2.33M, then falls to about $1.4-1.5M by N=19-20",
-    "positive_cohort_share_by_n": "declines monotonically from 130/330 at N=1 to 15/330 at N=20",
-    "correlated_deaths_by_n": "peak near N=5 at about 440 events and decline afterwards, because at large N the book rarely fills, so fewer PAs are alive to die together",
-    "activations_by_n": "plateau near 2,500-2,700 across N>=9, which is direct evidence that Evaluation pipeline time rather than cash is the binding constraint at large N, as the capital note predicted",
-    "shape": "an interior optimum in total cash coexists with a monotonically falling probability that any single cohort profits: larger synchronized books buy a fatter right tail with a much higher chance of losing the fees"
+  "corrections_2026_09_03": {
+    "status": "defects_found_after_exploratory_v0_and_fixed",
+    "runner_ignored_the_event_order_rank_map": {
+      "was": "run() hard-coded payout before spending regardless of event_order_mode",
+      "impact": "spend_before_payout was never executable; 25 of 110 cohorts raised Same-timestamp lifecycle phase order regressed",
+      "now": "phases dispatch in the selected rank map's order"
+    },
+    "exact_horizon_exit_was_dropped": {
+      "was": "the loop stopped at now >= horizon_end_at",
+      "contract": "do_not_settle_an_exit_strictly_after_cohort_horizon",
+      "impact": "one accepted opportunity (rr1:22-23:341:1306) exits exactly on a cohort horizon, so every arm reported five open batches when four were genuinely post-horizon; it carried no PA copies in exploratory_v0 so headline cash was unaffected there",
+      "now": "an exit landing exactly on the horizon settles; nothing else runs at that instant"
+    },
+    "pipeline_versus_cash_claim_was_backwards": {
+      "was": "reported that Evaluation pipeline time rather than cash binds at large N, inferred from the activation plateau alone",
+      "measured": "cash_bound time exceeds pipeline_bound by roughly 55x at N=20 (8,474 vs 153 days over 12 cohorts); book_full is 0 days at N>=12, so the book never reaches target",
+      "now": "cash_bound, pipeline_bound, book_full and dormant_slot days are measured per cohort and exported"
+    },
+    "aggregates_pooled_mutually_exclusive_policies": {
+      "was": "totals summed six alternative payout policies and counted the same 55 starts six times, producing a spurious '$2.33M at N=9-12'",
+      "now": "no cross-policy total is reported; per-policy best N ranges from 5 to 20, so no general N conclusion exists"
+    },
+    "the_gate_did_not_gate": {
+      "was": "policy_bundle never read remaining_blockers_before_the_sweep, and tests pinned the stale blocked state",
+      "now": "load_policy_bundle refuses unless exploratory=True is passed, and exploratory runs are labelled in their own manifest"
+    }
   }
 }

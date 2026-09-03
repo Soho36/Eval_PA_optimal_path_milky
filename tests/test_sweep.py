@@ -52,6 +52,7 @@ class ArmSummaryTests(unittest.TestCase):
             self.cohorts,
             target_active_pas=2,
             payout_policy_id="minimum_500_always",
+            exploratory=True,
         )
         second, _ = run_arm(
             ROOT,
@@ -59,6 +60,7 @@ class ArmSummaryTests(unittest.TestCase):
             self.cohorts,
             target_active_pas=2,
             payout_policy_id="minimum_500_always",
+            exploratory=True,
         )
         self.assertEqual(first.as_row(), second.as_row())
         self.assertEqual(first.cohort_count, len(self.cohorts))
@@ -71,6 +73,7 @@ class ArmSummaryTests(unittest.TestCase):
             self.cohorts,
             target_active_pas=2,
             payout_policy_id="minimum_500_always",
+            exploratory=True,
         )
         self.assertEqual(
             summary.pas_activated, sum(row.pas_activated for row in results)
@@ -95,6 +98,7 @@ class ArmSummaryTests(unittest.TestCase):
             self.cohorts,
             target_active_pas=1,
             payout_policy_id="minimum_500_always",
+            exploratory=True,
         )
         self.assertLessEqual(summary.retained_min_usd, summary.retained_p25_usd)
         self.assertLessEqual(summary.retained_p25_usd, summary.retained_median_usd)
@@ -108,6 +112,7 @@ class ArmSummaryTests(unittest.TestCase):
             self.cohorts,
             target_active_pas=2,
             payout_policy_id="maximum_always",
+            exploratory=True,
         )
         row = summary.as_row()
         self.assertNotIn(

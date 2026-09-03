@@ -16,6 +16,8 @@ import csv
 import hashlib
 import json
 from multiprocessing import Pool
+import platform
+import subprocess
 from pathlib import Path
 import sys
 import time
@@ -30,6 +32,34 @@ from milky_cow.sweep import build_grid, init_worker, run_arm_task  # noqa: E402
 RESULTS = ROOT / "results"
 
 
+def _git(*args: str) -> str:
+    try:
+        return subprocess.run(
+            ["git", *args], capture_output=True, text=True, cwd=ROOT, check=True
+        ).stdout.strip()
+    except Exception:
+        return ""
+
+
+def run_identity() -> dict:
+    """Everything needed to say which code produced this output."""
+
+    dirty = _git("status", "--porcelain")
+    return {
+        "git_revision": _git("rev-parse", "HEAD"),
+        "git_branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
+        "working_tree_dirty": bool(dirty),
+        "working_tree_digest_sha256": hashlib.sha256(
+            dirty.encode("utf-8")
+        ).hexdigest(),
+        "dirty_paths": sorted(
+            line[2:].strip() for line in dirty.splitlines() if line[2:].strip()
+        ),
+        "python": platform.python_version(),
+        "platform": platform.platform(),
+    }
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--n", type=int, nargs="*", default=list(range(1, 21)))
@@ -38,6 +68,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--event-order", default=None)
     parser.add_argument("--workers", type=int, default=7)
     parser.add_argument("--tag", default="central")
+    parser.add_argument(
+        "--exploratory",
+        action="store_true",
+        help="run despite the gate's outstanding blockers and label the output",
+    )
     return parser.parse_args()
 
 
@@ -57,11 +92,16 @@ def main() -> None:
         payout_policy_id=policies[0],
         path_stress_arm=path_arm,
         event_order_mode=event_order,
+        exploratory=args.exploratory,
     )
     dataset = load_verified_rr1_dataset(ROOT / "data" / "raw" / "rr1")
 
     grid = build_grid(
-        args.n, policies, path_stress_arm=path_arm, event_order_mode=event_order
+        args.n,
+        policies,
+        path_stress_arm=path_arm,
+        event_order_mode=event_order,
+        exploratory=args.exploratory,
     )
     print(
         f"sweep: {len(args.n)} N x {len(policies)} policies = {len(grid)} arms"
@@ -102,8 +142,12 @@ def main() -> None:
 
     manifest = {
         "schema_version": "milky_cow_sweep.v1",
-        "status": "aggregated_grid_not_a_ranked_conclusion",
-        "what_this_is_not": gate["remaining_blockers_before_the_sweep"],
+        "status": (
+            "exploratory_run_gate_blockers_outstanding"
+            if probe.exploratory
+            else "aggregated_grid_not_a_ranked_conclusion"
+        ),
+        "outstanding_blockers_at_run_time": list(probe.outstanding_blockers),
         "grid": {
             "n_values": args.n,
             "payout_policy_ids": list(policies),
@@ -122,19 +166,32 @@ def main() -> None:
         },
         "arms": summaries,
     }
+    # The digest covers the cohort rows too, not only the arm summaries: the
+    # CSV is a first-class output and belongs inside the seal.
     manifest["result_digest_sha256"] = hashlib.sha256(
-        json.dumps(summaries, sort_keys=True).encode("utf-8")
+        json.dumps(
+            {"arms": summaries, "cohorts": cohort_rows}, sort_keys=True
+        ).encode("utf-8")
     ).hexdigest()
+    manifest["run_identity"] = run_identity()
 
     RESULTS.mkdir(parents=True, exist_ok=True)
-    summary_path = RESULTS / f"sweep_{args.tag}_summary.json"
-    summary_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-
     cohort_path = RESULTS / f"sweep_{args.tag}_cohorts.csv"
     with cohort_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(cohort_rows[0]))
         writer.writeheader()
         writer.writerows(cohort_rows)
+
+    # Hash every output file before sealing the manifest that names them.
+    manifest["output_files"] = {
+        cohort_path.name: {
+            "sha256": hashlib.sha256(cohort_path.read_bytes()).hexdigest(),
+            "bytes": cohort_path.stat().st_size,
+            "rows": len(cohort_rows),
+        }
+    }
+    summary_path = RESULTS / f"sweep_{args.tag}_summary.json"
+    summary_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
     print(f"\n{len(grid)} arms in {elapsed / 60:.1f} min")
     print(f"  wrote {summary_path.relative_to(ROOT)}")

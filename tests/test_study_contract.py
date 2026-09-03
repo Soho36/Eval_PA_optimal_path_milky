@@ -51,7 +51,7 @@ class StudyContractTests(unittest.TestCase):
         )
         self.assertEqual(
             gate["status"],
-            "phase_1_contracts_resolved_integrated_sweep_still_blocked",
+            "exploratory_v0_produced_defects_found_reruns_required",
         )
         self.assertTrue(gate["remaining_blockers_before_the_sweep"])
         self.assertEqual(

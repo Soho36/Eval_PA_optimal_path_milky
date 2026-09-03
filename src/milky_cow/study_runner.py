@@ -20,7 +20,7 @@ from .cohorts import CohortWindow
 from .copy_to_all import PAAccount
 from .evaluation_consumer import CycleLocalEvaluationConsumer
 from .inputs import OpportunitySelection, TradeOffer, VerifiedRR1Dataset, money
-from .lifecycle import Lifecycle
+from .lifecycle import Lifecycle, event_order_phase_ranks
 from .policy_bundle import StudyPolicyBundle
 from .treasury import Treasury
 
@@ -70,6 +70,11 @@ class CohortResult:
 
     correlated_death_events: int
     max_simultaneous_deaths: int
+
+    cash_bound_days: float
+    pipeline_bound_days: float
+    dormant_slot_days: float
+    book_full_days: float
 
     audit_events: int
 
@@ -137,6 +142,16 @@ class CohortResult:
                     "PAs at once, which staggering at R=1 cannot do"
                 ),
             },
+            "constraint_time_days": {
+                "cash_bound": self.cash_bound_days,
+                "pipeline_bound": self.pipeline_bound_days,
+                "book_full": self.book_full_days,
+                "dormant_slot_days": self.dormant_slot_days,
+                "note": (
+                    "time below the N target attributed to its cause; "
+                    "dormant_slot_days is summed per blocked slot"
+                ),
+            },
             "audit_events": self.audit_events,
         }
 
@@ -175,7 +190,12 @@ class _Runner:
     deaths: int = 0
     payouts_executed: int = 0
     opportunities_consumed: int = 0
+    cash_bound_seconds: float = 0.0
+    pipeline_bound_seconds: float = 0.0
+    dormant_slot_seconds: float = 0.0
+    book_full_seconds: float = 0.0
     _last_close: datetime | None = field(default=None)
+    _prev_now: datetime | None = field(default=None)
 
     # -- next-event computation ------------------------------------------
     def _next_pa_entry(self) -> datetime | None:
@@ -236,18 +256,74 @@ class _Runner:
         anchor = self._last_close if self._last_close is not None else self._floor()
         return _next_session_close(anchor)
 
+    def _accrue_constraint_time(self, now: datetime) -> None:
+        """Attribute elapsed time to the reason the book was not at target.
+
+        This is what turns "pipeline time rather than cash binds at large N"
+        from an inference off the activation plateau into a measurement.
+        """
+
+        previous = self._prev_now
+        self._prev_now = now
+        if previous is None or now <= previous:
+            return
+        seconds = (now - previous).total_seconds()
+        life = self.lifecycle
+        dormant = sum(
+            1 for account in life.evaluations.values() if account.status == "failed"
+        )
+        self.dormant_slot_seconds += dormant * seconds
+        active = len(life.active_pa_ids)
+        if active >= self.bundle.target_active_pas:
+            self.book_full_seconds += seconds
+            return
+        committed = active + len(life.evaluations) + len(life.pending_activations)
+        if committed >= self.bundle.target_active_pas:
+            # Every slot is held by a running or dormant Evaluation or a
+            # pending activation: the book is waiting on the pipeline.
+            self.pipeline_bound_seconds += seconds
+        elif not self._can_fund(
+            self.bundle.evaluation_fee_usd,
+            "evaluation_purchase",
+            f"eval-{life._next_evaluation_number}",
+        ):
+            self.cash_bound_seconds += seconds
+
+    def _settles_at_horizon(self, now: datetime) -> bool:
+        """An exit landing exactly on the horizon settles; nothing else runs.
+
+        The contract forbids settling an exit *strictly* after the cutoff, so
+        the boundary instant itself is inside the cohort. Stopping at `>=`
+        would strand one real RR1 opportunity as a phantom open batch.
+        """
+
+        life = self.lifecycle
+        if any(
+            decision.exit_at == now
+            for decision in life.outstanding_pa_decisions.values()
+        ):
+            return True
+        return any(
+            account.outstanding_trade is not None
+            and account.outstanding_trade.offer.exit_at == now
+            for account in life.evaluations.values()
+        )
+
     def _floor(self) -> datetime:
         life = self.lifecycle
         return life.audit[-1].event_at if life.audit else self.cohort.start_at
 
     # -- phase handlers ---------------------------------------------------
-    def _settle_due_exits(self, now: datetime) -> None:
+    def _settle_pa_exits(self, now: datetime) -> None:
         life = self.lifecycle
         for key, decision in list(life.outstanding_pa_decisions.items()):
             if decision.exit_at == now:
                 before = {pa_id for pa_id in life.active_pa_ids}
                 life.settle_pa_opportunity(key, now)
                 self.deaths += len(before - set(life.active_pa_ids))
+
+    def _settle_evaluation_exits(self, now: datetime) -> None:
+        life = self.lifecycle
         for evaluation_id, account in list(life.evaluations.items()):
             trade = account.outstanding_trade
             if trade is not None and trade.offer.exit_at == now:
@@ -256,6 +332,8 @@ class _Runner:
                     self.passes += 1
 
     def _payouts(self, now: datetime) -> None:
+        if now >= self.cohort.horizon_end_at:
+            return
         if now.timetz().replace(tzinfo=None) != SESSION_CLOSE:
             return
         # Record the close as reached before deciding anything, so a close at
@@ -267,6 +345,8 @@ class _Runner:
         self.payouts_executed += len(executed)
 
     def _renewals(self, now: datetime) -> None:
+        if now >= self.cohort.horizon_end_at:
+            return
         life = self.lifecycle
         for evaluation_id, account in list(life.evaluations.items()):
             if account.outstanding_trade is not None:
@@ -281,6 +361,8 @@ class _Runner:
                 self.renewals_unfunded += 1
 
     def _activations(self, now: datetime) -> None:
+        if now >= self.cohort.horizon_end_at:
+            return
         life = self.lifecycle
         for evaluation_id, pending in list(life.pending_activations.items()):
             if pending.passed_at > now:
@@ -349,6 +431,8 @@ class _Runner:
             life.plan_growth_and_purchase(now)
 
     def _evaluation_entries(self, now: datetime) -> None:
+        if now >= self.cohort.horizon_end_at:
+            return
         life = self.lifecycle
         for evaluation_id, account in list(life.evaluations.items()):
             offer = self.consumer.next_offer(account, self.bundle.evaluation_rules)
@@ -372,21 +456,37 @@ class _Runner:
     def run(self) -> None:
         # Cohort start: the owner seed buys the bridge Evaluation.
         self._purchases(self.cohort.start_at)
+        handlers = {
+            "pa_exit": self._settle_pa_exits,
+            "evaluation_exit": self._settle_evaluation_exits,
+            "payout": self._payouts,
+            "renewal": self._renewals,
+            "activation": self._activations,
+            "purchase": self._purchases,
+            "evaluation_entry": self._evaluation_entries,
+            "pa_entry": self._pa_entry,
+        }
+        ranks = event_order_phase_ranks(self.bundle.event_order_mode)
+        # Zero-duration phases share their handler with the positive-duration
+        # phase of the same kind; the lifecycle picks the right phase label.
+        ordered_phases = [
+            phase
+            for phase, _ in sorted(ranks.items(), key=lambda item: item[1])
+            if phase in handlers
+        ]
         guard = 0
         while True:
             guard += 1
             if guard > 2_000_000:
                 raise RuntimeError("Cohort event loop failed to terminate")
             now = self._next_event_at()
-            if now is None or now >= self.cohort.horizon_end_at:
+            if now is None or now > self.cohort.horizon_end_at:
                 break
-            self._settle_due_exits(now)
-            self._payouts(now)
-            self._renewals(now)
-            self._activations(now)
-            self._purchases(now)
-            self._evaluation_entries(now)
-            self._pa_entry(now)
+            if now == self.cohort.horizon_end_at and not self._settles_at_horizon(now):
+                break
+            self._accrue_constraint_time(now)
+            for phase in ordered_phases:
+                handlers[phase](now)
 
 
 def run_cohort(
@@ -482,5 +582,9 @@ def run_cohort(
         horizon_open_copy_count=open_copies,
         correlated_death_events=len(simultaneous),
         max_simultaneous_deaths=max(simultaneous, default=0),
+        cash_bound_days=round(runner.cash_bound_seconds / 86_400.0, 3),
+        pipeline_bound_days=round(runner.pipeline_bound_seconds / 86_400.0, 3),
+        dormant_slot_days=round(runner.dormant_slot_seconds / 86_400.0, 3),
+        book_full_days=round(runner.book_full_seconds / 86_400.0, 3),
         audit_events=len(lifecycle.audit),
     )

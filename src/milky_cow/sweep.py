@@ -69,6 +69,11 @@ class ArmSummary:
     unwithdrawn_equity_total_usd: float
     horizon_open_batches: int
 
+    cash_bound_days: float
+    pipeline_bound_days: float
+    book_full_days: float
+    dormant_slot_days: float
+
     def as_row(self) -> dict[str, Any]:
         return {
             "arm_id": self.arm_id,
@@ -106,6 +111,12 @@ class ArmSummary:
                 "unwithdrawn_equity_total_usd": self.unwithdrawn_equity_total_usd,
                 "horizon_open_batches": self.horizon_open_batches,
                 "note": "never summed into the headline metric",
+            },
+            "constraint_time_days": {
+                "cash_bound": self.cash_bound_days,
+                "pipeline_bound": self.pipeline_bound_days,
+                "book_full": self.book_full_days,
+                "dormant_slot": self.dormant_slot_days,
             },
         }
 
@@ -146,6 +157,10 @@ def summarize_arm(results: Sequence[CohortResult]) -> ArmSummary:
             sum(row.surviving_unwithdrawn_equity_usd for row in results)
         ),
         horizon_open_batches=sum(row.horizon_open_batches for row in results),
+        cash_bound_days=round(sum(row.cash_bound_days for row in results), 2),
+        pipeline_bound_days=round(sum(row.pipeline_bound_days for row in results), 2),
+        book_full_days=round(sum(row.book_full_days for row in results), 2),
+        dormant_slot_days=round(sum(row.dormant_slot_days for row in results), 2),
     )
 
 
@@ -158,6 +173,7 @@ def run_arm(
     payout_policy_id: str,
     path_stress_arm: str | None = None,
     event_order_mode: str | None = None,
+    exploratory: bool = False,
 ) -> tuple[ArmSummary, list[CohortResult]]:
     """Execute one arm across every supplied cohort."""
 
@@ -167,6 +183,7 @@ def run_arm(
         payout_policy_id=payout_policy_id,
         path_stress_arm=path_stress_arm,
         event_order_mode=event_order_mode,
+        exploratory=exploratory,
     )
     results = [run_cohort(bundle, dataset, cohort) for cohort in cohorts]
     return summarize_arm(results), results
@@ -189,10 +206,16 @@ def init_worker(root: str, horizon_days: int) -> None:
     ).cohorts
 
 
-def run_arm_task(task: tuple[int, str, str, str]) -> dict[str, Any]:
+def run_arm_task(task: tuple[int, str, str, str, bool]) -> dict[str, Any]:
     """Worker entry point: one arm, returned as plain data."""
 
-    target_active_pas, payout_policy_id, path_stress_arm, event_order_mode = task
+    (
+        target_active_pas,
+        payout_policy_id,
+        path_stress_arm,
+        event_order_mode,
+        exploratory,
+    ) = task
     summary, results = run_arm(
         _WORKER["root"],
         _WORKER["dataset"],
@@ -201,6 +224,7 @@ def run_arm_task(task: tuple[int, str, str, str]) -> dict[str, Any]:
         payout_policy_id=payout_policy_id,
         path_stress_arm=path_stress_arm,
         event_order_mode=event_order_mode,
+        exploratory=exploratory,
     )
     return {
         "summary": summary.as_row(),
@@ -208,14 +232,39 @@ def run_arm_task(task: tuple[int, str, str, str]) -> dict[str, Any]:
             {
                 "n": row.target_active_pas,
                 "payout_policy_id": row.payout_policy_id,
+                "path_stress_arm": row.path_stress_arm,
+                "event_order_mode": row.event_order_mode,
                 "start_at": row.start_at.isoformat(),
+                "horizon_end_at": row.horizon_end_at.isoformat(),
+                # Reconciliation: retained == ending_cash - owner_capital, and
+                # for a reconciled ledger also harvest - fees.
                 "retained_usd": row.owner_net_retained_cash_usd,
+                "owner_capital_usd": row.owner_capital_supplied_usd,
+                "ending_cash_usd": row.ending_cash_usd,
+                "fees_paid_usd": row.fees_paid_usd,
                 "harvest_usd": row.cumulative_payout_harvest_usd,
+                "unwithdrawn_usd": row.surviving_unwithdrawn_equity_usd,
+                "evaluations_purchased": row.evaluations_purchased,
+                "renewals_paid": row.evaluation_renewals_paid,
+                "renewals_unfunded": row.evaluation_renewals_unfunded,
                 "activated": row.pas_activated,
                 "deaths": row.pa_deaths,
                 "correlated_death_events": row.correlated_death_events,
+                "max_simultaneous_deaths": row.max_simultaneous_deaths,
+                "survivors": row.surviving_pa_count,
                 "payouts": row.payouts_executed,
-                "unwithdrawn_usd": row.surviving_unwithdrawn_equity_usd,
+                "payouts_deferred": row.payouts_deferred_open_copy,
+                "first_pa_activated_at": (
+                    row.first_pa_activated_at.isoformat()
+                    if row.first_pa_activated_at
+                    else ""
+                ),
+                # Constraint attribution: which limit actually bound.
+                "cash_bound_days": row.cash_bound_days,
+                "pipeline_bound_days": row.pipeline_bound_days,
+                "book_full_days": row.book_full_days,
+                "dormant_slot_days": row.dormant_slot_days,
+                "horizon_open_batches": row.horizon_open_batches,
             }
             for row in results
         ],
@@ -228,9 +277,10 @@ def build_grid(
     *,
     path_stress_arm: str,
     event_order_mode: str,
-) -> list[tuple[int, str, str, str]]:
+    exploratory: bool = False,
+) -> list[tuple[int, str, str, str, bool]]:
     return [
-        (n, policy_id, path_stress_arm, event_order_mode)
+        (n, policy_id, path_stress_arm, event_order_mode, exploratory)
         for n in n_values
         for policy_id in payout_policy_ids
     ]

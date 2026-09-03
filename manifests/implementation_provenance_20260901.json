@@ -78,7 +78,7 @@
     },
     {
       "path": "config/milky_cow_contract_gate.json",
-      "sha256": "72eb59fcccef1fac0783e4c9ea33d4329fcdca5ea4f800926beec6dfe5c2081f",
+      "sha256": "e162c7af5c5d67752acc72ec4b6654af02e40d137b075d7fdfb884ee9cac9368",
       "role": "active_foundation_gate"
     },
     {
@@ -168,7 +168,7 @@
     },
     {
       "path": "tests/test_lifecycle_policy_contracts.py",
-      "sha256": "4fae9bc1fd3032861c9c8373b327bf028ff54794ffb2af8c01f450e526376d71",
+      "sha256": "5695f731af4a32d5c440bd18ec99f2c07d27a46f86b90dd704b31cee4f0813d9",
       "role": "acquisition_replacement_capital_and_gate_fixtures"
     },
     {
@@ -238,12 +238,12 @@
     },
     {
       "path": "tests/test_study_contract.py",
-      "sha256": "067e0b1a0f490613f2e899fa8840103c46223332c6635736f5d02d6c81eb52a4",
+      "sha256": "155e784819ea2796b26fdef3dd08fdca963c36b3294fbba848866798120aa0d0",
       "role": "active_vs_frozen_scope_governance_fixture"
     },
     {
       "path": "src/milky_cow/policy_bundle.py",
-      "sha256": "bce8090063f96e23f0ec191c81c98688d41a8c49f5336a30e3bf5a39afadabef",
+      "sha256": "40c27cb94b7f6f70763605fd397ff6570f1ad3ca2033a93f8063cbbc98b6ad47",
       "role": "gate_to_runtime_policy_bundle"
     },
     {
@@ -253,7 +253,7 @@
     },
     {
       "path": "src/milky_cow/study_runner.py",
-      "sha256": "68b160bc94b62c912e790329a8f6154d06ceb8b4d85fbaec1515e5a7621536ba",
+      "sha256": "c8b64fb411aeacf6fd9e7408a40cbeb1e6d10b06bac705758dff2dcdd28e5d80",
       "role": "single_cohort_lifecycle_runner"
     },
     {
@@ -263,22 +263,22 @@
     },
     {
       "path": "tests/test_study_runner.py",
-      "sha256": "ead0723948238e3b96001acd0b26ca73367ec553640a81ea4839eaf5006f3596",
+      "sha256": "a6fcb218dd1c9b936a27fb8fcb374ce329fb07aa4fdfe16a4a110dfb49debebb",
       "role": "runner_and_consumer_contract_tests"
     },
     {
       "path": "src/milky_cow/sweep.py",
-      "sha256": "82cf35f286f36cff03992c3f05cf3612462f5e85b7f823055814fcddc2d57de1",
+      "sha256": "9dca140cfe9637a323d17429b2778104287d892749efd7771e6f0033177a0408",
       "role": "n_by_payout_policy_sweep_aggregation"
     },
     {
       "path": "scripts/run_sweep.py",
-      "sha256": "19cbde1c88c3dcbb5cbd655bb77cd45626cb69d89fc8798e94f2c910d8da4e26",
+      "sha256": "81722b1ab9e5bf2ec71280ec18d86d9a5376d60c59d5d8874bc7c28f397326e0",
       "role": "sweep_entry_point"
     },
     {
       "path": "tests/test_sweep.py",
-      "sha256": "20180121e4dee728fb30c5a51e8c732f010ec6c300771475ee5721031ec82893",
+      "sha256": "aaf80a01980374c0cc487913b64e13947a742afb9fbd24a19c4fca56280626e0",
       "role": "sweep_aggregation_contract_tests"
     }
   ],
