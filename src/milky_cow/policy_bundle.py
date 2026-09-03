@@ -26,7 +26,7 @@ from .contracts import (
 )
 from .copy_to_all import CommissionTiming
 from .evaluation import EvaluationRules
-from .execution import ExecutionModel, execution_model
+from .execution import ExecutionModel
 from .inputs import PathStressArm
 from .lifecycle import EventOrderMode, event_order_phase_ranks
 from .payouts import Legacy25KPayoutRules, PayoutPolicy, load_payout_policies
@@ -71,6 +71,7 @@ class StudyPolicyBundle:
             f".{self.payout_policy.policy_id}"
             f".{self.path_stress_arm}"
             f".{self.event_order_mode}"
+            f".{self.execution.model_id}"
         )
 
 
@@ -109,6 +110,22 @@ def _scaling(block: dict[str, Any]) -> ScalingSchedule:
         synchronized_aggregation=block["synchronized_aggregation"],
         maximum_mnq=block["maximum_mnq"],
         outcome_scaling=block["outcome_scaling"],
+    )
+
+
+def _execution(config: dict[str, Any], override: str | None) -> ExecutionModel:
+    """Build the execution model from config, not from a hard-coded constant."""
+
+    block = config["execution"]
+    model_id = override or block["selected_model_id"]
+    catalog = block["models"]
+    if model_id not in catalog:
+        raise ValueError(f"Unsupported execution model: {model_id}")
+    row = catalog[model_id]
+    return ExecutionModel(
+        model_id=model_id,
+        slippage_ticks_per_side=row["slippage_ticks_per_side"],
+        tick_value_usd=row["tick_value_usd"],
     )
 
 
@@ -201,7 +218,7 @@ def load_policy_bundle(
             threshold_touch_fails=account_terms["threshold_touch_fails"],
             carries_if_alive_at_renewal=account_terms["carries_if_alive_at_renewal"],
         ),
-        payout_rules=Legacy25KPayoutRules(),
+        payout_rules=Legacy25KPayoutRules(**config["payout"]["rules"]),
         path_stress_arm=arm,
         commission_timing=config["scaling"]["commission_timing"],
         event_order_mode=order_mode,
@@ -213,10 +230,7 @@ def load_policy_bundle(
         horizon_days=config["reporting"]["horizon_days"],
         expected_pa_stream_sha256=stream["accepted_stream_sha256"],
         expected_pa_raw_offer_count=stream["expected_raw_offers"],
-        execution=execution_model(
-            execution_model_id
-            or config["execution"]["selected_model_id"]
-        ),
+        execution=_execution(config, execution_model_id),
         exploratory=exploratory,
         outstanding_blockers=outstanding,
     )

@@ -18,18 +18,34 @@ class GridTests(unittest.TestCase):
             ["minimum_500_always", "maximum_always"],
             path_stress_arm="source_constrained_then_seeded_coin",
             event_order_mode="canonical_settle_realize_spend_commit",
+            execution_model_ids=[
+                "perfect_linear_no_slippage_phase_1",
+                "one_tick_per_side_sensitivity",
+            ],
         )
-        self.assertEqual(len(grid), 4)
+        # Execution is a grid dimension: two models are two arms, not one.
+        self.assertEqual(len(grid), 8)
         # The grid follows the caller's order — which is the gate's declared
         # policy order — rather than re-sorting it, and repeats exactly.
         self.assertEqual(
             [(row[0], row[1]) for row in grid],
             [
                 (1, "minimum_500_always"),
+                (1, "minimum_500_always"),
+                (1, "maximum_always"),
                 (1, "maximum_always"),
                 (2, "minimum_500_always"),
+                (2, "minimum_500_always"),
+                (2, "maximum_always"),
                 (2, "maximum_always"),
             ],
+        )
+        self.assertEqual(
+            {row[4] for row in grid},
+            {
+                "perfect_linear_no_slippage_phase_1",
+                "one_tick_per_side_sensitivity",
+            },
         )
         # Every arm carries its own path and ordering, so a sweep can never
         # mix two treatments in one manifest by accident.
@@ -119,6 +135,31 @@ class ArmSummaryTests(unittest.TestCase):
             "unwithdrawn_equity_total_usd", row["owner_net_retained_cash_usd"]
         )
         self.assertIn("unwithdrawn_equity_total_usd", row["right_censoring"])
+
+    def test_execution_model_is_part_of_arm_identity(self) -> None:
+        """Two execution models produced identical arm ids before this."""
+
+        frictionless, _ = run_arm(
+            ROOT,
+            self.dataset,
+            self.cohorts,
+            target_active_pas=2,
+            payout_policy_id="cap_maximizer",
+            execution_model_id="perfect_linear_no_slippage_phase_1",
+            exploratory=True,
+        )
+        one_tick, _ = run_arm(
+            ROOT,
+            self.dataset,
+            self.cohorts,
+            target_active_pas=2,
+            payout_policy_id="cap_maximizer",
+            execution_model_id="one_tick_per_side_sensitivity",
+            exploratory=True,
+        )
+        self.assertNotEqual(frictionless.arm_id, one_tick.arm_id)
+        self.assertIn("perfect_linear", frictionless.arm_id)
+        self.assertIn("one_tick", one_tick.arm_id)
 
     def test_summarize_rejects_an_empty_arm(self) -> None:
         with self.assertRaises(ValueError):

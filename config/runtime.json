@@ -4,11 +4,11 @@
   "status": {
     "phase": "phase_1",
     "blockers_before_a_citable_sweep": [
-      "the one-tick-per-side execution sensitivity is not implemented; Lifecycle still hard-requires perfect_linear_no_slippage_fixture_only, so the arm the gate demands before any headline N conclusion cannot be constructed",
-      "no regime split is computed or reported, though the contract requires one; the exploratory_v0 run showed strong regime dependence that is unquantified",
+      "the two-model execution comparison has not been run at scale; one-tick is implemented and reaches both phases, but only smoke-sized grids have run it",
+      "no regime split is computed or reported, though the contract requires one",
       "the source_constrained_then_mae_first arm has not been run, so no parent comparison is legal",
-      "the spend_before_payout arm is now executable but has not been run and reported on the real tape",
-      "no Pareto reporting exists: results are reported as single aggregates rather than as the average-cash / profitable-share / downside / worst-period trade-off the economics actually present"
+      "the spend_before_payout arm is executable but has not been run and reported",
+      "no Pareto reporting exists: results are still single aggregates rather than the average-cash / profitable-share / downside / worst-period trade-off"
     ],
     "note": "a run while this list is non-empty must pass exploratory=True and is labelled exploratory in its own manifest"
   },
@@ -126,7 +126,23 @@
       "half_of_maximum"
     ],
     "lifecycle_timing": "atomic_request_approval_balance_removal_and_treasury_receipt",
-    "open_position_handling": "trading_allowed_on_payout_day"
+    "open_position_handling": "trading_allowed_on_payout_day",
+    "rules": {
+      "nominal_balance_usd": 25000.0,
+      "minimum_days": 8,
+      "minimum_profitable_days": 5,
+      "profitable_day_usd": 50.0,
+      "request_gate_balance_usd": 26600.0,
+      "safety_net_balance_usd": 26600.0,
+      "minimum_request_usd": 500.0,
+      "first_five_cap_usd": 1500.0,
+      "safety_net_request_count": 3,
+      "capped_request_count": 5,
+      "post_safety_minimum_balance_usd": 25100.01,
+      "full_split_cumulative_usd": 25000.0,
+      "split_after_full": 0.9
+    },
+    "rules_source": "rules/Payout_rules.txt and rules/25k_legacy_rules.txt"
   },
   "intratrade_path_order": {
     "central_arm": "source_constrained_then_seeded_coin",
@@ -159,7 +175,22 @@
   "execution": {
     "selected_model_id": "perfect_linear_no_slippage_phase_1",
     "sensitivity_model_id": "one_tick_per_side_sensitivity",
-    "known_bias_direction": "favors_high_n"
+    "known_bias_direction": "favors_high_n",
+    "models": {
+      "perfect_linear_no_slippage_phase_1": {
+        "slippage_ticks_per_side": 0.0,
+        "tick_value_usd": 0.5
+      },
+      "one_tick_per_side_sensitivity": {
+        "slippage_ticks_per_side": 1.0,
+        "tick_value_usd": 0.5
+      }
+    },
+    "applies_to": [
+      "evaluation_phase",
+      "pa_phase"
+    ],
+    "note": "MNQ moves $2.00 per index point with a 0.25-point minimum tick"
   },
   "reporting": {
     "objective": "owner_net_retained_cash",
@@ -212,7 +243,8 @@
     "upstream_evidence": "manifests/upstream_evidence_20260829.json",
     "rules": [
       "rules/25k_legacy_rules.txt",
-      "rules/MILKY_COW_COPY_TO_ALL_RULES.txt"
+      "rules/MILKY_COW_COPY_TO_ALL_RULES.txt",
+      "rules/Payout_rules.txt"
     ],
     "evaluation_behavior_lock": "tests/fixtures/evaluation/eodmae_legacy_25k_x3_behavior_lock.json",
     "note": "these are immutable inputs and stay hash-verified. Local mutable source and prose are governed by Git revision plus working-tree digest, recorded in each run manifest."

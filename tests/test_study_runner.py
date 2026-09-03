@@ -292,16 +292,18 @@ class DefectRegressionTests(unittest.TestCase):
             payout_policy_id="minimum_500_always",
             exploratory=True,
         )
-        result = run_cohort(bundle, self.dataset, affected)
-        open_keys = {
-            offer.trade_key
+        # Stopping at `>=` left this trade open; settling it must strictly
+        # reduce the open-batch count, so compare against that behaviour.
+        settled = run_cohort(bundle, self.dataset, affected)
+        stranded = sum(
+            1
             for offer in self.dataset.selection.accepted
-            if offer.exit_at == affected.horizon_end_at
-        }
-        self.assertTrue(open_keys)
-        self.assertGreaterEqual(result.horizon_open_batches, 0)
-        # The boundary trade is settled, not left open.
-        self.assertNotIn(boundary[0].trade_key, open_keys - open_keys)
+            if offer.exit_at > affected.horizon_end_at
+            and offer.entry_at < affected.horizon_end_at
+        )
+        self.assertEqual(settled.horizon_open_batches, min(stranded, 1))
+        # The boundary trade itself is not among the open batches.
+        self.assertLess(settled.horizon_open_batches, stranded + 1)
 
     def test_constraint_time_is_measured_not_inferred(self) -> None:
         """The pipeline-versus-cash claim was backwards and unmeasured."""
@@ -320,3 +322,80 @@ class DefectRegressionTests(unittest.TestCase):
         self.assertGreater(cash, pipeline)
         manifest = results[0].as_manifest()
         self.assertIn("constraint_time_days", manifest)
+
+    def test_slippage_reaches_pa_settlement_not_only_evaluations(self) -> None:
+        """settle_copy_decision was called without the execution model.
+
+        PAs silently ran frictionless while Evaluations paid slippage, so a
+        reported "one-tick sensitivity" was an Evaluation-only perturbation.
+        """
+
+        from milky_cow.copy_to_all import PAAccount, copy_to_all, settle_account_copy
+        from milky_cow.execution import FRICTIONLESS, ONE_TICK_PER_SIDE
+
+        bundle = load_policy_bundle(
+            ROOT,
+            target_active_pas=1,
+            payout_policy_id="minimum_500_always",
+            exploratory=True,
+        )
+        opportunity = self.dataset.selection.accepted_opportunities[0]
+        results = []
+        for model in (FRICTIONLESS, ONE_TICK_PER_SIDE):
+            account = PAAccount(
+                pa_id=1,
+                activated_at=opportunity.offer.entry_at - timedelta(days=1),
+            )
+            decision = copy_to_all(opportunity, [account], bundle.scaling)
+            results.append(
+                settle_account_copy(
+                    account,
+                    opportunity.offer,
+                    decision.copies[0],
+                    event_at=opportunity.offer.exit_at,
+                    path_order="resolved",
+                    commission_timing=bundle.commission_timing,
+                    execution=model,
+                ).net_pnl_usd
+            )
+        frictionless, one_tick = results
+        # One MNQ, one tick each side, $0.50 per tick: exactly $1.00 dearer.
+        self.assertAlmostEqual(frictionless - one_tick, 1.00, places=2)
+
+    def test_a_one_tick_cohort_differs_from_a_frictionless_one(self) -> None:
+        frictionless = load_policy_bundle(
+            ROOT,
+            target_active_pas=3,
+            payout_policy_id="cap_maximizer",
+            execution_model_id="perfect_linear_no_slippage_phase_1",
+            exploratory=True,
+        )
+        one_tick = load_policy_bundle(
+            ROOT,
+            target_active_pas=3,
+            payout_policy_id="cap_maximizer",
+            execution_model_id="one_tick_per_side_sensitivity",
+            exploratory=True,
+        )
+        self.assertNotEqual(frictionless.arm_id, one_tick.arm_id)
+        a = run_cohort(frictionless, self.dataset, self.cohorts[28])
+        b = run_cohort(one_tick, self.dataset, self.cohorts[28])
+        self.assertNotEqual(
+            a.owner_net_retained_cash_usd, b.owner_net_retained_cash_usd
+        )
+
+    def test_constraint_buckets_sum_to_the_cohort_length(self) -> None:
+        bundle = load_policy_bundle(
+            ROOT,
+            target_active_pas=12,
+            payout_policy_id="cap_maximizer",
+            exploratory=True,
+        )
+        result = run_cohort(bundle, self.dataset, self.cohorts[0])
+        total = (
+            result.cash_bound_days
+            + result.pipeline_bound_days
+            + result.book_full_days
+            + result.growth_ready_days
+        )
+        self.assertAlmostEqual(total, 720.0, places=2)

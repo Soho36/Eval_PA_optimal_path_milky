@@ -153,6 +153,7 @@ class Lifecycle:
     evaluation_rules: EvaluationRules = field(default_factory=EvaluationRules)
     payout_rules: Legacy25KPayoutRules = field(default_factory=Legacy25KPayoutRules)
     evaluation_fee_usd: float = 35.0
+    evaluation_renewal_fee_usd: float = 35.0
     activation_fee_usd: float = 125.0
     execution: ExecutionModel = FRICTIONLESS
     evaluations: dict[str, EvaluationAccount] = field(init=False, default_factory=dict)
@@ -198,7 +199,11 @@ class Lifecycle:
         event_order_phase_ranks(self.event_order_mode)
         if any(
             not math.isfinite(value) or value <= 0
-            for value in (self.evaluation_fee_usd, self.activation_fee_usd)
+            for value in (
+                self.evaluation_fee_usd,
+                self.evaluation_renewal_fee_usd,
+                self.activation_fee_usd,
+            )
         ):
             raise ValueError("Lifecycle fees must be finite and positive")
         if not isinstance(self.execution, ExecutionModel):
@@ -473,6 +478,7 @@ class Lifecycle:
                 self.path_stress_arm,
             ),
             commission_timing=self.commission_timing,
+            execution=self.execution,
         )
         del self.outstanding_pa_decisions[trade_key]
         self._record(event_at, phase, "pa_copy_batch_settled", trade_key)
@@ -643,7 +649,7 @@ class Lifecycle:
             raise ValueError("Passed or busy Evaluations cannot renew")
         paid = self.treasury.fund_and_pay_fee(
             event_at,
-            self.evaluation_fee_usd,
+            self.evaluation_renewal_fee_usd,
             "evaluation_renewal",
             evaluation_id,
             self.capital_policy,

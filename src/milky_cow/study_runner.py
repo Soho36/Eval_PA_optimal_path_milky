@@ -39,6 +39,7 @@ class CohortResult:
     payout_policy_id: str
     path_stress_arm: str
     event_order_mode: str
+    execution_model_id: str
 
     owner_capital_supplied_usd: float
     owner_net_retained_cash_usd: float
@@ -75,6 +76,7 @@ class CohortResult:
     pipeline_bound_days: float
     dormant_slot_days: float
     book_full_days: float
+    growth_ready_days: float
 
     audit_events: int
 
@@ -87,6 +89,7 @@ class CohortResult:
                 "payout_policy_id": self.payout_policy_id,
                 "path_stress_arm": self.path_stress_arm,
                 "event_order_mode": self.event_order_mode,
+                "execution_model_id": self.execution_model_id,
             },
             "provenance": {
                 "config_sha256": self.config_sha256,
@@ -146,10 +149,12 @@ class CohortResult:
                 "cash_bound": self.cash_bound_days,
                 "pipeline_bound": self.pipeline_bound_days,
                 "book_full": self.book_full_days,
+                "growth_ready": self.growth_ready_days,
                 "dormant_slot_days": self.dormant_slot_days,
                 "note": (
-                    "time below the N target attributed to its cause; "
-                    "dormant_slot_days is summed per blocked slot"
+                    "cash_bound + pipeline_bound + book_full + growth_ready "
+                    "equals the cohort length exactly; dormant_slot_days is a "
+                    "separate measure summed per blocked slot"
                 ),
             },
             "audit_events": self.audit_events,
@@ -194,6 +199,7 @@ class _Runner:
     pipeline_bound_seconds: float = 0.0
     dormant_slot_seconds: float = 0.0
     book_full_seconds: float = 0.0
+    growth_ready_seconds: float = 0.0
     _last_close: datetime | None = field(default=None)
     _prev_now: datetime | None = field(default=None)
 
@@ -288,6 +294,11 @@ class _Runner:
             f"eval-{life._next_evaluation_number}",
         ):
             self.cash_bound_seconds += seconds
+        else:
+            # Below target, a slot free and the fee affordable: the book is
+            # simply between the opportunity and the purchase. Attributing it
+            # keeps the four buckets summing to the exact cohort length.
+            self.growth_ready_seconds += seconds
 
     def _settles_at_horizon(self, now: datetime) -> bool:
         """An exit landing exactly on the horizon settles; nothing else runs.
@@ -454,6 +465,9 @@ class _Runner:
         self.opportunities_consumed += 1
 
     def run(self) -> None:
+        # Seed the clock at the cohort start so the interval before the first
+        # event is classified rather than silently dropped.
+        self._prev_now = self.cohort.start_at
         # Cohort start: the owner seed buys the bridge Evaluation.
         self._purchases(self.cohort.start_at)
         handlers = {
@@ -487,6 +501,10 @@ class _Runner:
             self._accrue_constraint_time(now)
             for phase in ordered_phases:
                 handlers[phase](now)
+        # The interval from the last event to the horizon is still cohort time
+        # and must be attributed, as is the head interval before the first
+        # event (handled by seeding _prev_now at the cohort start).
+        self._accrue_constraint_time(self.cohort.horizon_end_at)
 
 
 def run_cohort(
@@ -520,6 +538,7 @@ def run_cohort(
         payout_rules=bundle.payout_rules,
         execution=bundle.execution,
         evaluation_fee_usd=bundle.evaluation_fee_usd,
+        evaluation_renewal_fee_usd=bundle.evaluation_renewal_fee_usd,
         activation_fee_usd=bundle.activation_fee_usd,
     )
     runner = _Runner(
@@ -556,6 +575,7 @@ def run_cohort(
         payout_policy_id=bundle.payout_policy.policy_id,
         path_stress_arm=bundle.path_stress_arm,
         event_order_mode=bundle.event_order_mode,
+        execution_model_id=bundle.execution.model_id,
         owner_capital_supplied_usd=treasury.owner_capital_supplied_usd,
         owner_net_retained_cash_usd=treasury.owner_net_retained_cash_usd,
         cumulative_payout_harvest_usd=treasury.payout_receipts_usd,
@@ -587,5 +607,6 @@ def run_cohort(
         pipeline_bound_days=round(runner.pipeline_bound_seconds / 86_400.0, 3),
         dormant_slot_days=round(runner.dormant_slot_seconds / 86_400.0, 3),
         book_full_days=round(runner.book_full_seconds / 86_400.0, 3),
+        growth_ready_days=round(runner.growth_ready_seconds / 86_400.0, 3),
         audit_events=len(lifecycle.audit),
     )

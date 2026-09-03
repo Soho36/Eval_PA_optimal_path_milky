@@ -44,6 +44,7 @@ class ArmSummary:
     payout_policy_id: str
     path_stress_arm: str
     event_order_mode: str
+    execution_model_id: str
     cohort_count: int
 
     retained_median_usd: float
@@ -72,6 +73,7 @@ class ArmSummary:
     cash_bound_days: float
     pipeline_bound_days: float
     book_full_days: float
+    growth_ready_days: float
     dormant_slot_days: float
 
     def as_row(self) -> dict[str, Any]:
@@ -81,6 +83,7 @@ class ArmSummary:
             "payout_policy_id": self.payout_policy_id,
             "path_stress_arm": self.path_stress_arm,
             "event_order_mode": self.event_order_mode,
+            "execution_model_id": self.execution_model_id,
             "cohort_count": self.cohort_count,
             "owner_net_retained_cash_usd": {
                 "median": self.retained_median_usd,
@@ -116,6 +119,7 @@ class ArmSummary:
                 "cash_bound": self.cash_bound_days,
                 "pipeline_bound": self.pipeline_bound_days,
                 "book_full": self.book_full_days,
+                "growth_ready": self.growth_ready_days,
                 "dormant_slot": self.dormant_slot_days,
             },
         }
@@ -133,6 +137,7 @@ def summarize_arm(results: Sequence[CohortResult]) -> ArmSummary:
         payout_policy_id=first.payout_policy_id,
         path_stress_arm=first.path_stress_arm,
         event_order_mode=first.event_order_mode,
+        execution_model_id=first.execution_model_id,
         cohort_count=len(results),
         retained_median_usd=money(stats.median(retained)),
         retained_p25_usd=_quantile(retained, 0.25),
@@ -160,6 +165,7 @@ def summarize_arm(results: Sequence[CohortResult]) -> ArmSummary:
         cash_bound_days=round(sum(row.cash_bound_days for row in results), 2),
         pipeline_bound_days=round(sum(row.pipeline_bound_days for row in results), 2),
         book_full_days=round(sum(row.book_full_days for row in results), 2),
+        growth_ready_days=round(sum(row.growth_ready_days for row in results), 2),
         dormant_slot_days=round(sum(row.dormant_slot_days for row in results), 2),
     )
 
@@ -173,6 +179,7 @@ def run_arm(
     payout_policy_id: str,
     path_stress_arm: str | None = None,
     event_order_mode: str | None = None,
+    execution_model_id: str | None = None,
     exploratory: bool = False,
 ) -> tuple[ArmSummary, list[CohortResult]]:
     """Execute one arm across every supplied cohort."""
@@ -183,6 +190,7 @@ def run_arm(
         payout_policy_id=payout_policy_id,
         path_stress_arm=path_stress_arm,
         event_order_mode=event_order_mode,
+        execution_model_id=execution_model_id,
         exploratory=exploratory,
     )
     results = [run_cohort(bundle, dataset, cohort) for cohort in cohorts]
@@ -206,7 +214,7 @@ def init_worker(root: str, horizon_days: int) -> None:
     ).cohorts
 
 
-def run_arm_task(task: tuple[int, str, str, str, bool]) -> dict[str, Any]:
+def run_arm_task(task: tuple[int, str, str, str, str, bool]) -> dict[str, Any]:
     """Worker entry point: one arm, returned as plain data."""
 
     (
@@ -214,6 +222,7 @@ def run_arm_task(task: tuple[int, str, str, str, bool]) -> dict[str, Any]:
         payout_policy_id,
         path_stress_arm,
         event_order_mode,
+        execution_model_id,
         exploratory,
     ) = task
     summary, results = run_arm(
@@ -224,6 +233,7 @@ def run_arm_task(task: tuple[int, str, str, str, bool]) -> dict[str, Any]:
         payout_policy_id=payout_policy_id,
         path_stress_arm=path_stress_arm,
         event_order_mode=event_order_mode,
+        execution_model_id=execution_model_id,
         exploratory=exploratory,
     )
     return {
@@ -234,6 +244,7 @@ def run_arm_task(task: tuple[int, str, str, str, bool]) -> dict[str, Any]:
                 "payout_policy_id": row.payout_policy_id,
                 "path_stress_arm": row.path_stress_arm,
                 "event_order_mode": row.event_order_mode,
+                "execution_model_id": row.execution_model_id,
                 "start_at": row.start_at.isoformat(),
                 "horizon_end_at": row.horizon_end_at.isoformat(),
                 # Reconciliation: retained == ending_cash - owner_capital, and
@@ -263,6 +274,7 @@ def run_arm_task(task: tuple[int, str, str, str, bool]) -> dict[str, Any]:
                 "cash_bound_days": row.cash_bound_days,
                 "pipeline_bound_days": row.pipeline_bound_days,
                 "book_full_days": row.book_full_days,
+                "growth_ready_days": row.growth_ready_days,
                 "dormant_slot_days": row.dormant_slot_days,
                 "horizon_open_batches": row.horizon_open_batches,
             }
@@ -277,10 +289,14 @@ def build_grid(
     *,
     path_stress_arm: str,
     event_order_mode: str,
+    execution_model_ids: Sequence[str],
     exploratory: bool = False,
-) -> list[tuple[int, str, str, str, bool]]:
+) -> list[tuple[int, str, str, str, str, bool]]:
+    """The full product, including execution: two models are two arms."""
+
     return [
-        (n, policy_id, path_stress_arm, event_order_mode, exploratory)
+        (n, policy_id, path_stress_arm, event_order_mode, model_id, exploratory)
         for n in n_values
         for policy_id in payout_policy_ids
+        for model_id in execution_model_ids
     ]

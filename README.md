@@ -1,54 +1,37 @@
-# Legacy 25K milky-cow starter bundle
+# Legacy 25K copy-to-all study
 
-This is a temporary, self-contained handoff bundle. Move the whole directory to
-its final location, initialize a new Git repository there, create its virtual
-environment, and add that final folder to Codex as a new local project.
+A completed-trade economic simulator for a Legacy 25K Evaluation -> PA ->
+withdrawal lifecycle. Its defining behavior is **copy-to-all**: every accepted
+global opportunity is copied to every eligible active PA. No staggering, no
+routing competition, no dormant reserves.
 
-The study asks whether a synchronized book of 1-20 Legacy 25K PAs can be grown
-and harvested economically when every eligible active PA receives the same
-accepted global signal. It is intentionally separate from the R=1 account-
-staggering/inventory study.
+The study asks whether a synchronized book of 1-20 PAs can be grown and
+harvested economically, and exists to be differenced against the parent
+staggering study.
 
-## After moving the directory
+## Read in this order
 
-From its final directory in PowerShell. This is a new repository, so no branch
-needs to be created in the parent staggering repository:
+1. `STATUS.md` — where the work stands and what blocks a citable result.
+2. `ASSUMPTIONS.md` — why the model is shaped this way, and its known limits.
+3. `config/runtime.json` — every value the simulator reads.
+
+## Run
 
 ```powershell
-git init -b main
-& 'C:\Program Files\Python312\python.exe' -m venv .venv
-.\.venv\Scripts\python.exe -m pip install --upgrade pip
-.\.venv\Scripts\python.exe -m pip install -e .
-.\.venv\Scripts\python.exe scripts\verify_transfer_manifest.py
 .\scripts\run_tests.ps1
-git add .
-git commit -m "Initialize Legacy 25K milky-cow study"
+.\venv\Scripts\python.exe scripts\run_sweep.py --n 1 3 --workers 4 --exploratory
 ```
 
-If the system Python path differs, replace only the interpreter in the second
-command. The project-local `.venv` is used thereafter.
+While `config/runtime.json` lists blockers, a run must pass `--exploratory` and
+its manifest is labelled accordingly. Do not report an exploratory run as a
+study result.
 
-## What is included
+## Layout
 
-- the full frozen RR1 completed-trade tape and its import manifest;
-- Legacy 25K Evaluation, PA and payout rules;
-- the six payout-policy definitions as candidates;
-- the pinned EODMAE Evaluation behavior fixture;
-- exact parent/upstream provenance;
-- read-only snapshots of potentially reusable parent modules and tests; and
-- a minimal executable study-contract test.
-
-Files under `reference/` are evidence and implementation references, not active
-package code. Review and import them deliberately rather than copying the
-parent simulator wholesale.
-
-## What is deliberately excluded
-
-- Account-staggering routing fixtures;
-- the superseded `$200/$400` behavior lock;
-- inventory-grid results and rankings;
-- `max_headroom` routing; and
-- dormant-PA inventory mechanics.
-
-Read `project_memory/BEGINNING_OF_A_WORK_SESSION.md` before development.
-Use `NEW_CHAT_PROMPT.md` as the first message in the new Codex local project.
+- `src/milky_cow/` — the simulator.
+- `tests/` — behavioural and economic tests, plus defect regressions.
+- `results/` — run manifests. Each seals its own outputs by hash.
+- `manifests/`, `rules/` — frozen, hash-verified inputs. Do not edit.
+- `reference/` — read-only parent snapshots used for parity checks.
+- `archive/` — transfer paperwork, superseded configs and prior project
+  memory. Evidence, not mandatory reading.

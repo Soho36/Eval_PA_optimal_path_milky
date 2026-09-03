@@ -16,13 +16,17 @@ interpretation errors it contains.
 
 ## Blockers before a citable sweep
 
-1. No regime split is computed, though the contract requires one. The
+Mirrors `config/runtime.json`, which is the enforced copy.
+
+1. The two-model execution comparison has not been run at scale. One-tick is
+   implemented and now reaches **both** phases; only smoke grids have run it.
+2. No regime split is computed, though the contract requires one. The
    exploratory grid showed strong regime dependence that remains unquantified.
-2. The `source_constrained_then_mae_first` arm has not been run, so no parent
+3. The `source_constrained_then_mae_first` arm has not been run, so no parent
    comparison is legal.
-3. The `spend_before_payout` arm is now executable but has not been run and
+4. The `spend_before_payout` arm is executable but has not been run and
    reported.
-4. No Pareto reporting exists; results are still single aggregates.
+5. No Pareto reporting exists; results are still single aggregates.
 
 A run while these stand must pass `exploratory=True` and is labelled
 exploratory in its own manifest.
@@ -32,16 +36,18 @@ exploratory in its own manifest.
 - **Correlated deaths are real.** At N=2, 39 of 181 death events killed both
   PAs on the same trade — the copy-to-all signature that staggering at R=1
   cannot produce.
-- **Cash binds, not pipeline time.** Measured per cohort: at N=20, cash-bound
-  time exceeds pipeline-bound by roughly 55x (8,474 vs 153 days over 12
-  cohorts), and `book_full` is 0 days at N>=12, so the book never reaches
-  target. An earlier claim to the opposite was inferred from an activation
+- **Cash binds, not pipeline time.** Measured per cohort with complete
+  accounting: at N=20 over 12 cohorts, cash-bound 8,476 days versus
+  pipeline-bound 153, `book_full` 0 and `growth_ready` 11.9 — the four buckets
+  now sum to the cohort length exactly. The book never reaches target at
+  N>=12. An earlier claim to the opposite was inferred from an activation
   plateau and was wrong.
-- **A one-tick perturbation is not a small perturbation.** On identical trades
-  it costs exactly $1.00 per round turn at 1 MNQ, but across the grid it moved
-  totals by +17% to +22% *upward*, because it changes which accounts die when
-  and therefore the whole downstream trajectory. The N-curve is not robust to
-  it.
+- **A one-tick cost is exactly $1.00 per round turn at 1 MNQ**, verified on
+  identical trades in both phases. An earlier report that it moved grid totals
+  by +17% to +22% is **withdrawn**: PA settlement was not receiving the
+  execution model, so that perturbation touched Evaluations only and said
+  nothing about copy-to-all sensitivity. The corrected two-model comparison has
+  not yet been run at scale.
 
 ## Provenance model
 

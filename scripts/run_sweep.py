@@ -42,19 +42,38 @@ def _git(*args: str) -> str:
 
 
 def run_identity() -> dict:
-    """Everything needed to say which code produced this output."""
+    """Everything needed to say which code produced this output.
+
+    The working-tree digest hashes the *contents* of every modified file, not
+    the `git status` text: two different edits to the same paths produced the
+    same digest before this.
+    """
 
     dirty = _git("status", "--porcelain")
+    paths = sorted(
+        line[2:].strip().split(" -> ")[-1]
+        for line in dirty.splitlines()
+        if line[2:].strip()
+    )
+    digest = hashlib.sha256()
+    tracked: list[dict] = []
+    for relative in paths:
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"|")
+        candidate = ROOT / relative
+        if candidate.is_file():
+            blob = hashlib.sha256(candidate.read_bytes()).hexdigest()
+            digest.update(blob.encode("utf-8"))
+            tracked.append({"path": relative, "sha256": blob})
+        else:
+            digest.update(b"absent-or-directory")
+        digest.update(b"\n")
     return {
         "git_revision": _git("rev-parse", "HEAD"),
         "git_branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
         "working_tree_dirty": bool(dirty),
-        "working_tree_digest_sha256": hashlib.sha256(
-            dirty.encode("utf-8")
-        ).hexdigest(),
-        "dirty_paths": sorted(
-            line[2:].strip() for line in dirty.splitlines() if line[2:].strip()
-        ),
+        "working_tree_digest_sha256": digest.hexdigest(),
+        "dirty_files": tracked,
         "python": platform.python_version(),
         "platform": platform.platform(),
     }
@@ -66,8 +85,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--policies", nargs="*", default=None)
     parser.add_argument("--path-arm", default=None)
     parser.add_argument("--event-order", default=None)
+    parser.add_argument(
+        "--execution",
+        nargs="*",
+        default=None,
+        help="execution model ids; defaults to the configured model only",
+    )
     parser.add_argument("--workers", type=int, default=7)
     parser.add_argument("--tag", default="central")
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="replace an existing artifact with this tag instead of refusing",
+    )
     parser.add_argument(
         "--exploratory",
         action="store_true",
@@ -84,6 +114,7 @@ def main() -> None:
     policies = args.policies or config["payout"]["policy_ids"]
     path_arm = args.path_arm or config["intratrade_path_order"]["central_arm"]
     event_order = args.event_order or config["event_order"]["selected"]
+    execution_ids = args.execution or [config["execution"]["selected_model_id"]]
 
     # One bundle up front so a misconfigured grid fails before the workers start.
     probe = load_policy_bundle(
@@ -92,6 +123,7 @@ def main() -> None:
         payout_policy_id=policies[0],
         path_stress_arm=path_arm,
         event_order_mode=event_order,
+        execution_model_id=execution_ids[0],
         exploratory=args.exploratory,
     )
     dataset = load_verified_rr1_dataset(ROOT / "data" / "raw" / "rr1")
@@ -101,6 +133,7 @@ def main() -> None:
         policies,
         path_stress_arm=path_arm,
         event_order_mode=event_order,
+        execution_model_ids=execution_ids,
         exploratory=args.exploratory,
     )
     print(
@@ -133,11 +166,20 @@ def main() -> None:
     # Scheduling is nondeterministic; the manifest must not be.
     summaries = sorted(
         (payload["summary"] for payload in payloads),
-        key=lambda row: (row["n"], row["payout_policy_id"]),
+        key=lambda row: (
+            row["n"],
+            row["payout_policy_id"],
+            row["execution_model_id"],
+        ),
     )
     cohort_rows = sorted(
         (row for payload in payloads for row in payload["cohorts"]),
-        key=lambda row: (row["n"], row["payout_policy_id"], row["start_at"]),
+        key=lambda row: (
+            row["n"],
+            row["payout_policy_id"],
+            row["execution_model_id"],
+            row["start_at"],
+        ),
     )
 
     manifest = {
@@ -153,6 +195,7 @@ def main() -> None:
             "payout_policy_ids": list(policies),
             "path_stress_arm": path_arm,
             "event_order_mode": event_order,
+            "execution_model_ids": execution_ids,
             "arms": len(grid),
             "cohorts_per_arm": summaries[0]["cohort_count"],
             "total_cohort_runs": sum(row["cohort_count"] for row in summaries),
@@ -176,7 +219,13 @@ def main() -> None:
     manifest["run_identity"] = run_identity()
 
     RESULTS.mkdir(parents=True, exist_ok=True)
+    summary_path = RESULTS / f"sweep_{args.tag}_summary.json"
     cohort_path = RESULTS / f"sweep_{args.tag}_cohorts.csv"
+    if not args.overwrite and (summary_path.exists() or cohort_path.exists()):
+        raise SystemExit(
+            f"refusing to overwrite an existing artifact for tag '{args.tag}'; "
+            "choose a new --tag or pass --overwrite"
+        )
     with cohort_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(cohort_rows[0]))
         writer.writeheader()
@@ -190,7 +239,6 @@ def main() -> None:
             "rows": len(cohort_rows),
         }
     }
-    summary_path = RESULTS / f"sweep_{args.tag}_summary.json"
     summary_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
     print(f"\n{len(grid)} arms in {elapsed / 60:.1f} min")
