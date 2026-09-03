@@ -1,4 +1,5 @@
 # Status
+03.09.2026 - THE PROJECT HAS BEEN PUT ON HOLD
 
 Current state only. Rationale is in `ASSUMPTIONS.md`; values are in
 `config/runtime.json`.
