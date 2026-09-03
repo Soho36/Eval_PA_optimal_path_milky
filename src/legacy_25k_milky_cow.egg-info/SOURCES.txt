@@ -1,8 +1,0 @@
-README.md
-pyproject.toml
-src/legacy_25k_milky_cow.egg-info/PKG-INFO
-src/legacy_25k_milky_cow.egg-info/SOURCES.txt
-src/legacy_25k_milky_cow.egg-info/dependency_links.txt
-src/legacy_25k_milky_cow.egg-info/top_level.txt
-src/milky_cow/__init__.py
-tests/test_study_contract.py

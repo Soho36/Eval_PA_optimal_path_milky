@@ -1,25 +1,30 @@
 # Instructions for AI-assisted work
 
-Before doing project work, read
-`project_memory/BEGINNING_OF_A_WORK_SESSION.md` and follow its complete reading
-order. Treat code, tests, manifests and generated results as stronger evidence
-than project memory.
+Read `STATUS.md` for where the work stands, then `ASSUMPTIONS.md` for why the
+model is shaped the way it is. Both are prose and neither is loaded by code.
+Every value the simulator reads is in `config/runtime.json`.
+
+Treat code, tests and generated results as stronger evidence than prose. If
+prose and a test disagree, the test wins and the prose is stale — fix it.
 
 This repository is a completed-trade economic simulator for a Legacy 25K
-Evaluation -> Legacy 25K PA -> withdrawal/reinvestment lifecycle. Its defining
-PA-book behavior is copy-to-all: every accepted global strategy opportunity is
-copied to every eligible active PA. It does not stagger signals, choose one PA,
-or maintain dormant PA reserves.
+Evaluation -> PA -> withdrawal lifecycle. Its defining behavior is copy-to-all:
+every accepted global opportunity is copied to every eligible active PA. It
+does not stagger signals, choose one PA, or hold dormant reserves.
 
-Do not modify upstream repositories. Every imported artifact must retain its
-source repository, Git revision and byte hash. The effective-dated rules in
-`rules/` are primary inputs. Stop affected modeling work when a rule is missing,
-ambiguous, or conflicts with the implementation.
+Frozen inputs stay hash-verified: `manifests/rr1_import_20260829.json`,
+`manifests/upstream_evidence_20260829.json`, the files in `rules/`, and the
+Evaluation behavior-lock fixture. Do not edit them. Local source and prose are
+governed by Git; every run records the revision, working-tree digest and a hash
+of each output it writes.
 
-Do not inherit conclusions from the parent staggering study. In particular,
-`max_headroom`, K=2/S=1, dormant reserves, fill-rate congestion, and its policy
-rankings are out of scope unless independently reintroduced and tested here.
+Do not inherit conclusions from the parent staggering study. Adopting a
+mechanic for comparability is deliberate and recorded in `ASSUMPTIONS.md`;
+adopting a result is not.
 
-Do not begin an integrated parameter sweep until the copy-to-all contract,
-scaling rules, account activation timing, replacement policy and parity
-fixtures are executable tests.
+`archive/` holds transfer paperwork, superseded configs and prior project
+memory. It is evidence, not mandatory reading.
+
+While `config/runtime.json` lists blockers before a citable sweep, any run must
+pass `exploratory=True` and its manifest is labelled exploratory. Do not report
+an exploratory run as a study result.

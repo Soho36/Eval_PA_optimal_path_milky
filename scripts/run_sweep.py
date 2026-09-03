@@ -78,12 +78,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    gate = json.loads(
-        (ROOT / "config" / "milky_cow_contract_gate.json").read_text(encoding="utf-8")
+    config = json.loads(
+        (ROOT / "config" / "runtime.json").read_text(encoding="utf-8")
     )
-    policies = args.policies or gate["payout_candidates"]["policy_ids"]
-    path_arm = args.path_arm or gate["intratrade_path_order"]["central_arm"]
-    event_order = args.event_order or gate["event_order"]["selected"]
+    policies = args.policies or config["payout"]["policy_ids"]
+    path_arm = args.path_arm or config["intratrade_path_order"]["central_arm"]
+    event_order = args.event_order or config["event_order"]["selected"]
 
     # One bundle up front so a misconfigured grid fails before the workers start.
     probe = load_policy_bundle(
@@ -160,7 +160,7 @@ def main() -> None:
             "workers": args.workers,
         },
         "provenance": {
-            "gate_sha256": probe.gate_sha256,
+            "config_sha256": probe.config_sha256,
             "accepted_stream_sha256": dataset.selection.accepted_stream_sha256,
             "horizon_days": probe.horizon_days,
         },

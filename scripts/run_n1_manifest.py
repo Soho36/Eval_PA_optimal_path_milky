@@ -62,7 +62,7 @@ def main() -> None:
             "event_order_mode": bundle.event_order_mode,
         },
         "provenance": {
-            "gate_sha256": bundle.gate_sha256,
+            "gate_sha256": bundle.config_sha256,
             "accepted_stream_sha256": dataset.selection.accepted_stream_sha256,
             "raw_offer_count": dataset.selection.raw_count,
             "accepted_opportunity_count": len(dataset.selection.accepted),

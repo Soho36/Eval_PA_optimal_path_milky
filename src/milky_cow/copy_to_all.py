@@ -18,6 +18,7 @@ import math
 from typing import Literal, Mapping
 
 from .contracts import ScalingSchedule
+from .execution import FRICTIONLESS, ExecutionModel
 from .inputs import AcceptedOpportunity, PathOrder, TradeOffer, money
 
 
@@ -330,6 +331,7 @@ def settle_account_copy(
     trailing_drawdown_usd: float = 1_500.0,
     frozen_floor_profit_usd: float = 100.0,
     threshold_touch_fails: bool = True,
+    execution: ExecutionModel = FRICTIONLESS,
 ) -> PATradeResult:
     """Apply linear per-MNQ completed-trade outcomes to one copied account."""
 
@@ -363,18 +365,24 @@ def settle_account_copy(
     intratrade_commission = (
         commission if commission_timing == "intratrade_and_close" else 0.0
     )
+    # Entry-side slippage is already paid while the position is open, so it
+    # lowers the modelled excursion and can itself cause an intratrade death.
+    entry_slippage = money(contracts * execution.slippage_usd_per_mnq_per_side)
+    round_turn_slippage = money(contracts * execution.slippage_usd_per_mnq_round_turn)
     adverse = money(
         account.equity_profit_usd
         + contracts * min(offer.mae_usd_per_mnq, 0.0)
         - intratrade_commission
+        - entry_slippage
     )
     favorable = money(
         account.equity_profit_usd
         + contracts * max(offer.mfe_usd_per_mnq, 0.0)
         - intratrade_commission
+        - entry_slippage
     )
     net_pnl = money(
-        contracts * offer.gross_pnl_usd_per_mnq - commission
+        contracts * offer.gross_pnl_usd_per_mnq - commission - round_turn_slippage
     )
     closing = money(account.equity_profit_usd + net_pnl)
     account.last_mnq = contracts
@@ -468,6 +476,7 @@ def settle_copy_decision(
     event_at: datetime,
     path_order: SettlementPathOrder,
     commission_timing: CommissionTiming,
+    execution: ExecutionModel = FRICTIONLESS,
 ) -> tuple[PATradeResult, ...]:
     if decision.settled_at is not None:
         raise ValueError("Copy decision has already been settled")
@@ -499,6 +508,7 @@ def settle_copy_decision(
             event_at=event_at,
             path_order=path_order,
             commission_timing=commission_timing,
+            execution=execution,
         )
         for copy in decision.copies
     )

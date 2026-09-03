@@ -32,7 +32,7 @@ class CohortResult:
     """One executed cohort, ready to serialize as a result manifest."""
 
     arm_id: str
-    gate_sha256: str
+    config_sha256: str
     start_at: datetime
     horizon_end_at: datetime
     target_active_pas: int
@@ -89,7 +89,7 @@ class CohortResult:
                 "event_order_mode": self.event_order_mode,
             },
             "provenance": {
-                "gate_sha256": self.gate_sha256,
+                "config_sha256": self.config_sha256,
                 "status": "single_cohort_slice_not_a_study_result",
             },
             "cohort": {
@@ -518,6 +518,7 @@ def run_cohort(
         event_order_mode=bundle.event_order_mode,
         evaluation_rules=bundle.evaluation_rules,
         payout_rules=bundle.payout_rules,
+        execution=bundle.execution,
         evaluation_fee_usd=bundle.evaluation_fee_usd,
         activation_fee_usd=bundle.activation_fee_usd,
     )
@@ -548,7 +549,7 @@ def run_cohort(
     simultaneous = [count for count in deaths_by_trade.values() if count > 1]
     return CohortResult(
         arm_id=bundle.arm_id,
-        gate_sha256=bundle.gate_sha256,
+        config_sha256=bundle.config_sha256,
         start_at=cohort.start_at,
         horizon_end_at=cohort.horizon_end_at,
         target_active_pas=bundle.target_active_pas,

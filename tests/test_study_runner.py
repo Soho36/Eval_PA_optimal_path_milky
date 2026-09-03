@@ -42,12 +42,10 @@ class PolicyBundleTests(unittest.TestCase):
         self.assertEqual(bundle.evaluation_rules.contracts_mnq, 3)
 
     def test_priced_terms_come_from_the_gate_not_dataclass_defaults(self) -> None:
-        gate = json.loads(
-            (ROOT / "config" / "milky_cow_contract_gate.json").read_text(
-                encoding="utf-8"
-            )
+        config = json.loads(
+            (ROOT / "config" / "runtime.json").read_text(encoding="utf-8")
         )
-        terms = gate["commercial_terms"]
+        terms = config["commercial_terms"]
         bundle = load_policy_bundle(
             ROOT, target_active_pas=1, payout_policy_id="minimum_500_always", exploratory=True
         )
@@ -57,30 +55,31 @@ class PolicyBundleTests(unittest.TestCase):
             bundle.commission_usd_per_mnq, terms["commission_roundturn_usd_per_mnq"]
         )
 
-    def test_bundle_refuses_an_unresolved_gate(self) -> None:
-        gate = json.loads(
-            (ROOT / "config" / "milky_cow_contract_gate.json").read_text(
-                encoding="utf-8"
-            )
+    def test_a_blocked_config_refuses_a_non_exploratory_run(self) -> None:
+        config = json.loads(
+            (ROOT / "config" / "runtime.json").read_text(encoding="utf-8")
         )
-        gate["unresolved_before_integrated_sweep"] = ["economic_objective"]
+        config["status"]["blockers_before_a_citable_sweep"] = ["a blocker"]
         with tempfile.TemporaryDirectory() as tmp:
-            (Path(tmp) / "gate.json").write_text(json.dumps(gate), encoding="utf-8")
-            # The resolution check runs before evidence verification, so a bare
-            # directory holding only the tampered gate is enough.
+            (Path(tmp) / "runtime.json").write_text(
+                json.dumps(config), encoding="utf-8"
+            )
             with self.assertRaises(ValueError) as caught:
                 load_policy_bundle(
                     tmp,
                     target_active_pas=1,
                     payout_policy_id="minimum_500_always",
-                    gate_relative_path="gate.json",
+                    config_relative_path="runtime.json",
                 )
-            self.assertIn("unresolved", str(caught.exception))
+            self.assertIn("unfinished work", str(caught.exception))
 
     def test_bundle_rejects_an_n_outside_the_declared_axis(self) -> None:
         with self.assertRaises(ValueError):
             load_policy_bundle(
-                ROOT, target_active_pas=21, payout_policy_id="minimum_500_always"
+                ROOT,
+                target_active_pas=21,
+                payout_policy_id="minimum_500_always",
+                exploratory=True,
             )
 
 
@@ -239,10 +238,10 @@ class DefectRegressionTests(unittest.TestCase):
     def test_the_gate_actually_gates(self) -> None:
         """It previously listed blockers that had no runtime effect at all."""
 
-        gate = json.loads(
-            (ROOT / "config" / "milky_cow_contract_gate.json").read_text("utf-8")
+        config = json.loads(
+            (ROOT / "config" / "runtime.json").read_text("utf-8")
         )
-        self.assertTrue(gate["remaining_blockers_before_the_sweep"])
+        self.assertTrue(config["status"]["blockers_before_a_citable_sweep"])
         with self.assertRaises(ValueError) as caught:
             load_policy_bundle(
                 ROOT, target_active_pas=1, payout_policy_id="minimum_500_always"

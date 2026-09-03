@@ -19,6 +19,7 @@ from datetime import date, datetime, timedelta
 import math
 from typing import Literal
 
+from .execution import FRICTIONLESS, ExecutionModel
 from .inputs import PathOrder, TradeOffer, money
 
 
@@ -157,6 +158,7 @@ def settle_evaluation_trade(
     event_at: datetime,
     path_order: PathOrder,
     rules: EvaluationRules = EvaluationRules(),
+    execution: ExecutionModel = FRICTIONLESS,
 ) -> EvaluationTradeResult:
     trade = account.outstanding_trade
     if trade is None:
@@ -177,20 +179,27 @@ def settle_evaluation_trade(
 
     contracts = rules.contracts_mnq
     commission = money(contracts * offer.commission_usd_per_mnq)
+    # Entry-side slippage is paid while the position is open, so it lowers the
+    # modelled excursion; the round turn is charged in the realized result.
+    entry_slippage = money(contracts * execution.slippage_usd_per_mnq_per_side)
+    round_turn_slippage = money(contracts * execution.slippage_usd_per_mnq_round_turn)
     adverse = money(
         account.profit_usd
         + contracts * min(offer.mae_usd_per_mnq, 0.0)
         - commission
+        - entry_slippage
     )
     favorable = money(
         account.profit_usd
         + contracts * max(offer.mfe_usd_per_mnq, 0.0)
         - commission
+        - entry_slippage
     )
     closing = money(
         account.profit_usd
         + contracts * offer.gross_pnl_usd_per_mnq
         - commission
+        - round_turn_slippage
     )
     account.outstanding_trade = None
 
@@ -225,7 +234,9 @@ def settle_evaluation_trade(
             account.floor_profit_usd,
         )
 
-    net = money(contracts * offer.gross_pnl_usd_per_mnq - commission)
+    net = money(
+        contracts * offer.gross_pnl_usd_per_mnq - commission - round_turn_slippage
+    )
     account.profit_usd = closing
     _lift_peak(account, rules, closing)
     account.trading_days.add(offer.entry_trading_day)

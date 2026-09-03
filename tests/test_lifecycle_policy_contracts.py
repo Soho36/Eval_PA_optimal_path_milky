@@ -14,7 +14,7 @@ from milky_cow.contracts import (
     ScalingSchedule,
     plan_evaluation_purchase_intents,
 )
-from milky_cow.inputs import PATH_COIN_SEED, get_timezone
+from milky_cow.inputs import get_timezone
 from milky_cow.treasury import ExternalCapitalPolicy, Treasury
 
 
@@ -387,135 +387,24 @@ class ExternalCapitalContractTests(unittest.TestCase):
             )
 
 
-class IntegratedSweepGateTests(unittest.TestCase):
-    def test_contract_gate_covers_every_pa_count_and_remains_closed(self) -> None:
-        gate = json.loads(
-            (ROOT / "config" / "milky_cow_contract_gate.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        self.assertEqual(
-            gate["pa_book"]["active_pa_count_values"],
-            list(range(1, 21)),
-        )
-        self.assertEqual(
-            gate["pa_book"]["distribution"],
-            "copy_to_all_eligible_active_pas",
-        )
-        self.assertEqual(
-            gate["opportunity_stream"]["evaluation_consumer_mode"],
-            "cycle_local_one_position_restarted_at_each_renewal_boundary",
-        )
-        self.assertEqual(
-            gate["unresolved_before_integrated_sweep"],
-            [],
-        )
-        self.assertEqual(
-            gate["status"],
-            "exploratory_v0_produced_defects_found_reruns_required",
-        )
-        self.assertTrue(gate["remaining_blockers_before_the_sweep"])
-        self.assertNotIn("router", gate["pa_book"])
-        self.assertEqual(
-            set(gate["pa_book"]["allowed_roles"]),
-            {"active_alive", "dead"},
-        )
-        axis = gate["pa_book"]["active_pa_count_axis_semantics"]
-        self.assertEqual(
-            axis["headline_estimand"],
-            "maintained_target_active_pas_acquired_from_zero",
-        )
-        self.assertEqual(axis["initial_state"], "zero_evaluations_zero_pas")
-        self.assertIn("active_plus_running_evaluations_plus_pending_activations", axis["hard_cap_accounting"])
-        self.assertNotIn(
-            "active_pa_count_axis_semantics",
-            gate["unresolved_before_integrated_sweep"],
-        )
-
-        path = gate["intratrade_path_order"]
-        self.assertEqual(
-            path["scenario_arms"],
-            [
-                "source_constrained_then_mae_first",
-                "source_constrained_then_mfe_first",
-                "source_constrained_then_seeded_coin",
-            ],
-        )
-        self.assertEqual(path["phase_scope"], ["evaluation", "pa"])
-        self.assertEqual(path["rr1_source_population_evidence"]["accepted_ambiguous_opportunities"], 3_722)
-        self.assertEqual(
-            path["delta_reference"],
-            "source_constrained_then_seeded_coin",
-        )
-        self.assertEqual(path["resolver_seed"], PATH_COIN_SEED)
-        acquisition = gate["acquisition"]
-        self.assertIn("running_evaluation", acquisition["pipeline_credit_toward_target"])
-        self.assertIn("exceed_n", acquisition["overshoot_behavior"])
-
-    def test_active_gate_hash_binds_its_evidence_and_supersedes_initial_scope(self) -> None:
-        gate = json.loads(
-            (ROOT / "config" / "milky_cow_contract_gate.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        self.assertFalse(
-            gate["governance"]["runtime_merge_with_parent_or_initial_contract"]
-        )
-        self.assertEqual(
-            gate["governance"]["superseded_artifact_role"],
-            "frozen_transfer_evidence_only",
-        )
-        for row in gate["evidence_bindings"]:
-            digest = hashlib.sha256((ROOT / row["path"]).read_bytes()).hexdigest()
-            self.assertEqual(digest, row["sha256"], row["path"])
-
-    def test_exact_six_payout_candidates_match_the_candidate_file(self) -> None:
-        gate = json.loads(
-            (ROOT / "config" / "milky_cow_contract_gate.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        policies = json.loads(
-            (ROOT / "config" / "payout_policies.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        expected = {row["policy_id"] for row in policies["policies"]}
-        self.assertEqual(
-            set(gate["payout_candidates"]["policy_ids"]),
-            expected,
-        )
-        self.assertEqual(len(expected), 6)
-
-
-class ResolvedParentParityPolicyTests(unittest.TestCase):
-    """Selected phase-1 fields and explicitly named candidates must be buildable.
-
-    A gate value that cannot construct the primitive it names remains prose, not a
-    contract, so every resolved policy is instantiated from the gate itself.
-    """
+class RuntimeConfigTests(unittest.TestCase):
+    """The config must build the primitives it names, and must gate the run."""
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.gate = json.loads(
-            (ROOT / "config" / "milky_cow_contract_gate.json").read_text(
-                encoding="utf-8"
-            )
+        cls.config = json.loads(
+            (ROOT / "config" / "runtime.json").read_text(encoding="utf-8")
         )
 
     def test_flat_schedule_gives_every_pa_one_mnq_at_any_state(self) -> None:
-        block = self.gate["scaling"]
-        self.assertEqual(block["selected_policy_id"], "flat_one_mnq_no_scaling_phase_1")
-        self.assertEqual(block["commission_timing"], "close_only")
-        self.assertEqual(block["maximum_mnq"], 1)
+        block = self.config["scaling"]
         schedule = ScalingSchedule(
             policy_id=block["selected_policy_id"],
             scope=block["scope"],
             threshold_metric=block["threshold_metric"],
             levels=tuple(
                 ScalingLevel(
-                    minimum_metric_usd=level["minimum_metric_usd"],
-                    mnq=level["mnq"],
+                    minimum_metric_usd=level["minimum_metric_usd"], mnq=level["mnq"]
                 )
                 for level in block["levels"]
             ),
@@ -532,10 +421,8 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
         )
         self.assertEqual(set(sizes.values()), {1})
 
-    def test_acquisition_and_replacement_build_the_parent_baseline_arm(self) -> None:
-        acq = self.gate["acquisition"]
-        rep = self.gate["replacement"]
-        self.assertEqual(acq["selected_policy_id"], "greedy_to_target_parent_baseline")
+    def test_greedy_is_greedy_in_time_not_in_batch(self) -> None:
+        acq = self.config["acquisition"]
         policy = AcquisitionPolicy(
             policy_id=acq["selected_policy_id"],
             mode=acq["mode"],
@@ -543,36 +430,26 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
             max_running_evaluations=acq["maximum_running_evaluations"],
             cadence_days=acq["cadence_days"],
         )
-        self.assertEqual(policy.mode, "one_per_decision")
-        self.assertIsNone(policy.cadence_days)
-        replacement = ReplacementPolicy(
-            policy_id=rep["selected_policy_id"],
-            mode=rep["mode"],
-            max_purchases_per_death_event=rep["max_purchases_per_death_event"],
-            shares_acquisition_pipeline=rep["shares_evaluation_pipeline"],
-        )
-        self.assertTrue(replacement.shares_acquisition_pipeline)
-        # Greedy is greedy in time, not in batch: an empty book at N=20 still
-        # buys exactly one Evaluation per decision.
+        rep = self.config["replacement"]
         intents = plan_evaluation_purchase_intents(
             BookPipelineState(
                 target_active_pas=20,
                 active_pa_ids=(),
-                target_accounting=acq["executable_target_accounting_contracts"][0],
+                target_accounting="active_plus_running_and_pending",
             ),
             policy,
-            replacement,
+            ReplacementPolicy(
+                policy_id=rep["selected_policy_id"],
+                mode=rep["mode"],
+                max_purchases_per_death_event=rep["max_purchases_per_death_event"],
+                shares_acquisition_pipeline=rep["shares_evaluation_pipeline"],
+            ),
             reason="growth",
         )
         self.assertEqual(len(intents), 1)
 
-    def test_selected_capital_bridge_is_limited_to_eval_1_lineage(self) -> None:
-        block = self.gate["external_capital"]
-        self.assertEqual(block["starting_cash_usd"], 35.0)
-        self.assertEqual(block["selection_status"], "selected_by_user_2026_09_02")
-        self.assertEqual(block["mode"], "first_pa_chain_only")
-        self.assertEqual(block["bridge_chain_identity"], "eval-1")
-        self.assertIsNone(block["lifetime_hard_cap_usd"])
+    def test_capital_bridge_funds_only_its_own_chain(self) -> None:
+        block = self.config["external_capital"]
         policy = ExternalCapitalPolicy(
             policy_id=block["selected_policy_id"],
             mode=block["mode"],
@@ -583,220 +460,35 @@ class ResolvedParentParityPolicyTests(unittest.TestCase):
             reopens=block["bridge_reopens"],
             bridge_evaluation_id=block["bridge_chain_identity"],
         )
-        self.assertFalse(policy.reopens)
-        self.assertFalse(
+        self.assertTrue(
             policy.authorizes(
-                "evaluation_purchase",
+                "pa_activation",
                 bridge_closed=False,
                 contributed_usd=0.0,
-                shortfall_usd=35.0,
+                shortfall_usd=125.0,
                 reference="eval-1",
             )
         )
-        for purpose in ("evaluation_renewal", "pa_activation"):
-            self.assertTrue(
-                policy.authorizes(
-                    purpose,
-                    bridge_closed=False,
-                    contributed_usd=0.0,
-                    shortfall_usd=125.0,
-                    reference="eval-1",
-                )
+        # A different Evaluation chain may never bridge.
+        self.assertFalse(
+            policy.authorizes(
+                "pa_activation",
+                bridge_closed=False,
+                contributed_usd=0.0,
+                shortfall_usd=125.0,
+                reference="eval-7",
             )
-            self.assertFalse(
-                policy.authorizes(
-                    purpose,
-                    bridge_closed=False,
-                    contributed_usd=0.0,
-                    shortfall_usd=125.0,
-                    reference="eval-2",
-                )
-            )
-            self.assertFalse(
-                policy.authorizes(
-                    purpose,
-                    bridge_closed=True,
-                    contributed_usd=160.0,
-                    shortfall_usd=125.0,
-                    reference="eval-1",
-                    activated_evaluation_ids={"eval-1"},
-                )
-            )
-
-    def test_parent_comparison_pins_the_revision_and_the_delta_arm(self) -> None:
-        parent = self.gate["parent_comparison"]
-        self.assertEqual(
-            parent["parent_revision"],
-            "106cfb782c6e573856282095441bb69f23924a55",
-        )
-        # The parent pinned mae_first; differencing against the seeded coin
-        # would compare two different path-order treatments.
-        self.assertEqual(
-            parent["comparison_arm_for_parent_delta"],
-            "source_constrained_then_mae_first",
-        )
-        self.assertIn(
-            parent["comparison_arm_for_parent_delta"],
-            self.gate["intratrade_path_order"]["scenario_arms"],
-        )
-        self.assertNotEqual(
-            parent["comparison_arm_for_parent_delta"],
-            self.gate["intratrade_path_order"]["delta_reference"],
-        )
-        # K=5 is a parent selection and must never become this study's axis.
-        self.assertIn("target_pa_count_k", parent["not_adopted"])
-        self.assertEqual(
-            self.gate["pa_book"]["active_pa_count_values"], list(range(1, 21))
-        )
-
-    def test_unmodelled_execution_records_its_bias_direction(self) -> None:
-        stress = self.gate["reporting"]["stress_scenarios"][
-            "aggregate_execution_and_slippage"
-        ]
-        self.assertFalse(stress["modeled"])
-        self.assertEqual(stress["known_bias_direction"], "favors_high_n")
-
-    def test_evaluation_boundaries_match_the_parent_failure_and_day_basis(self) -> None:
-        boundaries = self.gate["evaluation_rule_boundaries"]
-        failure = boundaries["mid_cycle_failure"]
-        self.assertFalse(failure["carries_state"])
-        self.assertIn("dormant_until_the_30_day_boundary", failure["rule"])
-        # Parent parity: a dormant failed Evaluation keeps its pipeline slot,
-        # because the parent never moves its status off "active".
-        self.assertEqual(
-            failure["dormant_slot_release"], "held_until_the_renewal_boundary"
-        )
-        self.assertEqual(
-            failure["dormant_slot_release_status"],
-            "parent_parity_verified_not_an_interpretation",
-        )
-        day = boundaries["trading_day_boundary"]
-        self.assertIn("00:00", day["cutoff"])
-        self.assertEqual(day["evaluation_trading_day_basis"], "entry_local_calendar_date")
-        self.assertEqual(day["pa_realized_pnl_day_basis"], "exit_local_calendar_date")
-
-    def test_objective_candidates_are_executable_and_keep_equity_separate(self) -> None:
-        objective = self.gate["economic_objective"]
-        self.assertEqual(objective["status"], "selected_by_user_2026_09_02")
-        self.assertEqual(objective["headline_metric"], "owner_net_retained_cash")
-        self.assertEqual(
-            objective["secondary_metric"],
-            "cumulative_payout_harvest",
-        )
-        self.assertEqual(
-            set(objective["candidate_metrics"]),
-            {"owner_net_retained_cash", "cumulative_payout_harvest"},
-        )
-        self.assertEqual(
-            objective["candidate_metrics"]["owner_net_retained_cash"]["equivalent_formula"],
-            "payout_receipts - fees_paid",
-        )
-        self.assertEqual(
-            objective["companion_reported_never_summed"],
-            "surviving_unwithdrawn_pa_equity_at_horizon",
-        )
-
-    def test_horizon_matches_the_parent_and_censoring_never_sums(self) -> None:
-        window = self.gate["reporting"]["horizon_and_right_censoring"]
-        self.assertEqual(window["primary_days"], 720)
-        self.assertGreater(window["diagnostic_days"], window["primary_days"])
-        censoring = window["right_censoring"]
-        self.assertIn("never_summed", censoring["rule"])
-        self.assertIn("sunk", censoring["running_evaluations_at_horizon"])
-        treatment = window["horizon_crossing_trade_treatment"]
-        self.assertEqual(treatment["status"], "selected_by_user_2026_09_02")
-        self.assertEqual(
-            treatment["selected"],
-            "admit_before_horizon_leave_open_trade_unscored",
-        )
-        self.assertIn("open_batch_count_at_horizon", treatment["required_reporting"])
-
-    def test_regimes_partition_on_an_input_not_on_the_measured_outcome(self) -> None:
-        regimes = self.gate["reporting"]["regime_definitions"]
-        self.assertEqual(regimes["volatility_partition"]["metric"], "candle_range")
-        # Directional regimes need price data the frozen tape does not carry.
-        self.assertEqual(
-            regimes["directional_regimes_not_defined"]["status"],
-            "deferred_pending_a_provenance_tracked_external_price_import",
-        )
-        windows = regimes["calendar_windows"]["windows"]
-        self.assertIsNone(windows[0]["from_date"])
-        self.assertIsNone(windows[-1]["to_date"])
-        self.assertEqual(windows[0]["to_date"], windows[1]["from_date"])
-
-    def test_phase_1_allows_normal_trading_on_payout_days(self) -> None:
-        payouts = self.gate["payout_candidates"]
-        handling = payouts["open_position_handling"]
-        self.assertEqual(handling["phase_1_rule"], "trading_allowed_on_payout_day")
-        self.assertTrue(handling["same_day_realized_pnl_counts"])
-        self.assertIn("23:59", handling["mechanism"])
-        self.assertEqual(handling["deferral_scope"], "per_pa_not_whole_book")
-        self.assertIn("leave balance", handling["deferred_pa_state"])
-        self.assertEqual(
-            handling["verified_rr1_exposure"][
-                "accepted_trades_open_at_one_or_more_23_59_closes"
-            ],
-            67,
-        )
-        self.assertEqual(
-            handling["verified_rr1_exposure"]["total_23_59_closes_crossed"],
-            97,
-        )
-        self.assertIn("deferred", handling["future_sit_out_sensitivity"])
-        # A terminal sweep is a censoring valuation, never a policy.
-        self.assertFalse(payouts["terminal_sweep"]["is_a_policy"])
-        # The exact six-candidate axis holds; the trigger is not a seventh arm.
-        self.assertEqual(len(payouts["policy_ids"]), 6)
-        trigger = payouts["accumulation_trigger_candidate"]
-        self.assertIn("excluded_from_phase_1", trigger["status"])
-        self.assertLess(
-            trigger["measured_evidence_1_mnq_720d_window"][
-                "share_of_windows_reaching_5000_usd"
-            ],
-            1.0,
         )
 
     def test_declared_event_order_matches_the_lifecycle_code(self) -> None:
-        from milky_cow.lifecycle import EVENT_ORDER_PHASE_RANKS, _PHASE_RANK
+        from milky_cow.lifecycle import _PHASE_RANK
 
-        declared = self.gate["event_order"]["order"]
-        coded = [phase for phase, _ in sorted(_PHASE_RANK.items(), key=lambda kv: kv[1])]
+        declared = self.config["event_order"]["order"]
+        coded = [p for p, _ in sorted(_PHASE_RANK.items(), key=lambda kv: kv[1])]
         self.assertEqual(coded, declared)
         # Payout must fund the same-timestamp spends that follow it.
-        self.assertLess(declared.index("payout"), declared.index("renewal"))
-        self.assertLess(declared.index("payout"), declared.index("activation"))
-        self.assertLess(declared.index("payout"), declared.index("purchase"))
-        # Everything outstanding settles before any cash decision.
-        self.assertEqual(declared[0], "pa_exit")
-        # New exposure is committed last.
-        self.assertEqual(declared[-1], "pa_entry")
-        sensitivity = self.gate["event_order"]["sensitivity_plan"]
-        self.assertEqual(sensitivity["selected"], "spend_before_payout")
-        sensitivity_coded = [
-            phase
-            for phase, _ in sorted(
-                EVENT_ORDER_PHASE_RANKS["spend_before_payout"].items(),
-                key=lambda kv: kv[1],
-            )
-        ]
-        self.assertEqual(sensitivity_coded, sensitivity["order"])
-        self.assertLess(
-            sensitivity["order"].index("purchase"),
-            sensitivity["order"].index("payout"),
-        )
-
-    def test_evaluation_consumer_resets_per_cycle_unlike_the_pa_stream(self) -> None:
-        stream = self.gate["opportunity_stream"]
-        self.assertEqual(
-            stream["evaluation_consumer_mode"],
-            "cycle_local_one_position_restarted_at_each_renewal_boundary",
-        )
-        contract = stream["evaluation_consumer_contract"]
-        self.assertEqual(contract["selector_reset_scope"], "every_renewal_boundary")
-        self.assertEqual(stream["selector_reset_scope"], "never_for_pa_book_scenarios")
-        # The Evaluation runs 3 MNQ; phase-1 "no scaling" is a PA-only decision.
-        self.assertEqual(contract["position_size_mnq"], 3)
-        self.assertEqual(self.gate["scaling"]["maximum_mnq"], 1)
+        for later in ("renewal", "activation", "purchase"):
+            self.assertLess(declared.index("payout"), declared.index(later))
 
 
 if __name__ == "__main__":

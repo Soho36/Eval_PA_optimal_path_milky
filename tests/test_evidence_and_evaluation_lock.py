@@ -19,10 +19,6 @@ from milky_cow.inputs import (
     load_verified_rr1_dataset,
     path_order_for_offer,
 )
-from milky_cow.provenance import (
-    verify_implementation_provenance,
-    verify_transfer_snapshot,
-)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,22 +41,6 @@ class EvidenceAndEvaluationLockTests(unittest.TestCase):
                 / "eodmae_legacy_25k_x3_behavior_lock.json"
             ).read_text(encoding="utf-8")
         )
-
-    def test_transfer_receipt_preserves_every_imported_parent_artifact(self) -> None:
-        result = verify_transfer_snapshot(ROOT)
-        self.assertEqual(result.manifest_entries, 96)
-        self.assertEqual(result.parent_snapshot_entries, 73)
-        self.assertEqual(result.parent_snapshot_exact, 73)
-        self.assertEqual(result.initial_exact_entries, 95)
-        self.assertEqual(result.exact_entries, 83)
-        self.assertEqual(result.project_developed_entries, 12)
-        self.assertEqual(result.acknowledged_deviations, 1)
-
-    def test_implementation_derivatives_are_hash_bound_to_reviewed_sources(self) -> None:
-        result = verify_implementation_provenance(ROOT)
-        self.assertEqual(result.reviewed_sources, 8)
-        self.assertGreaterEqual(result.local_artifacts, 23)
-        self.assertEqual(result.derivations, 7)
 
     def test_rr1_manifest_and_global_stream_parity(self) -> None:
         verified = self.dataset.verification

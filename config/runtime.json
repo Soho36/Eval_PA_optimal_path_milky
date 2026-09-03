@@ -1,0 +1,220 @@
+{
+  "schema_version": "milky_cow_runtime.v1",
+  "purpose": "Every value the simulator reads at run time. Rationale lives in ASSUMPTIONS.md and current state in STATUS.md; neither is loaded by code.",
+  "status": {
+    "phase": "phase_1",
+    "blockers_before_a_citable_sweep": [
+      "the one-tick-per-side execution sensitivity is not implemented; Lifecycle still hard-requires perfect_linear_no_slippage_fixture_only, so the arm the gate demands before any headline N conclusion cannot be constructed",
+      "no regime split is computed or reported, though the contract requires one; the exploratory_v0 run showed strong regime dependence that is unquantified",
+      "the source_constrained_then_mae_first arm has not been run, so no parent comparison is legal",
+      "the spend_before_payout arm is now executable but has not been run and reported on the real tape",
+      "no Pareto reporting exists: results are reported as single aggregates rather than as the average-cash / profitable-share / downside / worst-period trade-off the economics actually present"
+    ],
+    "note": "a run while this list is non-empty must pass exploratory=True and is labelled exploratory in its own manifest"
+  },
+  "input_stream": {
+    "raw_manifest": "manifests/rr1_import_20260829.json",
+    "expected_raw_offers": 12658,
+    "expected_accepted_opportunities": 9299,
+    "accepted_stream_sha256": "1175787ba50f0ab9f08a953f60b661e597c70f2bdb9329a517603616aaae6759",
+    "causal_order": [
+      "entry_at",
+      "window_order",
+      "source_row",
+      "ticket"
+    ],
+    "busy_interval": "[entry_at, exit_at)"
+  },
+  "pa_book": {
+    "active_pa_count_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "distribution": "copy_to_all_eligible_active_pas",
+    "hard_cap_accounting": "active_plus_running_evaluations_plus_pending_activations_lte_n"
+  },
+  "evaluation": {
+    "consumer_mode": "cycle_local_one_position_restarted_at_each_renewal_boundary",
+    "selector_reset_scope": "every_renewal_boundary",
+    "boundary_spanning_offer": "skipped_and_cycle_closed_without_consuming_it",
+    "carries_if_alive_at_renewal": true,
+    "contracts_mnq": 3,
+    "cycle_days": 30,
+    "minimum_trading_days": 1,
+    "target_profit_usd": 1500.0,
+    "threshold_touch_fails": true,
+    "trailing_drawdown_usd": 1500.0
+  },
+  "commercial_terms": {
+    "commission_roundturn_usd_per_mnq": 1.05,
+    "evaluation_purchase_fee_usd": 35.0,
+    "evaluation_renewal_fee_usd": 35.0,
+    "pa_activation_fee_usd": 125.0,
+    "slippage_ticks_per_side": 0
+  },
+  "scaling": {
+    "selected_policy_id": "flat_one_mnq_no_scaling_phase_1",
+    "scope": "per_account",
+    "threshold_metric": "equity_profit_usd",
+    "levels": [
+      {
+        "minimum_metric_usd": null,
+        "mnq": 1
+      }
+    ],
+    "threshold_operator": "greater_than_or_equal",
+    "decision_time": "entry_before_trade_after_prior_same_timestamp_events",
+    "downscale_rule": "immediate",
+    "synchronized_aggregation": null,
+    "maximum_mnq": 1,
+    "outcome_scaling": "linear_per_mnq",
+    "commission_timing": "close_only"
+  },
+  "acquisition": {
+    "selected_policy_id": "greedy_to_target_parent_baseline",
+    "mode": "one_per_decision",
+    "max_purchases_per_decision": 1,
+    "maximum_running_evaluations": null,
+    "cadence_days": null
+  },
+  "replacement": {
+    "selected_policy_id": "greedy_to_target_emergent_replacement",
+    "mode": "evaluation_pipeline",
+    "max_purchases_per_death_event": 1,
+    "shares_evaluation_pipeline": true
+  },
+  "external_capital": {
+    "selected_policy_id": "first_pa_chain_only_phase_1",
+    "mode": "first_pa_chain_only",
+    "starting_cash_usd": 35.0,
+    "lifetime_hard_cap_usd": null,
+    "permitted_uses": [
+      "evaluation_renewal",
+      "pa_activation"
+    ],
+    "contribution_timing": "just_in_time_exact_shortfall",
+    "bridge_close_event": "bridge_evaluation_activated",
+    "bridge_reopens": false,
+    "bridge_chain_identity": "eval-1"
+  },
+  "payout": {
+    "catalog": "config/payout_policies.json",
+    "policy_ids": [
+      "minimum_500_always",
+      "maximum_always",
+      "rush_to_uncapped",
+      "cap_maximizer",
+      "preserve_safety_net",
+      "half_of_maximum"
+    ],
+    "lifecycle_timing": "atomic_request_approval_balance_removal_and_treasury_receipt",
+    "open_position_handling": "trading_allowed_on_payout_day"
+  },
+  "intratrade_path_order": {
+    "central_arm": "source_constrained_then_seeded_coin",
+    "scenario_arms": [
+      "source_constrained_then_mae_first",
+      "source_constrained_then_mfe_first",
+      "source_constrained_then_seeded_coin"
+    ],
+    "parent_comparison_arm": "source_constrained_then_mae_first",
+    "resolver_seed": 20260823
+  },
+  "event_order": {
+    "selected": "canonical_settle_realize_spend_commit",
+    "order": [
+      "pa_exit",
+      "evaluation_exit",
+      "zero_duration_evaluation_entry",
+      "zero_duration_pa_entry",
+      "zero_duration_pa_exit",
+      "zero_duration_evaluation_exit",
+      "payout",
+      "renewal",
+      "activation",
+      "purchase",
+      "evaluation_entry",
+      "pa_entry"
+    ],
+    "sensitivity_arm": "spend_before_payout"
+  },
+  "execution": {
+    "selected_model_id": "perfect_linear_no_slippage_phase_1",
+    "sensitivity_model_id": "one_tick_per_side_sensitivity",
+    "known_bias_direction": "favors_high_n"
+  },
+  "reporting": {
+    "objective": "owner_net_retained_cash",
+    "objective_formula": "treasury cash - (starting cash + external contributions)",
+    "secondary": "cumulative_payout_harvest",
+    "horizon_days": 720,
+    "diagnostic_horizon_days": 1440,
+    "cohort_cadence": "first accepted-opportunity session of each calendar month",
+    "expected_cohorts_at_720d": 55,
+    "horizon_crossing": "admit_before_horizon_leave_open_trade_unscored",
+    "regime_windows": [
+      {
+        "name": "2020-2021",
+        "from_date": null,
+        "to_date": "2022-01-01"
+      },
+      {
+        "name": "2022-2024",
+        "from_date": "2022-01-01",
+        "to_date": null
+      }
+    ],
+    "pareto_axes": [
+      "average_owner_net_retained_cash",
+      "profitable_start_share",
+      "downside_percentile",
+      "worst_regime_performance"
+    ],
+    "never_sum": [
+      "surviving unwithdrawn equity into the headline",
+      "the six payout policies into one total: they are alternatives"
+    ]
+  },
+  "parent_comparison": {
+    "repository": "Eval_PA_optimal_path",
+    "revision": "106cfb782c6e573856282095441bb69f23924a55",
+    "arm": {
+      "purchase_policy": "greedy_to_target",
+      "target_pa_count_k": 5,
+      "standby_pa_target_s": 0,
+      "routing_policy": "max_headroom",
+      "pa_requested_copies_r": 1,
+      "pa_intratrade_path": "mae_first",
+      "bootstrap_funding_mode": "through_first_pa"
+    },
+    "path_arm_required": "source_constrained_then_mae_first"
+  },
+  "frozen_evidence": {
+    "rr1_import_manifest": "manifests/rr1_import_20260829.json",
+    "upstream_evidence": "manifests/upstream_evidence_20260829.json",
+    "rules": [
+      "rules/25k_legacy_rules.txt",
+      "rules/MILKY_COW_COPY_TO_ALL_RULES.txt"
+    ],
+    "evaluation_behavior_lock": "tests/fixtures/evaluation/eodmae_legacy_25k_x3_behavior_lock.json",
+    "note": "these are immutable inputs and stay hash-verified. Local mutable source and prose are governed by Git revision plus working-tree digest, recorded in each run manifest."
+  }
+}

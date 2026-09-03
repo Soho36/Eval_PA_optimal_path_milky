@@ -1,9 +1,13 @@
-"""Construct every runtime policy object from the active contract gate.
+"""Construct every runtime policy object from one typed configuration file.
 
-This is the single seam between the resolved contract and executable code. The
-gate is the only source: no dataclass default may silently supply a term that
-moves cash or changes an outcome. A gate whose contract fields are unresolved,
-or whose bound evidence no longer hashes, cannot produce a bundle.
+This is the single seam between the configuration and executable code.
+``config/runtime.json`` is the only source: no dataclass default may silently
+supply a term that moves cash or changes an outcome. Rationale lives in
+ASSUMPTIONS.md and current state in STATUS.md, neither of which is loaded here.
+
+While the config lists blockers before a citable sweep, a caller must pass
+``exploratory=True``; the resulting bundle carries that flag so every run
+manifest can label itself.
 """
 
 from __future__ import annotations
@@ -22,20 +26,21 @@ from .contracts import (
 )
 from .copy_to_all import CommissionTiming
 from .evaluation import EvaluationRules
+from .execution import ExecutionModel, execution_model
 from .inputs import PathStressArm
 from .lifecycle import EventOrderMode, event_order_phase_ranks
 from .payouts import Legacy25KPayoutRules, PayoutPolicy, load_payout_policies
 from .treasury import ExternalCapitalPolicy
 
-DEFAULT_GATE = "config/milky_cow_contract_gate.json"
+DEFAULT_CONFIG = "config/runtime.json"
 
 
 @dataclass(frozen=True, slots=True)
 class StudyPolicyBundle:
     """One fully resolved (N, payout policy, path arm, event order) arm."""
 
-    gate_path: str
-    gate_sha256: str
+    config_path: str
+    config_sha256: str
     target_active_pas: int
     payout_policy: PayoutPolicy
     scaling: ScalingSchedule
@@ -55,6 +60,7 @@ class StudyPolicyBundle:
     horizon_days: int
     expected_pa_stream_sha256: str
     expected_pa_raw_offer_count: int
+    execution: ExecutionModel
     exploratory: bool
     outstanding_blockers: tuple[str, ...]
 
@@ -72,39 +78,17 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _require_resolved(gate: dict[str, Any], *, allow_blockers: bool) -> None:
-    unresolved = gate.get("unresolved_before_integrated_sweep")
-    if unresolved:
+def _blockers(config: dict[str, Any], *, allow: bool) -> tuple[str, ...]:
+    """The config gates the run, or the run declares itself exploratory."""
+
+    outstanding = tuple(config["status"].get("blockers_before_a_citable_sweep") or ())
+    if outstanding and not allow:
         raise ValueError(
-            "Gate contract fields are unresolved; refusing to build a runtime "
-            f"bundle: {sorted(unresolved)}"
-        )
-    open_questions = gate.get("open_questions_requiring_user_decision") or ()
-    if open_questions:
-        raise ValueError(
-            "Gate carries open user decisions; refusing to build a runtime "
-            f"bundle: {sorted(q['id'] for q in open_questions)}"
-        )
-    # The blocker list previously had no runtime effect at all, so the gate did
-    # not actually gate the sweep it claimed to block. Enforce it, and make
-    # exploratory runs say so explicitly rather than pass silently.
-    blockers = gate.get("remaining_blockers_before_the_sweep") or ()
-    if blockers and not allow_blockers:
-        raise ValueError(
-            "Gate lists unfinished work before the sweep; pass "
+            "Config lists unfinished work before a citable sweep; pass "
             "exploratory=True to run anyway and have the result labelled "
-            f"exploratory: {list(blockers)}"
+            f"exploratory: {list(outstanding)}"
         )
-
-
-def _verify_evidence(root: Path, gate: dict[str, Any]) -> None:
-    stale = [
-        row["path"]
-        for row in gate["evidence_bindings"]
-        if _sha256(root / row["path"]) != row["sha256"]
-    ]
-    if stale:
-        raise ValueError(f"Gate evidence bindings are stale: {sorted(stale)}")
+    return outstanding
 
 
 def _scaling(block: dict[str, Any]) -> ScalingSchedule:
@@ -148,20 +132,20 @@ def load_policy_bundle(
     payout_policy_id: str,
     path_stress_arm: PathStressArm | None = None,
     event_order_mode: EventOrderMode | None = None,
-    gate_relative_path: str = DEFAULT_GATE,
+    config_relative_path: str = DEFAULT_CONFIG,
+    execution_model_id: str | None = None,
     exploratory: bool = False,
 ) -> StudyPolicyBundle:
     """Build one executable arm from the gate, or refuse and say why."""
 
     root = Path(root)
-    gate_path = root / gate_relative_path
-    gate = json.loads(gate_path.read_text(encoding="utf-8"))
-    _require_resolved(gate, allow_blockers=exploratory)
-    _verify_evidence(root, gate)
+    config_path = root / config_relative_path
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    outstanding = _blockers(config, allow=exploratory)
 
-    if target_active_pas not in gate["pa_book"]["active_pa_count_values"]:
+    if target_active_pas not in config["pa_book"]["active_pa_count_values"]:
         raise ValueError(
-            f"N={target_active_pas} is outside the gate's declared count axis"
+            f"N={target_active_pas} is outside the declared count axis"
         )
 
     policies = {
@@ -170,42 +154,42 @@ def load_policy_bundle(
     }
     if payout_policy_id not in policies:
         raise ValueError(f"Unknown payout policy: {payout_policy_id}")
-    if payout_policy_id not in set(gate["payout_candidates"]["policy_ids"]):
-        raise ValueError(f"Payout policy is not a gate candidate: {payout_policy_id}")
+    if payout_policy_id not in set(config["payout"]["policy_ids"]):
+        raise ValueError(f"Payout policy is not a declared candidate: {payout_policy_id}")
 
-    path_block = gate["intratrade_path_order"]
+    path_block = config["intratrade_path_order"]
     arm = path_stress_arm or path_block["central_arm"]
     if arm not in path_block["scenario_arms"]:
         raise ValueError(f"Path arm is not a declared scenario arm: {arm}")
 
-    order_mode = event_order_mode or gate["event_order"]["selected"]
+    order_mode = event_order_mode or config["event_order"]["selected"]
     event_order_phase_ranks(order_mode)
 
-    terms = gate["commercial_terms"]
-    account_terms = gate["evaluation_rule_boundaries"]["evaluation_account_terms"]
-    stream = gate["opportunity_stream"]
-    capital_block = gate["external_capital"]
+    terms = config["commercial_terms"]
+    account_terms = config["evaluation"]
+    stream = config["input_stream"]
+    capital_block = config["external_capital"]
 
     return StudyPolicyBundle(
-        gate_path=gate_relative_path,
-        gate_sha256=_sha256(gate_path),
+        config_path=config_relative_path,
+        config_sha256=_sha256(config_path),
         target_active_pas=target_active_pas,
         payout_policy=policies[payout_policy_id],
-        scaling=_scaling(gate["scaling"]),
+        scaling=_scaling(config["scaling"]),
         acquisition=AcquisitionPolicy(
-            policy_id=gate["acquisition"]["selected_policy_id"],
-            mode=gate["acquisition"]["mode"],
-            max_purchases_per_decision=gate["acquisition"]["max_purchases_per_decision"],
-            max_running_evaluations=gate["acquisition"]["maximum_running_evaluations"],
-            cadence_days=gate["acquisition"]["cadence_days"],
+            policy_id=config["acquisition"]["selected_policy_id"],
+            mode=config["acquisition"]["mode"],
+            max_purchases_per_decision=config["acquisition"]["max_purchases_per_decision"],
+            max_running_evaluations=config["acquisition"]["maximum_running_evaluations"],
+            cadence_days=config["acquisition"]["cadence_days"],
         ),
         replacement=ReplacementPolicy(
-            policy_id=gate["replacement"]["selected_policy_id"],
-            mode=gate["replacement"]["mode"],
-            max_purchases_per_death_event=gate["replacement"][
+            policy_id=config["replacement"]["selected_policy_id"],
+            mode=config["replacement"]["mode"],
+            max_purchases_per_death_event=config["replacement"][
                 "max_purchases_per_death_event"
             ],
-            shares_acquisition_pipeline=gate["replacement"]["shares_evaluation_pipeline"],
+            shares_acquisition_pipeline=config["replacement"]["shares_evaluation_pipeline"],
         ),
         capital=_capital(capital_block),
         evaluation_rules=EvaluationRules(
@@ -219,18 +203,20 @@ def load_policy_bundle(
         ),
         payout_rules=Legacy25KPayoutRules(),
         path_stress_arm=arm,
-        commission_timing=gate["scaling"]["commission_timing"],
+        commission_timing=config["scaling"]["commission_timing"],
         event_order_mode=order_mode,
         evaluation_fee_usd=terms["evaluation_purchase_fee_usd"],
         evaluation_renewal_fee_usd=terms["evaluation_renewal_fee_usd"],
         activation_fee_usd=terms["pa_activation_fee_usd"],
         commission_usd_per_mnq=terms["commission_roundturn_usd_per_mnq"],
         starting_cash_usd=capital_block["starting_cash_usd"],
-        horizon_days=gate["reporting"]["horizon_and_right_censoring"]["primary_days"],
-        expected_pa_stream_sha256=stream["accepted_stream_key_sha256"],
+        horizon_days=config["reporting"]["horizon_days"],
+        expected_pa_stream_sha256=stream["accepted_stream_sha256"],
         expected_pa_raw_offer_count=stream["expected_raw_offers"],
-        exploratory=exploratory,
-        outstanding_blockers=tuple(
-            gate.get("remaining_blockers_before_the_sweep") or ()
+        execution=execution_model(
+            execution_model_id
+            or config["execution"]["selected_model_id"]
         ),
+        exploratory=exploratory,
+        outstanding_blockers=outstanding,
     )

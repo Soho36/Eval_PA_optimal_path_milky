@@ -12,6 +12,7 @@ from datetime import datetime, time
 import math
 from typing import Literal
 
+from .execution import FRICTIONLESS, ExecutionModel
 from .contracts import (
     AcquisitionPolicy,
     BookPipelineState,
@@ -153,9 +154,7 @@ class Lifecycle:
     payout_rules: Legacy25KPayoutRules = field(default_factory=Legacy25KPayoutRules)
     evaluation_fee_usd: float = 35.0
     activation_fee_usd: float = 125.0
-    aggregate_execution_assumption: Literal[
-        "perfect_linear_no_slippage_fixture_only"
-    ] = "perfect_linear_no_slippage_fixture_only"
+    execution: ExecutionModel = FRICTIONLESS
     evaluations: dict[str, EvaluationAccount] = field(init=False, default_factory=dict)
     pending_activations: dict[str, PendingActivation] = field(
         init=False, default_factory=dict
@@ -202,10 +201,8 @@ class Lifecycle:
             for value in (self.evaluation_fee_usd, self.activation_fee_usd)
         ):
             raise ValueError("Lifecycle fees must be finite and positive")
-        if self.aggregate_execution_assumption != (
-            "perfect_linear_no_slippage_fixture_only"
-        ):
-            raise ValueError("The contract fixture requires an explicit execution assumption")
+        if not isinstance(self.execution, ExecutionModel):
+            raise ValueError("Lifecycle requires an explicit ExecutionModel")
         if not isinstance(self.pa_opportunity_selection, OpportunitySelection):
             raise ValueError("Lifecycle requires one explicit PA opportunity selection")
         if (
@@ -507,6 +504,7 @@ class Lifecycle:
             event_at=event_at,
             path_order=path_order_for_offer(offer, self.path_stress_arm),
             rules=self.evaluation_rules,
+            execution=self.execution,
         )
         self._record(event_at, phase, "evaluation_trade_settled", offer.trade_key)
         self.evaluation_trade_results.append(result)
